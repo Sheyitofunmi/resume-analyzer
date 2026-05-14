@@ -36,9 +36,19 @@ const Upload = () => {
   ): boolean => {
     const next: Record<string, string> = {};
     if (!companyName.trim()) next.companyName = "Company name is required.";
+    else if (companyName.trim().length < 2)
+      next.companyName = "Company name must be at least 2 characters.";
+
     if (!jobTitle.trim()) next.jobTitle = "Job title is required.";
+    else if (jobTitle.trim().length < 3)
+      next.jobTitle = "Job title must be at least 3 characters.";
+
     if (!jobDescription.trim())
       next.jobDescription = "Job description is required.";
+    else if (jobDescription.trim().length < 50)
+      next.jobDescription =
+        "Job description must be at least 50 characters. Please paste the full job posting.";
+
     if (!file) next.file = "Please upload a resume PDF.";
     setErrors(next);
     return Object.keys(next).length === 0;
