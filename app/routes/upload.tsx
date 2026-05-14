@@ -1,6 +1,7 @@
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { isRouteErrorResponse, useRouteError } from "react-router";
 import Navbar from "~/components/Navbar";
+import Footer from "~/components/Footer";
 import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
@@ -13,6 +14,15 @@ const STEPS = [
   "Upload resume",
   "Analyze against job description",
   "Save analysis",
+];
+
+const FEATURE_PILLS = [
+  { icon: "🎯", label: "ATS Score" },
+  { icon: "🔑", label: "Keyword Analysis" },
+  { icon: "✍️", label: "Rewrite Tips" },
+  { icon: "💬", label: "Tone & Style" },
+  { icon: "🧠", label: "Interview Prep" },
+  { icon: "📊", label: "Structure Check" },
 ];
 
 const Upload = () => {
@@ -150,7 +160,7 @@ const Upload = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget.closest("form");
     if (!form) return;
@@ -166,19 +176,42 @@ const Upload = () => {
   };
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
       <Navbar />
 
-      <section id="main-content" className="main-section">
+      <section id="main-content" className="main-section flex-1">
+        {/* Hero heading */}
         <div className="page-heading pt-8 sm:pt-12 pb-2">
+          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-2 animate-in fade-in duration-500">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
+              AI-Powered Analysis
+            </span>
+          </div>
           <h1>Smart feedback for your dream job</h1>
           {!isProcessing && (
             <h2>Drop your resume for an ATS score and improvement tips</h2>
           )}
         </div>
 
+        {/* Feature pills — hidden during processing */}
+        {!isProcessing && (
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            {FEATURE_PILLS.map((pill, i) => (
+              <span
+                key={pill.label}
+                className="flex items-center gap-1.5 bg-white border border-gray-100 rounded-full px-3 py-1.5 text-xs sm:text-sm text-gray-600 shadow-sm hover:border-indigo-200 hover:text-indigo-600 hover:shadow-md transition-all duration-200 cursor-default animate-in fade-in duration-500"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <span>{pill.icon}</span>
+                <span className="font-medium">{pill.label}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
         {isProcessing ? (
-          <div className="w-full max-w-lg flex flex-col items-center gap-6">
+          <div className="w-full max-w-lg flex flex-col items-center gap-6 animate-in fade-in duration-300">
             <ol
               aria-label="Upload progress"
               className="w-full flex flex-col gap-2"
@@ -189,17 +222,17 @@ const Upload = () => {
                 return (
                   <li
                     key={label}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                       done
                         ? "bg-green-50 text-green-700"
                         : active
-                          ? "bg-indigo-50 text-indigo-700"
+                          ? "bg-indigo-50 text-indigo-700 shadow-sm"
                           : "bg-gray-50 text-gray-400"
                     }`}
                   >
                     <span
                       aria-hidden="true"
-                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-300 ${
                         done
                           ? "bg-green-500 text-white"
                           : active
@@ -211,7 +244,7 @@ const Upload = () => {
                     </span>
                     {label}
                     {active && (
-                      <span className="ml-auto text-xs text-indigo-400">
+                      <span className="ml-auto text-xs text-indigo-400 animate-pulse">
                         In progress…
                       </span>
                     )}
@@ -228,15 +261,15 @@ const Upload = () => {
               src="/images/resume-scan.gif"
               alt=""
               aria-hidden="true"
-              className="w-40"
+              className="w-40 rounded-2xl"
             />
-            <p className="text-gray-500 text-sm">{statusText}</p>
+            <p className="text-gray-500 text-sm text-center">{statusText}</p>
           </div>
         ) : (
           <form
             id="upload-form"
             onSubmit={handleSubmit}
-            className="w-full max-w-2xl flex flex-col gap-5 text-left"
+            className="w-full max-w-2xl flex flex-col gap-5 text-left bg-white/70 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-500"
             noValidate
           >
             <div className="form-div">
@@ -331,15 +364,21 @@ const Upload = () => {
               )}
             </div>
 
-            <button className="primary-button" type="submit">
-              Analyze Resume
+            <button
+              className="primary-button text-lg font-semibold py-3"
+              type="submit"
+            >
+              ✨ Analyze Resume
             </button>
           </form>
         )}
       </section>
+
+      <Footer />
     </main>
   );
 };
+
 export default Upload;
 
 export function ErrorBoundary() {

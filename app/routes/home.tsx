@@ -1,6 +1,9 @@
 import type { Route } from "./+types/home";
 import Navbar from "~/components/Navbar";
+import Footer from "~/components/Footer";
 import ResumeCard from "~/components/ResumeCard";
+import StatsStrip from "~/components/StatsStrip";
+import HowItWorks from "~/components/HowItWorks";
 import { usePuterStore } from "~/lib/puter";
 import {
   isRouteErrorResponse,
@@ -144,7 +147,7 @@ const ComparePanel = ({
         );
       })}
 
-      {/* Keyword overlap — only if both have keyword data */}
+      {/* Keyword overlap */}
       {kwA && kwB && (
         <div className="px-6 py-4 border-t border-gray-100">
           <p className="text-xs font-semibold text-gray-500 mb-3">
@@ -303,35 +306,45 @@ export default function Home() {
   );
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
       <Navbar />
 
-      <section id="main-content" className="main-section">
+      <section id="main-content" className="main-section flex-1">
         <div className="page-heading pt-8 sm:pt-12 pb-4">
           <h1>Track Your Applications & Resume Ratings</h1>
           {!loadingResumes && resumes?.length === 0 ? (
-            <h2>No resumes found. Upload your first resume to get feedback.</h2>
+            <h2>No resumes yet — upload your first to get AI feedback.</h2>
           ) : (
             <h2>Review your submissions and check AI-powered feedback.</h2>
           )}
         </div>
 
         {loadingResumes && (
-          <div className="flex flex-col items-center justify-center">
-            <img src="/images/resume-scan-2.gif" className="w-[200px]" />
+          <div className="flex flex-col items-center justify-center gap-4">
+            <img
+              src="/images/resume-scan-2.gif"
+              className="w-[200px]"
+              alt="Loading"
+            />
+            <p className="text-sm text-gray-400 animate-pulse">
+              Loading your resumes…
+            </p>
           </div>
         )}
 
         {!loadingResumes && resumes.length > 0 && (
           <>
-            {/* Toolbar: compare toggle + status */}
+            {/* Stats strip */}
+            <StatsStrip />
+
+            {/* Toolbar */}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 {compareMode && compareIds.length > 0 && (
                   <span className="text-sm text-gray-500">
                     {compareIds.length === 1
                       ? "Select one more to compare"
-                      : "Ready to compare"}
+                      : "Ready to compare ✓"}
                   </span>
                 )}
                 {compareMode && compareIds.length === 0 && (
@@ -343,9 +356,9 @@ export default function Home() {
               {resumes.length >= 2 && (
                 <button
                   onClick={toggleCompareMode}
-                  className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-colors ${
+                  className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-all duration-200 ${
                     compareMode
-                      ? "bg-indigo-600 text-white border-indigo-600"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
                       : "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                   }`}
                 >
@@ -369,7 +382,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Compare panel */}
             {compareResumes && (
               <ComparePanel
                 a={compareResumes[0]}
@@ -407,29 +419,51 @@ export default function Home() {
           </>
         )}
 
+        {/* Empty state */}
         {!loadingResumes && resumes?.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-6 gap-6 max-w-md text-center">
-            <div className="flex flex-col gap-3">
-              <p className="text-gray-600 text-base">
-                Upload your resume and paste a job description — Resumind will
-                score it against ATS systems and give you actionable tips to
-                improve your chances.
-              </p>
-              <ul className="text-sm text-gray-500 flex flex-col gap-1">
-                <li>✓ ATS compatibility score</li>
-                <li>✓ Keyword gap analysis</li>
-                <li>✓ Tone, structure &amp; content feedback</li>
-              </ul>
+          <div className="flex flex-col items-center gap-10 w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Intro card */}
+            <div className="flex flex-col items-center gap-5 text-center bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 w-full">
+              <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
+                  Get Started
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <p className="text-gray-700 text-base leading-relaxed">
+                  Upload your resume and paste a job description — Resumind will
+                  score it against ATS systems and give you actionable tips to
+                  improve your chances.
+                </p>
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-500">
+                  <span>✓ ATS compatibility score</span>
+                  <span>✓ Keyword gap analysis</span>
+                  <span>✓ Tone, structure &amp; content feedback</span>
+                  <span>✓ Interview prep questions</span>
+                  <span>✓ Rewrite suggestions</span>
+                </div>
+              </div>
+
+              <Link
+                to="/upload"
+                className="primary-button w-fit text-lg font-semibold px-8 py-3"
+              >
+                ✨ Upload Your First Resume
+              </Link>
             </div>
-            <Link
-              to="/upload"
-              className="primary-button w-fit text-xl font-semibold"
-            >
-              Upload Your First Resume
-            </Link>
+
+            {/* How it works */}
+            <HowItWorks />
+
+            {/* Stats strip */}
+            <StatsStrip />
           </div>
         )}
       </section>
+
+      <Footer />
     </main>
   );
 }

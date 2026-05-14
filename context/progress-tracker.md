@@ -53,6 +53,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - **Skip-to-main-content link (`root.tsx`, `app.css`):** A visually hidden `<a href="#main-content">` is inserted at the top of every page and becomes visible on focus, allowing keyboard users to bypass the navbar. Home and upload pages have `id="main-content"` on their main section; resume page uses `id="resume-feedback"` for direct jump to feedback.
 - **Global focus-visible ring (`app.css`):** Added a global `:focus-visible` rule (`outline: 2px solid #6366f1`) so every interactive element has a visible keyboard focus indicator. Components that define their own `focus-visible:ring-*` utilities override this without conflict.
 
+### Design & Component Overhaul (latest session)
+
+- **Navbar upgrade (`Navbar.tsx`):** Now sticky with scroll-shadow, user avatar pill showing initials via `auth.user.username`, sign-out button, and context-aware nav link (shows "← My Resumes" on upload page, "Upload Resume" elsewhere).
+- **StatsStrip component (`StatsStrip.tsx`):** New animated counter strip with 4 stats (AI Metrics, Keyword Signals, Analysis Time, ATS Coverage). Counters animate on IntersectionObserver entry with eased `requestAnimationFrame` countdown. Shown on dashboard (with resumes) and in empty state.
+- **HowItWorks component (`HowItWorks.tsx`):** 3-step flow card (Upload → AI Analyzes → Get Feedback) with staggered fade-in animations, gradient backgrounds per step, connector line on desktop, and IntersectionObserver-triggered entrance. Supports `compact` prop.
+- **Footer component (`Footer.tsx`):** Full branded footer with feature strip, 3-column layout (brand + links + powered-by), and privacy note. Added to Home and Upload pages.
+- **Upload page hero (`upload.tsx`):** Added "AI-Powered Analysis" badge pill with pulse dot, 6 animated feature pills (ATS Score, Keyword Analysis, Rewrite Tips, Tone & Style, Interview Prep, Structure Check) with staggered entrance. Upload form wrapped in frosted-glass card (`bg-white/70 backdrop-blur-sm`). Analyze button upgraded with ✨ icon.
+- **Home page empty state (`home.tsx`):** Replaced plain text with a frosted-glass intro card featuring feature checklist, pulsing badge, and prominent CTA. Followed by `HowItWorks` and `StatsStrip` sections. Stats strip also added above the resume grid when resumes exist.
+- **`FormEvent` deprecation fix (`upload.tsx`):** Replaced deprecated `FormEvent<HTMLFormElement>` import with `React.SyntheticEvent<HTMLFormElement>`.
+
 ## In Progress
 
 - None.
