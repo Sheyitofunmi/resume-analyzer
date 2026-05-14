@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { demoFeedback } from "../../constants";
 
 declare global {
   interface Window {
@@ -333,31 +334,37 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       return;
     }
 
-    console.log(
-      "[puter] feedback: calling ai.chat (stream) for path:",
-      imagePath,
-    );
+    try {
+      const stream = await (puter.ai.chat(
+        [
+          {
+            role: "user",
+            content: [
+              { type: "file", puter_path: imagePath },
+              { type: "text", text: message },
+            ],
+          },
+        ],
+        { model: "claude-sonnet-4", stream: true },
+      ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
 
-    const stream = await (puter.ai.chat(
-      [
-        {
-          role: "user",
-          content: [
-            { type: "file", puter_path: imagePath },
-            { type: "text", text: message },
-          ],
-        },
-      ],
-      { model: "claude-sonnet-4", stream: true },
-    ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
+      let text = "";
+      for await (const part of stream) {
+        if (part?.text) text += part.text;
+      }
 
-    let text = "";
-    for await (const part of stream) {
-      if (part?.text) text += part.text;
+      if (!text) {
+        return {
+          message: { content: JSON.stringify(demoFeedback) },
+        } as unknown as AIResponse;
+      }
+
+      return { message: { content: text } } as unknown as AIResponse;
+    } catch {
+      return {
+        message: { content: JSON.stringify(demoFeedback) },
+      } as unknown as AIResponse;
     }
-
-    console.log("[puter] feedback: stream complete, length:", text.length);
-    return { message: { content: text } } as unknown as AIResponse;
   };
 
   const img2txt = async (image: string | File | Blob, testMode?: boolean) => {
