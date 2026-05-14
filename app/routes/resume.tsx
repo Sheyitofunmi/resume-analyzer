@@ -368,11 +368,11 @@ const Resume = () => {
         {/* Left: resume image */}
         <section
           aria-label="Resume preview"
-          className="feedback-section print:hidden bg-[url('/images/bg-small.svg')] bg-cover h-[100vh] sticky top-0 items-center justify-center"
+          className="feedback-section print:hidden bg-[url('/images/bg-small.svg')] bg-cover lg:h-screen lg:sticky lg:top-0 flex items-center justify-center"
         >
-          {imageUrl && resumeUrl && (
-            <div className="flex flex-col items-center gap-2 animate-in fade-in duration-1000">
-              <div className="gradient-border max-sm:m-0 h-[90%] max-wxl:h-fit w-fit">
+          {imageUrl && resumeUrl ? (
+            <div className="flex flex-col items-center gap-3 animate-in fade-in duration-1000 w-full">
+              <div className="gradient-border w-full max-w-sm mx-auto">
                 <a
                   href={resumeUrl}
                   target="_blank"
@@ -382,16 +382,22 @@ const Resume = () => {
                   <img
                     src={imageUrl}
                     alt={`Resume preview${storedCompanyName ? ` for ${storedCompanyName}` : ""}`}
-                    className="w-full h-full object-contain rounded-2xl"
+                    className="w-full object-contain rounded-2xl max-h-[70vh]"
                   />
                 </a>
               </div>
               {pageCount && pageCount > 1 && (
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 text-center">
                   Showing page 1 of {pageCount} — click to view full PDF
                 </p>
               )}
             </div>
+          ) : (
+            !imageUrl && (
+              <div className="w-full max-w-sm mx-auto gradient-border">
+                <div className="w-full h-[400px] bg-gray-100 rounded-2xl animate-pulse" />
+              </div>
+            )
           )}
         </section>
 
@@ -400,7 +406,7 @@ const Resume = () => {
           id="resume-feedback"
           className="feedback-section print:w-full print:px-0"
         >
-          <h2 className="text-4xl !text-black font-bold print:hidden">
+          <h2 className="!text-2xl sm:!text-3xl !text-black font-bold print:hidden">
             Resume Review
           </h2>
           {feedback ? (

@@ -148,178 +148,172 @@ const Upload = () => {
       <Navbar />
 
       <section id="main-content" className="main-section">
-        <div className="page-heading py-16">
+        <div className="page-heading pt-8 sm:pt-12 pb-2">
           <h1>Smart feedback for your dream job</h1>
-
-          {isProcessing ? (
-            <div className="w-full flex flex-col items-center gap-6">
-              {/* Step progress tracker */}
-              <ol
-                aria-label="Upload progress"
-                className="w-full max-w-md flex flex-col gap-2"
-              >
-                {STEPS.map((label, i) => {
-                  const done = i < currentStep;
-                  const active = i === currentStep;
-                  return (
-                    <li
-                      key={label}
-                      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                        done
-                          ? "bg-green-50 text-green-700"
-                          : active
-                            ? "bg-indigo-50 text-indigo-700"
-                            : "bg-gray-50 text-gray-400"
-                      }`}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                          done
-                            ? "bg-green-500 text-white"
-                            : active
-                              ? "bg-indigo-500 text-white animate-pulse"
-                              : "bg-gray-200 text-gray-400"
-                        }`}
-                      >
-                        {done ? "✓" : i + 1}
-                      </span>
-                      {label}
-                      {active && (
-                        <span className="ml-auto text-xs text-indigo-400">
-                          In progress…
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-
-              {/* Accessible live status for screen readers */}
-              <p aria-live="polite" aria-atomic="true" className="sr-only">
-                {statusText}
-              </p>
-
-              <img
-                src="/images/resume-scan.gif"
-                alt=""
-                aria-hidden="true"
-                className="w-48"
-              />
-              <p className="text-gray-500 text-sm">{statusText}</p>
-            </div>
-          ) : (
-            <>
-              <h2>Drop your resume for an ATS score and improvement tips</h2>
-              <form
-                id="upload-form"
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-4 mt-8"
-                noValidate
-              >
-                <div className="form-div">
-                  <label htmlFor="company-name">Company Name</label>
-                  <input
-                    type="text"
-                    name="company-name"
-                    placeholder="e.g. Acme Corp"
-                    id="company-name"
-                    aria-invalid={!!errors.companyName}
-                    aria-describedby={
-                      errors.companyName ? "company-name-error" : undefined
-                    }
-                    onChange={() =>
-                      setErrors((prev) => ({ ...prev, companyName: "" }))
-                    }
-                  />
-                  {errors.companyName && (
-                    <p
-                      id="company-name-error"
-                      role="alert"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.companyName}
-                    </p>
-                  )}
-                </div>
-
-                <div className="form-div">
-                  <label htmlFor="job-title">Job Title</label>
-                  <input
-                    type="text"
-                    name="job-title"
-                    placeholder="e.g. Senior Frontend Engineer"
-                    id="job-title"
-                    aria-invalid={!!errors.jobTitle}
-                    aria-describedby={
-                      errors.jobTitle ? "job-title-error" : undefined
-                    }
-                    onChange={() =>
-                      setErrors((prev) => ({ ...prev, jobTitle: "" }))
-                    }
-                  />
-                  {errors.jobTitle && (
-                    <p
-                      id="job-title-error"
-                      role="alert"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.jobTitle}
-                    </p>
-                  )}
-                </div>
-
-                <div className="form-div">
-                  <label htmlFor="job-description">Job Description</label>
-                  <textarea
-                    rows={5}
-                    name="job-description"
-                    placeholder="Paste the full job description here…"
-                    id="job-description"
-                    aria-invalid={!!errors.jobDescription}
-                    aria-describedby={
-                      errors.jobDescription
-                        ? "job-description-error"
-                        : undefined
-                    }
-                    onChange={() =>
-                      setErrors((prev) => ({ ...prev, jobDescription: "" }))
-                    }
-                  />
-                  {errors.jobDescription && (
-                    <p
-                      id="job-description-error"
-                      role="alert"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.jobDescription}
-                    </p>
-                  )}
-                </div>
-
-                <div className="form-div">
-                  <label htmlFor="uploader">
-                    Upload Resume (PDF, max 20 MB)
-                  </label>
-                  <FileUploader onFileSelect={handleFileSelect} />
-                  {errors.file && (
-                    <p
-                      id="file-error"
-                      role="alert"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.file}
-                    </p>
-                  )}
-                </div>
-
-                <button className="primary-button" type="submit">
-                  Analyze Resume
-                </button>
-              </form>
-            </>
+          {!isProcessing && (
+            <h2>Drop your resume for an ATS score and improvement tips</h2>
           )}
         </div>
+
+        {isProcessing ? (
+          <div className="w-full max-w-lg flex flex-col items-center gap-6">
+            <ol
+              aria-label="Upload progress"
+              className="w-full flex flex-col gap-2"
+            >
+              {STEPS.map((label, i) => {
+                const done = i < currentStep;
+                const active = i === currentStep;
+                return (
+                  <li
+                    key={label}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      done
+                        ? "bg-green-50 text-green-700"
+                        : active
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "bg-gray-50 text-gray-400"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                        done
+                          ? "bg-green-500 text-white"
+                          : active
+                            ? "bg-indigo-500 text-white animate-pulse"
+                            : "bg-gray-200 text-gray-400"
+                      }`}
+                    >
+                      {done ? "✓" : i + 1}
+                    </span>
+                    {label}
+                    {active && (
+                      <span className="ml-auto text-xs text-indigo-400">
+                        In progress…
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+
+            <p aria-live="polite" aria-atomic="true" className="sr-only">
+              {statusText}
+            </p>
+
+            <img
+              src="/images/resume-scan.gif"
+              alt=""
+              aria-hidden="true"
+              className="w-40"
+            />
+            <p className="text-gray-500 text-sm">{statusText}</p>
+          </div>
+        ) : (
+          <form
+            id="upload-form"
+            onSubmit={handleSubmit}
+            className="w-full max-w-2xl flex flex-col gap-5 text-left"
+            noValidate
+          >
+            <div className="form-div">
+              <label htmlFor="company-name">Company Name</label>
+              <input
+                type="text"
+                name="company-name"
+                placeholder="e.g. Acme Corp"
+                id="company-name"
+                aria-invalid={!!errors.companyName}
+                aria-describedby={
+                  errors.companyName ? "company-name-error" : undefined
+                }
+                onChange={() =>
+                  setErrors((prev) => ({ ...prev, companyName: "" }))
+                }
+              />
+              {errors.companyName && (
+                <p
+                  id="company-name-error"
+                  role="alert"
+                  className="text-red-500 text-sm"
+                >
+                  {errors.companyName}
+                </p>
+              )}
+            </div>
+
+            <div className="form-div">
+              <label htmlFor="job-title">Job Title</label>
+              <input
+                type="text"
+                name="job-title"
+                placeholder="e.g. Senior Frontend Engineer"
+                id="job-title"
+                aria-invalid={!!errors.jobTitle}
+                aria-describedby={
+                  errors.jobTitle ? "job-title-error" : undefined
+                }
+                onChange={() =>
+                  setErrors((prev) => ({ ...prev, jobTitle: "" }))
+                }
+              />
+              {errors.jobTitle && (
+                <p
+                  id="job-title-error"
+                  role="alert"
+                  className="text-red-500 text-sm"
+                >
+                  {errors.jobTitle}
+                </p>
+              )}
+            </div>
+
+            <div className="form-div">
+              <label htmlFor="job-description">Job Description</label>
+              <textarea
+                rows={5}
+                name="job-description"
+                placeholder="Paste the full job description here…"
+                id="job-description"
+                aria-invalid={!!errors.jobDescription}
+                aria-describedby={
+                  errors.jobDescription ? "job-description-error" : undefined
+                }
+                onChange={() =>
+                  setErrors((prev) => ({ ...prev, jobDescription: "" }))
+                }
+              />
+              {errors.jobDescription && (
+                <p
+                  id="job-description-error"
+                  role="alert"
+                  className="text-red-500 text-sm"
+                >
+                  {errors.jobDescription}
+                </p>
+              )}
+            </div>
+
+            <div className="form-div">
+              <label htmlFor="uploader">Upload Resume (PDF, max 20 MB)</label>
+              <FileUploader onFileSelect={handleFileSelect} />
+              {errors.file && (
+                <p
+                  id="file-error"
+                  role="alert"
+                  className="text-red-500 text-sm"
+                >
+                  {errors.file}
+                </p>
+              )}
+            </div>
+
+            <button className="primary-button" type="submit">
+              Analyze Resume
+            </button>
+          </form>
+        )}
       </section>
     </main>
   );
