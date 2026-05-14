@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { isRouteErrorResponse, useRouteError } from "react-router";
 import Navbar from "~/components/Navbar";
 import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
@@ -8,14 +9,31 @@ import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 
 const Upload = () => {
-  const { auth, isLoading, fs, ai, kv } = usePuterStore();
+  const { fs, ai, kv } = usePuterStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleFileSelect = (file: File | null) => {
     setFile(file);
+    if (file) setErrors((prev) => ({ ...prev, file: "" }));
+  };
+
+  const validate = (
+    companyName: string,
+    jobTitle: string,
+    jobDescription: string,
+  ): boolean => {
+    const next: Record<string, string> = {};
+    if (!companyName.trim()) next.companyName = "Company name is required.";
+    if (!jobTitle.trim()) next.jobTitle = "Job title is required.";
+    if (!jobDescription.trim())
+      next.jobDescription = "Job description is required.";
+    if (!file) next.file = "Please upload a resume PDF.";
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
   const handleAnalyze = async ({
@@ -81,6 +99,7 @@ const Upload = () => {
         companyName,
         jobTitle,
         jobDescription,
+        pageCount: imageFile.pageCount,
         feedback: JSON.parse(feedbackText),
       };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
@@ -103,9 +122,9 @@ const Upload = () => {
     const jobTitle = formData.get("job-title") as string;
     const jobDescription = formData.get("job-description") as string;
 
-    if (!file) return;
+    if (!validate(companyName, jobTitle, jobDescription)) return;
 
-    await handleAnalyze({ companyName, jobTitle, jobDescription, file });
+    await handleAnalyze({ companyName, jobTitle, jobDescription, file: file! });
   };
 
   return (
@@ -128,6 +147,7 @@ const Upload = () => {
               id="upload-form"
               onSubmit={handleSubmit}
               className="flex flex-col gap-4 mt-8"
+              noValidate
             >
               <div className="form-div">
                 <label htmlFor="company-name">Company Name</label>
@@ -136,7 +156,16 @@ const Upload = () => {
                   name="company-name"
                   placeholder="Company Name"
                   id="company-name"
+                  aria-invalid={!!errors.companyName}
+                  onChange={() =>
+                    setErrors((prev) => ({ ...prev, companyName: "" }))
+                  }
                 />
+                {errors.companyName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.companyName}
+                  </p>
+                )}
               </div>
               <div className="form-div">
                 <label htmlFor="job-title">Job Title</label>
@@ -145,7 +174,14 @@ const Upload = () => {
                   name="job-title"
                   placeholder="Job Title"
                   id="job-title"
+                  aria-invalid={!!errors.jobTitle}
+                  onChange={() =>
+                    setErrors((prev) => ({ ...prev, jobTitle: "" }))
+                  }
                 />
+                {errors.jobTitle && (
+                  <p className="text-red-500 text-sm mt-1">{errors.jobTitle}</p>
+                )}
               </div>
               <div className="form-div">
                 <label htmlFor="job-description">Job Description</label>
@@ -154,12 +190,24 @@ const Upload = () => {
                   name="job-description"
                   placeholder="Job Description"
                   id="job-description"
+                  aria-invalid={!!errors.jobDescription}
+                  onChange={() =>
+                    setErrors((prev) => ({ ...prev, jobDescription: "" }))
+                  }
                 />
+                {errors.jobDescription && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.jobDescription}
+                  </p>
+                )}
               </div>
 
               <div className="form-div">
                 <label htmlFor="uploader">Upload Resume</label>
                 <FileUploader onFileSelect={handleFileSelect} />
+                {errors.file && (
+                  <p className="text-red-500 text-sm mt-1">{errors.file}</p>
+                )}
               </div>
 
               <button className="primary-button" type="submit">
@@ -173,3 +221,24 @@ const Upload = () => {
   );
 };
 export default Upload;
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const message = isRouteErrorResponse(error)
+    ? error.statusText
+    : error instanceof Error
+      ? error.message
+      : "Something went wrong.";
+
+  return (
+    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center flex flex-col gap-4">
+        <h1 className="text-2xl font-bold text-red-500">Upload Failed</h1>
+        <p className="text-gray-600">{message}</p>
+        <a href="/upload" className="primary-button w-fit mx-auto">
+          Try Again
+        </a>
+      </div>
+    </main>
+  );
+}

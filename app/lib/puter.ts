@@ -242,27 +242,26 @@ export const usePuterStore = create<PuterStore>((set, get) => {
   };
 
   const init = (): void => {
-    const puter = getPuter();
-    if (puter) {
+    if (getPuter()) {
       set({ puterReady: true });
       checkAuthStatus();
       return;
     }
 
+    let attempts = 0;
+    const maxAttempts = 100; // 10 s at 100 ms
+
     const interval = setInterval(() => {
+      attempts++;
       if (getPuter()) {
         clearInterval(interval);
         set({ puterReady: true });
         checkAuthStatus();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setError("Puter.js failed to load. Please refresh the page.");
       }
     }, 100);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      if (!getPuter()) {
-        setError("Puter.js failed to load within 10 seconds");
-      }
-    }, 10000);
   };
 
   const write = async (path: string, data: string | File | Blob) => {

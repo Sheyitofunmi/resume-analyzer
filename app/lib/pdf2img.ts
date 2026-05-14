@@ -1,6 +1,7 @@
 export interface PdfConversionResult {
   imageUrl: string;
   file: File | null;
+  pageCount: number;
   error?: string;
 }
 
@@ -29,6 +30,7 @@ export async function convertPdfToImage(
 
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+    const pageCount: number = pdf.numPages;
     const page = await pdf.getPage(1);
 
     const viewport = page.getViewport({ scale: 1.5 });
@@ -58,11 +60,13 @@ export async function convertPdfToImage(
             resolve({
               imageUrl: URL.createObjectURL(blob),
               file: imageFile,
+              pageCount,
             });
           } else {
             resolve({
               imageUrl: "",
               file: null,
+              pageCount,
               error: "Failed to create image blob",
             });
           }
@@ -75,6 +79,7 @@ export async function convertPdfToImage(
     return {
       imageUrl: "",
       file: null,
+      pageCount: 0,
       error: `Failed to convert PDF: ${err}`,
     };
   }
