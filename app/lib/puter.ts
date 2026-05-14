@@ -47,6 +47,7 @@ interface PuterStore {
   isLoading: boolean;
   error: string | null;
   puterReady: boolean;
+  isUsingDemoFeedback: boolean;
   auth: {
     user: PuterUser | null;
     isAuthenticated: boolean;
@@ -354,13 +355,16 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       }
 
       if (!text) {
+        set({ isUsingDemoFeedback: true });
         return {
           message: { content: JSON.stringify(demoFeedback) },
         } as unknown as AIResponse;
       }
 
+      set({ isUsingDemoFeedback: false });
       return { message: { content: text } } as unknown as AIResponse;
     } catch {
+      set({ isUsingDemoFeedback: true });
       return {
         message: { content: JSON.stringify(demoFeedback) },
       } as unknown as AIResponse;
@@ -428,6 +432,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     isLoading: true,
     error: null,
     puterReady: false,
+    isUsingDemoFeedback: false,
     auth: {
       user: null,
       isAuthenticated: false,

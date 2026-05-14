@@ -67,7 +67,7 @@ export default function Home() {
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
       <Navbar />
 
-      <section className="main-section">
+      <section id="main-content" className="main-section">
         <div className="page-heading py-16">
           <h1>Track Your Applications & Resume Ratings</h1>
           {!loadingResumes && resumes?.length === 0 ? (
@@ -122,12 +122,24 @@ export default function Home() {
         )}
 
         {!loadingResumes && resumes?.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-10 gap-4">
+          <div className="flex flex-col items-center justify-center mt-6 gap-6 max-w-md text-center">
+            <div className="flex flex-col gap-3">
+              <p className="text-gray-600 text-base">
+                Upload your resume and paste a job description — Resumind will
+                score it against ATS systems and give you actionable tips to
+                improve your chances.
+              </p>
+              <ul className="text-sm text-gray-500 flex flex-col gap-1">
+                <li>✓ ATS compatibility score</li>
+                <li>✓ Keyword gap analysis</li>
+                <li>✓ Tone, structure &amp; content feedback</li>
+              </ul>
+            </div>
             <Link
               to="/upload"
               className="primary-button w-fit text-xl font-semibold"
             >
-              Upload Resume
+              Upload Your First Resume
             </Link>
           </div>
         )}

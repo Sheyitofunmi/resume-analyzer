@@ -24,6 +24,27 @@ body {
   @apply bg-white;
 }
 
+/* Skip-to-main link — visually hidden until focused by keyboard */
+.skip-link {
+  @apply absolute -top-full left-2 z-50 bg-white px-4 py-2 rounded shadow text-indigo-700 font-semibold text-sm;
+  transition: top 0.1s;
+}
+.skip-link:focus {
+  @apply top-2;
+}
+
+/* Global focus-visible ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove the ring only where components define their own (accordion, buttons) */
+[class*="focus-visible:ring"] {
+  outline: none;
+}
+
 main {
   @apply min-h-screen pt-10;
 }

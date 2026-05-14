@@ -41,6 +41,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body suppressHydrationWarning>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <script src="https://js.puter.com/v2/"></script>
         {children}
         <ScrollRestoration />
