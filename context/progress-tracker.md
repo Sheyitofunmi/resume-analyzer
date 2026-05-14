@@ -4,16 +4,21 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature complete + UI/UX/Accessibility polish pass done
+- Rich text resume editor implemented
 
 ## Current Goal
 
-- App is stable, accessible, and production-ready. Ready for end-to-end testing and deployment.
+- End-to-end testing of the new editor features, then deployment.
 
 ## Completed
 
+### Feature Additions (recent)
+
+- **Rich text editor toolbar (`resume-edit.tsx`):** Added a full formatting toolbar: Undo/Redo, block-format selector, font-size selector (pt-based, uses font-tag marker trick), Bold/Italic/Underline/Strikethrough, text-color swatch picker (8 colors), clear formatting, Insert/Remove Link (dialog preserves selection range), Align Left/Centre/Right, Bullet list, Numbered list, Indent/Outdent. Auto-save debounced at 2.5s after typing. Unsaved-changes indicator (amber pulsing dot) + saved-ago label in nav bar. Live word count in footer. Active link URL detected via `selectionchange` and shown as tooltip. Download dropdown has PDF (print) and Word (.doc) options.
+
 ### Bug Fixes & Code Quality
 
+- **Resume editor blank content fix (`resume-edit.tsx`):** The load function was setting `editorRef.current.innerHTML` while `extracting` was still `true`, so the editor div hadn't rendered yet and `editorRef.current` was `null`. Fixed by storing extracted HTML in `editorHtml` state and applying it to the editor via a `useEffect` that fires after `extracting` becomes `false` and the div is mounted.
 - **Honest AI scoring (`constants/index.ts`):** Rewrote `prepareInstructions` prompt with strict rules: all scores set to 0 for non-resume images; all scores below 20 for random/nonsensical job title or description; AI explicitly forbidden from inflating scores out of politeness or fabricating keywords not present in the resume.
 - **Form minimum-length validation (`upload.tsx`):** Added length guards to `validate()` — company name ≥ 2 chars, job title ≥ 3 chars, job description ≥ 50 chars. Prevents garbage one-word inputs from passing through to the AI.
 
@@ -66,6 +71,36 @@ Update this file whenever the current phase, active feature, or implementation s
 ## In Progress
 
 - None.
+
+---
+
+## Session: Fixes + Resume Editor (2026-05-14)
+
+### Bug Fixes & Code Quality
+
+- **AI model upgrade (`puter.ts`):** Updated hardcoded model string from `claude-sonnet-4` to `claude-sonnet-4-6` for better reasoning quality.
+- **Deduplicated `extractJSON` (`utils.ts`, `puter.ts`, `resume.tsx`):** Moved the JSON-extraction helper into `lib/utils.ts` as a single shared `extractJSON()`. Removed the duplicate local `extractJSONText` from `puter.ts` and the local `extractJSON` from `resume.tsx`; both now import from utils. The shared version also correctly handles JSON arrays (not just objects).
+- **Meta title trailing space (`resume.tsx`):** Fixed `"ResumeLens | Review "` → `"ResumeLens | Review"`.
+- **Puter loading screen (`root.tsx`):** Added a full-page spinner overlay (`PuterLoadingScreen`) that shows while `isLoading && !puterReady` — replaces the blank page users saw during the 10-second Puter.js init poll.
+- **Wipe confirmation (`wipe.tsx`):** Full redesign — now requires typing `DELETE` before the wipe button becomes active. Styled consistently with the rest of the app. Shows a success state after wipe and a spinner/error state during loading.
+
+### UX Improvements
+
+- **Re-analyze modal (`resume.tsx`):** Converted the inline re-analyze form (which pushed page content down) to a proper overlay modal (`role="dialog"`, `aria-modal`, backdrop click to dismiss, `zoom-in-95` entrance animation). Cleaner on all screen sizes.
+- **"Edit Resume" nav button (`resume.tsx`):** Added an "Edit Resume" button in the resume page nav bar that links to `/resume/:id/edit`.
+
+### New Feature: Resume Editor + Download
+
+- **`extractPdfText` (`pdf2img.ts`):** New export that uses the already-loaded pdfjs-dist to extract plain text from all pages of a PDF blob. Reuses `loadPdfJs()` — no extra setup.
+- **`/resume/:id/edit` route (`resume-edit.tsx`):** New page with:
+  - Loads the stored PDF from Puter, extracts text via `extractPdfText` on first visit.
+  - Persists user edits to Puter KV under `resume-edit:<id>` — subsequent visits reload the saved edit.
+  - **Left panel:** AI improvement tips filtered to `type === "improve"` across all feedback categories (ATS, content, tone, structure) — shown as amber tip cards for reference while editing.
+  - **Right panel:** Full-height `<textarea>` (monospace, spellcheck enabled) with the extracted resume text.
+  - **Save Edits** button writes the current text to KV with a 3-second "✓ Saved" toast.
+  - **Download PDF** button: builds a print-optimized HTML document in memory — detects ALL-CAPS lines as section headers (`<h2>`), bullet chars as list items (`<li>`), and other lines as paragraphs (`<p>`). Opens in a new tab and auto-triggers `window.print()`. Zero extra dependencies.
+- **Route registered (`routes.ts`):** `/resume/:id/edit` → `routes/resume-edit.tsx`.
+- **Editor redesigned (session 2):** Replaced plain textarea with a full WYSIWYG experience — A4 white paper card on a gray desktop background. The paper div is `contentEditable` styled with `.resume-doc` (Georgia serif, proper resume typography). Better PDF text parser splits on known section headers (SUMMARY, WORK EXPERIENCE, SKILLS, etc.) injecting `<h1>`, `<h2>`, `<ul>/<li>`, and `<p>` tags. `Ctrl+B` / `Ctrl+I` work natively. Print CSS in `app.css` uses `.resume-editor-chrome` / `.resume-paper-wrap` / `.resume-paper` to hide all UI chrome and print only the A4 paper. KV key changed to `resume-edit-html:<id>` to store HTML (not plain text).
 
 ## Next Up
 

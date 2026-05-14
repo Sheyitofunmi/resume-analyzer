@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { demoFeedback } from "../../constants";
+import { extractJSON } from "~/lib/utils";
 
 declare global {
   interface Window {
@@ -355,7 +356,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
             ],
           },
         ],
-        { model: "claude-sonnet-4", stream: true },
+        { model: "claude-sonnet-4-6", stream: true },
       ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
 
       let text = "";
@@ -378,19 +379,6 @@ export const usePuterStore = create<PuterStore>((set, get) => {
         message: { content: JSON.stringify(demoFeedback) },
       } as unknown as AIResponse;
     }
-  };
-
-  const extractJSONText = (text: string): string => {
-    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenced) return fenced[1].trim();
-    const first = text.indexOf("[");
-    const last = text.lastIndexOf("]");
-    if (first !== -1 && last !== -1) return text.slice(first, last + 1);
-    const firstObj = text.indexOf("{");
-    const lastObj = text.lastIndexOf("}");
-    if (firstObj !== -1 && lastObj !== -1)
-      return text.slice(firstObj, lastObj + 1);
-    return text.trim();
   };
 
   const interviewQuestions = async (
@@ -418,7 +406,7 @@ Return as a JSON array only, no other text, no backticks. Example: [{"category":
         typeof response.message.content === "string"
           ? response.message.content
           : response.message.content[0].text;
-      return JSON.parse(extractJSONText(text)) as InterviewQuestion[];
+      return JSON.parse(extractJSON(text)) as InterviewQuestion[];
     } catch {
       return undefined;
     }
@@ -452,7 +440,7 @@ Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...
         typeof response.message.content === "string"
           ? response.message.content
           : response.message.content[0].text;
-      return JSON.parse(extractJSONText(text)) as RewriteSuggestion[];
+      return JSON.parse(extractJSON(text)) as RewriteSuggestion[];
     } catch {
       return undefined;
     }

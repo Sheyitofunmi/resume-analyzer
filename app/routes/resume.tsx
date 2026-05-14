@@ -15,22 +15,14 @@ import ResumeChecklist from "~/components/ResumeChecklist";
 import InterviewQuestions from "~/components/InterviewQuestions";
 import RewriteSuggestions from "~/components/RewriteSuggestions";
 import { prepareInstructions } from "../../constants";
+import { extractJSON } from "~/lib/utils";
 
 export const meta = () => [
-  { title: "ResumeLens | Review " },
+  { title: "ResumeLens | Review" },
   { name: "description", content: "Detailed overview of your resume" },
 ];
 
 const MAX_JOB_DESC_CHARS = 3000;
-
-function extractJSON(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced) return fenced[1].trim();
-  const first = text.indexOf("{");
-  const last = text.lastIndexOf("}");
-  if (first !== -1 && last !== -1) return text.slice(first, last + 1);
-  return text.trim();
-}
 
 const Resume = () => {
   const { auth, isLoading, fs, kv, ai, isUsingDemoFeedback } = usePuterStore();
@@ -225,13 +217,19 @@ const Resume = () => {
         <div className="flex items-center gap-2">
           {feedback && !isReanalyzing && (
             <button
-              onClick={() => setShowReanalyze((v) => !v)}
-              aria-expanded={showReanalyze}
-              aria-controls="reanalyze-form"
+              onClick={() => setShowReanalyze(true)}
               className="back-button text-sm font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             >
               Re-analyze
             </button>
+          )}
+          {feedback && (
+            <Link
+              to={`/resume/${id}/edit`}
+              className="back-button text-sm font-semibold text-emerald-700 border-emerald-200 hover:bg-emerald-50 transition-colors"
+            >
+              Edit Resume
+            </Link>
           )}
           {feedback && (
             <button
@@ -280,73 +278,85 @@ const Resume = () => {
         </div>
       )}
 
-      {/* Re-analyze form */}
+      {/* Re-analyze modal */}
       {showReanalyze && (
         <div
-          id="reanalyze-form"
-          className="print:hidden border-b border-gray-100 bg-indigo-50/50 px-8 py-5 animate-in fade-in duration-300"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reanalyze-title"
+          className="print:hidden fixed inset-0 z-50 flex items-center justify-center p-4"
         >
-          <p className="text-sm font-semibold text-gray-700 mb-1">
-            Re-analyze against a different job description
-          </p>
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-3 w-fit">
-            ⚠ This will replace your current analysis.
-          </p>
-          <form
-            onSubmit={handleReanalyze}
-            className="flex flex-col gap-3 max-w-2xl"
-            noValidate
-          >
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="reanalyze-job-title"
-                className="text-xs font-medium text-gray-600"
-              >
-                Job Title
-              </label>
-              <input
-                id="reanalyze-job-title"
-                type="text"
-                value={newJobTitle}
-                onChange={(e) => setNewJobTitle(e.target.value)}
-                placeholder="e.g. Senior Frontend Engineer"
-                required
-                className="text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="reanalyze-job-desc"
-                className="text-xs font-medium text-gray-600"
-              >
-                Job Description
-              </label>
-              <textarea
-                id="reanalyze-job-desc"
-                rows={4}
-                value={newJobDescription}
-                onChange={(e) => setNewJobDescription(e.target.value)}
-                placeholder="Paste job description here…"
-                required
-                className="text-sm"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                className="primary-button w-fit px-6 text-sm"
-              >
-                Analyze
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowReanalyze(false)}
-                className="back-button text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowReanalyze(false)}
+            aria-hidden="true"
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h2
+              id="reanalyze-title"
+              className="!text-base !text-gray-900 font-semibold mb-1"
+            >
+              Re-analyze Resume
+            </h2>
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4 w-fit">
+              ⚠ This will replace your current analysis.
+            </p>
+            <form
+              onSubmit={handleReanalyze}
+              className="flex flex-col gap-3"
+              noValidate
+            >
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="reanalyze-job-title"
+                  className="text-xs font-medium text-gray-600"
+                >
+                  Job Title
+                </label>
+                <input
+                  id="reanalyze-job-title"
+                  type="text"
+                  value={newJobTitle}
+                  onChange={(e) => setNewJobTitle(e.target.value)}
+                  placeholder="e.g. Senior Frontend Engineer"
+                  required
+                  className="text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="reanalyze-job-desc"
+                  className="text-xs font-medium text-gray-600"
+                >
+                  Job Description
+                </label>
+                <textarea
+                  id="reanalyze-job-desc"
+                  rows={5}
+                  value={newJobDescription}
+                  onChange={(e) => setNewJobDescription(e.target.value)}
+                  placeholder="Paste job description here…"
+                  required
+                  className="text-sm"
+                />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="primary-button w-fit px-6 text-sm"
+                >
+                  Analyze
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReanalyze(false)}
+                  className="back-button text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

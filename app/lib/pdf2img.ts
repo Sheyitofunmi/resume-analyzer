@@ -22,6 +22,22 @@ async function loadPdfJs(): Promise<any> {
   return loadPromise;
 }
 
+export async function extractPdfText(blob: Blob): Promise<string> {
+  const lib = await loadPdfJs();
+  const arrayBuffer = await blob.arrayBuffer();
+  const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
+  const pages: string[] = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item: { str?: string }) => item.str ?? "")
+      .join(" ");
+    pages.push(pageText);
+  }
+  return pages.join("\n\n");
+}
+
 export async function convertPdfToImage(
   file: File,
 ): Promise<PdfConversionResult> {

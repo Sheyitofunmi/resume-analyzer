@@ -12,6 +12,15 @@ import "./app.css";
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
 
+function PuterLoadingScreen() {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white">
+      <div className="w-10 h-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+      <p className="text-sm text-gray-500 font-medium">Connecting to Puter…</p>
+    </div>
+  );
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -26,11 +35,13 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { init } = usePuterStore();
+  const { init, isLoading, puterReady } = usePuterStore();
 
   useEffect(() => {
     init();
   }, [init]);
+
+  const showLoader = isLoading && !puterReady;
 
   return (
     <html lang="en">
@@ -45,7 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           Skip to main content
         </a>
         <script src="https://js.puter.com/v2/"></script>
-        {children}
+        {showLoader ? <PuterLoadingScreen /> : children}
         <ScrollRestoration />
         <Scripts />
       </body>
