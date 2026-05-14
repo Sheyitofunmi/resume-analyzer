@@ -6,5 +6,16 @@
 /.react-router/
 /build/
 
-# Claude Code local config
+# AI agent / IDE AI tool configs
 .claude/
+.cursor/
+.cursorignore
+.cursorrules
+.cursorrules
+.aider*
+.continue/
+.codeium/
+.windsurf/
+.github/copilot-instructions.md
+AGENTS.md
+.roomodes
