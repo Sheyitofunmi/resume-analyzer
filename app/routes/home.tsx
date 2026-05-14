@@ -229,7 +229,7 @@ const ComparePanel = ({
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Resumind" },
+    { title: "ResumeLens" },
     { name: "description", content: "Smart feedback for your dream job!" },
   ];
 }
@@ -433,9 +433,9 @@ export default function Home() {
 
               <div className="flex flex-col gap-3">
                 <p className="text-gray-700 text-base leading-relaxed">
-                  Upload your resume and paste a job description — Resumind will
-                  score it against ATS systems and give you actionable tips to
-                  improve your chances.
+                  Upload your resume and paste a job description — ResumeLens
+                  will score it against ATS systems and give you actionable tips
+                  to improve your chances.
                 </p>
                 <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-500">
                   <span>✓ ATS compatibility score</span>

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 export const meta = () => [
-  { title: "Resumind | Auth" },
+  { title: "ResumeLens | Auth" },
   { name: "description", content: "Log into your account" },
 ];
 
@@ -29,9 +29,10 @@ const Auth = () => {
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 text-sm text-blue-800 flex flex-col gap-1">
             <p className="font-semibold">What is Puter?</p>
             <p className="text-blue-700">
-              Resumind uses <span className="font-medium">Puter</span> — a free
-              cloud platform — to securely store your resumes and AI analysis.
-              No separate sign-up required; your Puter account holds everything.
+              ResumeLens uses <span className="font-medium">Puter</span> — a
+              free cloud platform — to securely store your resumes and AI
+              analysis. No separate sign-up required; your Puter account holds
+              everything.
             </p>
           </div>
 

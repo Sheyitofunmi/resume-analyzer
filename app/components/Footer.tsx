@@ -77,7 +77,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="text-xs text-gray-400">
-            © {new Date().getFullYear()} Resumind. All rights reserved.
+            © {new Date().getFullYear()} ResumeLens. All rights reserved.
           </p>
           <p className="text-xs text-gray-400">
             Your resumes are stored securely via Puter — no third-party sharing.

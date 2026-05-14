@@ -17,7 +17,7 @@ import RewriteSuggestions from "~/components/RewriteSuggestions";
 import { prepareInstructions } from "../../constants";
 
 export const meta = () => [
-  { title: "Resumind | Review " },
+  { title: "ResumeLens | Review " },
   { name: "description", content: "Detailed overview of your resume" },
 ];
 
