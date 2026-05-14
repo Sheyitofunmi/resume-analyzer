@@ -82,6 +82,15 @@ interface PuterStore {
       image: string | File | Blob,
       testMode?: boolean,
     ) => Promise<string | undefined>;
+    interviewQuestions: (
+      jobTitle: string,
+      jobDescription: string,
+      improveTips: string[],
+    ) => Promise<InterviewQuestion[] | undefined>;
+    rewriteSuggestions: (
+      jobTitle: string,
+      improveTips: { tip: string; explanation: string }[],
+    ) => Promise<RewriteSuggestion[] | undefined>;
   };
   kv: {
     get: (key: string) => Promise<string | null | undefined>;
@@ -371,6 +380,84 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     }
   };
 
+  const extractJSONText = (text: string): string => {
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenced) return fenced[1].trim();
+    const first = text.indexOf("[");
+    const last = text.lastIndexOf("]");
+    if (first !== -1 && last !== -1) return text.slice(first, last + 1);
+    const firstObj = text.indexOf("{");
+    const lastObj = text.lastIndexOf("}");
+    if (firstObj !== -1 && lastObj !== -1)
+      return text.slice(firstObj, lastObj + 1);
+    return text.trim();
+  };
+
+  const interviewQuestions = async (
+    jobTitle: string,
+    jobDescription: string,
+    improveTips: string[],
+  ): Promise<InterviewQuestion[] | undefined> => {
+    const puter = getPuter();
+    if (!puter) {
+      setError("Puter.js not available");
+      return;
+    }
+    try {
+      const prompt = `You are a hiring expert preparing a candidate for a job interview.
+Job title: ${jobTitle}
+Job description (summary): ${jobDescription.slice(0, 400)}
+Resume weaknesses to focus on: ${improveTips.slice(0, 3).join("; ")}
+
+Generate exactly 5 likely interview questions the candidate should prepare for.
+For each question provide: category (one of "behavioral", "technical", "situational", "role-specific") and question.
+Return as a JSON array only, no other text, no backticks. Example: [{"category":"behavioral","question":"..."}]`;
+
+      const response = (await puter.ai.chat(prompt)) as AIResponse;
+      const text =
+        typeof response.message.content === "string"
+          ? response.message.content
+          : response.message.content[0].text;
+      return JSON.parse(extractJSONText(text)) as InterviewQuestion[];
+    } catch {
+      return undefined;
+    }
+  };
+
+  const rewriteSuggestions = async (
+    jobTitle: string,
+    improveTips: { tip: string; explanation: string }[],
+  ): Promise<RewriteSuggestion[] | undefined> => {
+    const puter = getPuter();
+    if (!puter) {
+      setError("Puter.js not available");
+      return;
+    }
+    try {
+      const weaknesses = improveTips
+        .slice(0, 4)
+        .map((t) => `• ${t.tip}: ${t.explanation}`)
+        .join("\n");
+      const prompt = `You are a professional resume writer.
+Role being applied for: ${jobTitle}
+Resume weaknesses identified:
+${weaknesses}
+
+Provide exactly 3 concrete rewrite examples showing how to fix these weaknesses.
+For each example: weak (the poor version), strong (the improved version), why (one sentence explaining the improvement).
+Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...","strong":"...","why":"..."}]`;
+
+      const response = (await puter.ai.chat(prompt)) as AIResponse;
+      const text =
+        typeof response.message.content === "string"
+          ? response.message.content
+          : response.message.content[0].text;
+      return JSON.parse(extractJSONText(text)) as RewriteSuggestion[];
+    } catch {
+      return undefined;
+    }
+  };
+
   const img2txt = async (image: string | File | Blob, testMode?: boolean) => {
     const puter = getPuter();
     if (!puter) {
@@ -459,6 +546,15 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       feedback: (path: string, message: string) => feedback(path, message),
       img2txt: (image: string | File | Blob, testMode?: boolean) =>
         img2txt(image, testMode),
+      interviewQuestions: (
+        jobTitle: string,
+        jobDescription: string,
+        improveTips: string[],
+      ) => interviewQuestions(jobTitle, jobDescription, improveTips),
+      rewriteSuggestions: (
+        jobTitle: string,
+        improveTips: { tip: string; explanation: string }[],
+      ) => rewriteSuggestions(jobTitle, improveTips),
     },
     kv: {
       get: (key: string) => getKV(key),

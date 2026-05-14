@@ -6,9 +6,15 @@ import { usePuterStore } from "~/lib/puter";
 const ResumeCard = ({
   resume: { id, companyName, jobTitle, feedback, imagePath },
   onDelete,
+  compareMode = false,
+  isSelected = false,
+  onSelect,
 }: {
   resume: Resume;
   onDelete?: () => void;
+  compareMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }) => {
   const { fs } = usePuterStore();
   const [resumeUrl, setResumeUrl] = useState("");
@@ -48,8 +54,43 @@ const ResumeCard = ({
   };
 
   return (
-    <div className="resume-card animate-in fade-in duration-1000 group relative">
-      {onDelete && !confirmDelete && (
+    <div
+      className={`resume-card animate-in fade-in duration-1000 group relative transition-all ${
+        compareMode
+          ? isSelected
+            ? "ring-2 ring-indigo-500 cursor-pointer"
+            : "cursor-pointer opacity-80 hover:opacity-100 hover:ring-2 hover:ring-indigo-300"
+          : ""
+      }`}
+      onClick={compareMode ? onSelect : undefined}
+      role={compareMode ? "checkbox" : undefined}
+      aria-checked={compareMode ? isSelected : undefined}
+      tabIndex={compareMode ? 0 : undefined}
+      onKeyDown={
+        compareMode
+          ? (e) => {
+              if (e.key === " " || e.key === "Enter") onSelect?.();
+            }
+          : undefined
+      }
+    >
+      {/* Compare mode selection indicator */}
+      {compareMode && (
+        <div
+          className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+            isSelected
+              ? "bg-indigo-500 border-indigo-500"
+              : "bg-white border-gray-300"
+          }`}
+          aria-hidden="true"
+        >
+          {isSelected && (
+            <span className="text-white text-xs font-bold leading-none">✓</span>
+          )}
+        </div>
+      )}
+
+      {onDelete && !confirmDelete && !compareMode && (
         <button
           onClick={handleDeleteClick}
           className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-md hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"

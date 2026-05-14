@@ -10,6 +10,10 @@ import { usePuterStore } from "~/lib/puter";
 import Summary from "~/components/Summary";
 import ATS from "~/components/ATS";
 import Details from "~/components/Details";
+import ScoreHistory from "~/components/ScoreHistory";
+import ResumeChecklist from "~/components/ResumeChecklist";
+import InterviewQuestions from "~/components/InterviewQuestions";
+import RewriteSuggestions from "~/components/RewriteSuggestions";
 import { prepareInstructions } from "../../constants";
 
 export const meta = () => [
@@ -41,6 +45,7 @@ const Resume = () => {
   const [storedJobTitle, setStoredJobTitle] = useState("");
   const [storedCompanyName, setStoredCompanyName] = useState("");
   const [storedImagePath, setStoredImagePath] = useState("");
+  const [scoreHistory, setScoreHistory] = useState<ScoreHistoryEntry[]>([]);
 
   const [showReanalyze, setShowReanalyze] = useState(false);
   const [newJobTitle, setNewJobTitle] = useState("");
@@ -87,6 +92,11 @@ const Resume = () => {
         setStoredImagePath(data.imagePath ?? "");
         setNewJobTitle(data.jobTitle ?? "");
         setNewJobDescription(data.jobDescription ?? "");
+      }
+
+      const historyRaw = await kv.get(`resume-history:${id}`);
+      if (historyRaw && !cancelled) {
+        setScoreHistory(JSON.parse(historyRaw) as ScoreHistoryEntry[]);
       }
 
       const [resumeBlob, imageBlob] = await Promise.all([
@@ -158,6 +168,24 @@ const Resume = () => {
 
       setFeedback(newFeedback);
       setStoredJobTitle(newJobTitle);
+
+      const newEntry: ScoreHistoryEntry = {
+        date: new Date().toISOString(),
+        overall: newFeedback.overallScore,
+        ats: newFeedback.ATS.score,
+        tone: newFeedback.toneAndStyle.score,
+        content: newFeedback.content.score,
+        structure: newFeedback.structure.score,
+        skills: newFeedback.skills.score,
+      };
+      const historyRaw = await kv.get(`resume-history:${id}`);
+      const existing: ScoreHistoryEntry[] = historyRaw
+        ? JSON.parse(historyRaw)
+        : [];
+      const updatedHistory = [...existing, newEntry];
+      await kv.set(`resume-history:${id}`, JSON.stringify(updatedHistory));
+      setScoreHistory(updatedHistory);
+
       setReanalyzeStatus("");
       setSuccessToast(true);
       setTimeout(() => setSuccessToast(false), 4000);
@@ -412,12 +440,25 @@ const Resume = () => {
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />
+              {scoreHistory.length > 0 && (
+                <ScoreHistory history={scoreHistory} />
+              )}
+              <ResumeChecklist feedback={feedback} />
               <ATS
                 score={feedback.ATS.score || 0}
                 suggestions={feedback.ATS.tips || []}
                 keywords={feedback.ATS.keywords}
               />
               <Details feedback={feedback} />
+              <InterviewQuestions
+                jobTitle={storedJobTitle}
+                jobDescription={newJobDescription}
+                feedback={feedback}
+              />
+              <RewriteSuggestions
+                jobTitle={storedJobTitle}
+                feedback={feedback}
+              />
             </div>
           ) : !isReanalyzing ? (
             <div aria-live="polite" aria-busy="true">

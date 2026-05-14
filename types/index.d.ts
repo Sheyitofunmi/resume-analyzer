@@ -9,6 +9,27 @@ interface Resume {
   feedback: Feedback;
 }
 
+interface ScoreHistoryEntry {
+  date: string;
+  overall: number;
+  ats: number;
+  tone: number;
+  content: number;
+  structure: number;
+  skills: number;
+}
+
+interface InterviewQuestion {
+  category: string;
+  question: string;
+}
+
+interface RewriteSuggestion {
+  weak: string;
+  strong: string;
+  why: string;
+}
+
 interface Feedback {
   overallScore: number;
   ATS: {

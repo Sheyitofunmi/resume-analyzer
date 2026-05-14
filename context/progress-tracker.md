@@ -14,6 +14,9 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ### Bug Fixes & Code Quality
 
+- **Honest AI scoring (`constants/index.ts`):** Rewrote `prepareInstructions` prompt with strict rules: all scores set to 0 for non-resume images; all scores below 20 for random/nonsensical job title or description; AI explicitly forbidden from inflating scores out of politeness or fabricating keywords not present in the resume.
+- **Form minimum-length validation (`upload.tsx`):** Added length guards to `validate()` — company name ≥ 2 chars, job title ≥ 3 chars, job description ≥ 50 chars. Prevents garbage one-word inputs from passing through to the AI.
+
 - **Type fix:** Added `explanation` field to `ATS.tips` in `types/index.d.ts` and `AIResponseFormat` — closes the type/runtime mismatch between ATS and Details components.
 - **Dead code removal:** Removed unused `resumes` sample array from `constants/index.ts`.
 - **Form validation (`upload.tsx`):** All fields (company name, job title, job description, file) are validated before submit; inline error messages per field with `aria-describedby` linkage.

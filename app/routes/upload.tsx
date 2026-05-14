@@ -128,6 +128,18 @@ const Upload = () => {
         feedback: JSON.parse(feedbackText),
       };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
+
+      const historyEntry: ScoreHistoryEntry = {
+        date: new Date().toISOString(),
+        overall: data.feedback.overallScore,
+        ats: data.feedback.ATS.score,
+        tone: data.feedback.toneAndStyle.score,
+        content: data.feedback.content.score,
+        structure: data.feedback.structure.score,
+        skills: data.feedback.skills.score,
+      };
+      await kv.set(`resume-history:${uuid}`, JSON.stringify([historyEntry]));
+
       setStatusText("Done! Redirecting…");
       navigate(`/resume/${uuid}`);
     } catch (err) {
