@@ -1,26 +1,11 @@
 import { useState } from "react";
 import { usePuterStore } from "~/lib/puter";
 
-const CATEGORY_STYLES: Record<
-  string,
-  { label: string; bg: string; text: string }
-> = {
-  behavioral: {
-    label: "Behavioral",
-    bg: "bg-[#f8f7f4]",
-    text: "text-[#525252]",
-  },
-  technical: { label: "Technical", bg: "bg-[#f8f7f4]", text: "text-[#525252]" },
-  situational: {
-    label: "Situational",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-  },
-  "role-specific": {
-    label: "Role-Specific",
-    bg: "bg-[#f8f7f4]",
-    text: "text-[#525252]",
-  },
+const CATEGORY_COLORS: Record<string, string> = {
+  behavioral: "var(--copper-hi)",
+  technical: "var(--phos)",
+  situational: "var(--copper)",
+  "role-specific": "var(--fg-2)",
 };
 
 const InterviewQuestions = ({
@@ -63,22 +48,47 @@ const InterviewQuestions = ({
   };
 
   return (
-    <div className="bg-white border border-[#e5e5e5] w-full overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-[#e5e5e5] flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-base font-semibold text-[#0a0a0a]">
-            Interview Question Predictor
-          </h3>
-          <p className="text-xs text-[#525252] mt-0.5">
+    <div
+      className="rl-card"
+      style={{ position: "relative", padding: 0, overflow: "hidden" }}
+    >
+      <span className="rl-corner tl" />
+      <span className="rl-corner tr" />
+      <span className="rl-corner bl" />
+      <span className="rl-corner br" />
+
+      {/* Header */}
+      <div
+        style={{
+          padding: "16px 20px",
+          borderBottom: "1px dashed var(--border)",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="rl-eyebrow-prompt">interview_prep</span>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+            }}
+          >
             Predicted questions based on this role and your resume gaps.
           </p>
         </div>
+
         {!questions && !loading && (
           <button
             onClick={handleGenerate}
-            className="primary-button flex-shrink-0 text-xs px-4 py-1.5"
+            className="rl-btn rl-btn-primary"
+            style={{ fontSize: 11, padding: "8px 14px", flexShrink: 0 }}
           >
-            Predict Questions
+            $ predict →
           </button>
         )}
         {questions && (
@@ -87,56 +97,123 @@ const InterviewQuestions = ({
               setQuestions(null);
               setError("");
             }}
-            className="flex-shrink-0 text-xs font-medium text-[#525252] hover:text-[#0a0a0a] border border-[#e5e5e5] px-3 py-1.5 transition-colors"
+            className="rl-btn rl-btn-secondary"
+            style={{ fontSize: 11, padding: "6px 12px", flexShrink: 0 }}
           >
-            Regenerate
+            ↺ regenerate
           </button>
         )}
       </div>
 
-      <div className="px-5 py-4">
+      {/* Body */}
+      <div style={{ padding: "16px 20px" }}>
         {loading && (
-          <div className="flex items-center gap-3 text-sm text-[#525252]">
-            <span className="w-4 h-4 border-2 border-[#0a0a0a] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-            Predicting interview questions…
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+            }}
+          >
+            <span className="rl-dot" />
+            generating questions…
           </div>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-[#e11d48]">
-            {error}
+          <p
+            role="alert"
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--ember)",
+            }}
+          >
+            ✕ {error}
           </p>
         )}
 
         {!loading && !questions && !error && (
-          <p className="text-sm text-[#525252] text-center py-4">
-            Click "Predict Questions" to generate 5 likely interview questions
-            for this role.
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-3)",
+              textAlign: "center",
+              padding: "16px 0",
+            }}
+          >
+            // click predict to generate 5 likely interview questions
           </p>
         )}
 
         {questions && (
-          <ol className="flex flex-col gap-4">
+          <ol
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0,
+              margin: 0,
+              padding: 0,
+              listStyle: "none",
+            }}
+          >
             {questions.map((q, i) => {
               const cat = q.category?.toLowerCase() ?? "";
-              const style = CATEGORY_STYLES[cat] ?? {
-                label: q.category,
-                bg: "bg-[#f8f7f4]",
-                text: "text-[#525252]",
-              };
+              const color = CATEGORY_COLORS[cat] ?? "var(--fg-2)";
               return (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-[#0a0a0a] text-white text-xs font-bold flex items-center justify-center mt-0.5">
-                    {i + 1}
+                <li
+                  key={i}
+                  className="rl-row"
+                  style={{ alignItems: "flex-start", gap: 14 }}
+                >
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--fg-3)",
+                      width: 24,
+                      paddingTop: 2,
+                      textAlign: "right",
+                    }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#0a0a0a] leading-relaxed">
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 13,
+                        color: "var(--fg-1)",
+                        lineHeight: 1.65,
+                      }}
+                    >
                       {q.question}
                     </p>
                     <span
-                      className={`inline-block mt-1.5 text-[10px] font-semibold px-2 py-0.5 uppercase tracking-widest border border-[#e5e5e5] ${style.bg} ${style.text}`}
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        color,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
                     >
-                      {style.label}
+                      [{cat || "general"}]
                     </span>
                   </div>
                 </li>

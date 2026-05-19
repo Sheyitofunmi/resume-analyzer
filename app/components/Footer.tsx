@@ -1,92 +1,212 @@
 import { Link } from "react-router";
 
 const FEATURES = [
-  "ATS Score",
-  "Keyword Analysis",
-  "Rewrite Tips",
-  "Tone & Style",
-  "Interview Prep",
+  { k: "ATS", label: "ats_score" },
+  { k: "KW", label: "keyword_analysis" },
+  { k: "RW", label: "rewrite_tips" },
+  { k: "TS", label: "tone_style" },
+  { k: "IV", label: "interview_prep" },
 ];
 
 const Footer = () => {
   return (
-    <footer className="w-full border-t border-[#e5e5e5] bg-[#f8f7f4] mt-12">
-      {/* Feature strip */}
-      <div className="border-b border-[#e5e5e5] py-4 px-4 overflow-x-auto">
-        <div className="flex items-center justify-center gap-6 sm:gap-10 min-w-max mx-auto">
-          {FEATURES.map((f) => (
+    <footer
+      style={{
+        width: "100%",
+        borderTop: "1px solid var(--border)",
+        background: "var(--bg-2)",
+        marginTop: 64,
+        position: "relative",
+        zIndex: 2,
+      }}
+    >
+      {/* Feature chip strip */}
+      <div
+        style={{
+          borderBottom: "1px dashed var(--border)",
+          padding: "14px 24px",
+          display: "flex",
+          justifyContent: "center",
+          gap: 16,
+          flexWrap: "wrap",
+          maxWidth: 1280,
+          margin: "0 auto",
+        }}
+      >
+        {FEATURES.map((f) => (
+          <span key={f.k} className="rl-chip">
+            <span style={{ color: "var(--copper)" }}>[{f.k}]</span>
+            <span>{f.label}</span>
+          </span>
+        ))}
+      </div>
+
+      {/* Main footer grid */}
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "40px 24px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 32,
+        }}
+      >
+        {/* Brand */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              fontFamily: "var(--font-mono)",
+              fontSize: 16,
+              fontWeight: 500,
+              color: "var(--fg-1)",
+            }}
+          >
             <span
-              key={f}
-              className="text-xs font-semibold text-[#525252] uppercase tracking-widest whitespace-nowrap"
+              style={{
+                width: 22,
+                height: 22,
+                background: "var(--phos)",
+                color: "var(--bg)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                fontWeight: 700,
+              }}
             >
-              {f}
+              R
             </span>
+            resumelens<span style={{ color: "var(--phos)" }}>_</span>
+          </span>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+              lineHeight: 1.7,
+              maxWidth: 280,
+            }}
+          >
+            AI feedback for your resume. Five-dimension scoring. Keyword diff.
+            Rewrite tips. Built for engineers who'd rather read a structured
+            report than a vibe-check.
+          </p>
+        </div>
+
+        {/* Product links */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <span className="rl-comment">product</span>
+          {[
+            { to: "/", label: "my_resumes" },
+            { to: "/upload", label: "upload_resume" },
+          ].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 13,
+                color: "var(--fg-2)",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "color var(--dur-fast)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--copper-hi)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--fg-2)")
+              }
+            >
+              <span style={{ color: "var(--fg-3)" }}>→</span> {item.label}
+            </Link>
           ))}
+        </div>
+
+        {/* Powered by */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <span className="rl-comment">powered_by</span>
+          {["claude (anthropic)", "puter cloud", "react router v7"].map(
+            (item) => (
+              <span
+                key={item}
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  color: "var(--fg-2)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span style={{ color: "var(--phos)" }}>✓</span> {item}
+              </span>
+            ),
+          )}
+        </div>
+
+        {/* Status */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <span className="rl-comment">status</span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-2)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <span className="rl-dot" /> all systems operational
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-2)",
+            }}
+          >
+            · 3s avg analysis time
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-2)",
+            }}
+          >
+            · 100+ keyword signals
+          </span>
         </div>
       </div>
 
-      {/* Main footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4">
-          {/* Brand */}
-          <div className="flex flex-col gap-3">
-            <p
-              className="text-xl font-bold text-[#0a0a0a]"
-              style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
-            >
-              ResumeLens
-            </p>
-            <p className="text-sm text-[#525252] max-w-xs leading-relaxed">
-              Actionable feedback to help you land your next role. Score,
-              analyze, and improve your resume in seconds.
-            </p>
-          </div>
-
-          {/* Links */}
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold text-[#0a0a0a] uppercase tracking-widest">
-              Product
-            </p>
-            <div className="flex flex-col gap-2">
-              <Link
-                to="/"
-                className="text-sm text-[#525252] hover:text-[#e11d48] transition-colors w-fit"
-              >
-                My Resumes
-              </Link>
-              <Link
-                to="/upload"
-                className="text-sm text-[#525252] hover:text-[#e11d48] transition-colors w-fit"
-              >
-                Upload Resume
-              </Link>
-            </div>
-          </div>
-
-          {/* Powered by */}
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold text-[#0a0a0a] uppercase tracking-widest">
-              Built With
-            </p>
-            <div className="flex flex-col gap-2">
-              <span className="text-sm text-[#525252]">
-                Claude AI — Anthropic
-              </span>
-              <span className="text-sm text-[#525252]">Puter Cloud</span>
-              <span className="text-sm text-[#525252]">React Router v7</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-[#e5e5e5] flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p className="text-xs text-[#525252]">
-            © {new Date().getFullYear()} ResumeLens. All rights reserved.
-          </p>
-          <p className="text-xs text-[#525252]">
-            Your resumes are stored securely via Puter — no third-party sharing.
-          </p>
-        </div>
+      {/* Bottom bar */}
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "20px 24px",
+          borderTop: "1px solid var(--border)",
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 11,
+          color: "var(--fg-4)",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
+        <span>
+          // © {new Date().getFullYear()} resumelens — your data, your machine.
+        </span>
+        <span>// stored via puter — no third-party access.</span>
       </div>
     </footer>
   );

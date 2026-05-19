@@ -10,10 +10,10 @@ import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 
 const STEPS = [
-  "Convert PDF to image",
-  "Upload resume",
-  "Analyze against job description",
-  "Save analysis",
+  { label: "convert PDF to image", cmd: "pdf2img" },
+  { label: "upload resume", cmd: "fs.write" },
+  { label: "analyze against job description", cmd: "ai.feedback" },
+  { label: "save analysis", cmd: "kv.set" },
 ];
 
 const Upload = () => {
@@ -25,9 +25,9 @@ const Upload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleFileSelect = (file: File | null) => {
-    setFile(file);
-    if (file) setErrors((prev) => ({ ...prev, file: "" }));
+  const handleFileSelect = (f: File | null) => {
+    setFile(f);
+    if (f) setErrors((prev) => ({ ...prev, file: "" }));
   };
 
   const validate = (
@@ -36,21 +36,17 @@ const Upload = () => {
     jobDescription: string,
   ): boolean => {
     const next: Record<string, string> = {};
-    if (!companyName.trim()) next.companyName = "Company name is required.";
+    if (!companyName.trim()) next.companyName = "company_name is required";
     else if (companyName.trim().length < 2)
-      next.companyName = "Company name must be at least 2 characters.";
-
-    if (!jobTitle.trim()) next.jobTitle = "Job title is required.";
+      next.companyName = "must be at least 2 characters";
+    if (!jobTitle.trim()) next.jobTitle = "job_title is required";
     else if (jobTitle.trim().length < 3)
-      next.jobTitle = "Job title must be at least 3 characters.";
-
+      next.jobTitle = "must be at least 3 characters";
     if (!jobDescription.trim())
-      next.jobDescription = "Job description is required.";
+      next.jobDescription = "job_description is required";
     else if (jobDescription.trim().length < 50)
-      next.jobDescription =
-        "Job description must be at least 50 characters. Please paste the full job posting.";
-
-    if (!file) next.file = "Please upload a resume PDF.";
+      next.jobDescription = "paste the full job posting (min 50 chars)";
+    if (!file) next.file = "upload a resume PDF";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -67,7 +63,6 @@ const Upload = () => {
     file: File;
   }) => {
     setIsProcessing(true);
-
     try {
       const uuid = generateUUID();
 
@@ -75,7 +70,7 @@ const Upload = () => {
       setStatusText("Converting resume to image…");
       const imageFile = await convertPdfToImage(file);
       if (!imageFile.file) {
-        setStatusText("Failed to convert PDF to image. Please try again.");
+        setStatusText("Failed to convert PDF. Please try again.");
         setIsProcessing(false);
         setCurrentStep(-1);
         return;
@@ -88,7 +83,7 @@ const Upload = () => {
         imageFile.file,
       );
       if (!uploadedImage) {
-        setStatusText("Failed to upload image. Please try again.");
+        setStatusText("Upload failed. Please try again.");
         setIsProcessing(false);
         setCurrentStep(-1);
         return;
@@ -156,192 +151,316 @@ const Upload = () => {
     const form = e.currentTarget.closest("form");
     if (!form) return;
     const formData = new FormData(form);
-
     const companyName = formData.get("company-name") as string;
     const jobTitle = formData.get("job-title") as string;
     const jobDescription = formData.get("job-description") as string;
-
     if (!validate(companyName, jobTitle, jobDescription)) return;
-
     await handleAnalyze({ companyName, jobTitle, jobDescription, file: file! });
   };
 
   return (
-    <main className="bg-[#f8f7f4] min-h-screen flex flex-col">
+    <main className="rl-page">
       <Navbar />
 
-      <section id="main-content" className="main-section flex-1">
+      <div className="rl-section" style={{ flex: 1 }}>
         {/* Heading */}
-        <div className="page-heading pt-8 sm:pt-12 pb-2">
-          <h1>Smart feedback for your dream job</h1>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            marginBottom: 32,
+          }}
+        >
+          <span className="rl-eyebrow-prompt">resumelens analyze</span>
+          <h1>
+            smart_feedback for_your
+            <br />
+            dream_job
+            <span className="rl-cursor" />
+          </h1>
           {!isProcessing && (
-            <h2>Drop your resume for an ATS score and improvement tips</h2>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                color: "var(--fg-2)",
+                lineHeight: 1.7,
+                maxWidth: 560,
+              }}
+            >
+              Drop your PDF. Paste the JD. We score five dimensions and surface
+              every missing keyword in three seconds.
+            </p>
           )}
         </div>
 
         {isProcessing ? (
-          <div className="w-full max-w-lg flex flex-col items-center gap-6 animate-in fade-in duration-300">
-            <ol
-              aria-label="Upload progress"
-              className="w-full flex flex-col gap-1 border border-[#e5e5e5] bg-white"
+          /* Progress pipeline */
+          <div
+            className="rl-fade-in"
+            style={{
+              width: "100%",
+              maxWidth: 560,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <div
+              className="rl-card is-phos"
+              style={{ position: "relative", padding: 0 }}
             >
-              {STEPS.map((label, i) => {
-                const done = i < currentStep;
-                const active = i === currentStep;
-                return (
-                  <li
-                    key={label}
-                    className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-b border-[#e5e5e5] last:border-b-0 transition-all duration-300 ${
-                      done
-                        ? "text-green-700 bg-[#f0fdf4]"
-                        : active
-                          ? "text-[#0a0a0a] bg-white"
-                          : "text-[#a3a3a3] bg-white"
-                    }`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-300 ${
-                        done
-                          ? "text-green-600"
-                          : active
-                            ? "text-[#e11d48]"
-                            : "text-[#a3a3a3]"
-                      }`}
+              <span className="rl-corner tl" />
+              <span className="rl-corner tr" />
+              <span className="rl-corner bl" />
+              <span className="rl-corner br" />
+              <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                {STEPS.map(({ label, cmd }, i) => {
+                  const done = i < currentStep;
+                  const active = i === currentStep;
+                  return (
+                    <li
+                      key={label}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "13px 20px",
+                        borderBottom:
+                          i < STEPS.length - 1
+                            ? "1px dashed var(--border)"
+                            : "none",
+                        background: active
+                          ? "rgba(168,230,163,0.04)"
+                          : "transparent",
+                        transition: "background var(--dur-base)",
+                      }}
                     >
-                      {done ? "✓" : `${i + 1}.`}
-                    </span>
-                    {label}
-                    {active && (
-                      <span className="ml-auto text-xs text-[#525252]">
-                        In progress…
+                      <span
+                        style={{
+                          flexShrink: 0,
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 13,
+                          color: done
+                            ? "var(--phos)"
+                            : active
+                              ? "var(--copper)"
+                              : "var(--fg-4)",
+                          width: 16,
+                          textAlign: "center",
+                        }}
+                      >
+                        {done ? "✓" : active ? "▶" : String(i + 1)}
                       </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+                      <span
+                        style={{
+                          flex: 1,
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 13,
+                          color: done
+                            ? "var(--phos)"
+                            : active
+                              ? "var(--fg-1)"
+                              : "var(--fg-4)",
+                        }}
+                      >
+                        {label}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          color: done
+                            ? "var(--phos-dim)"
+                            : active
+                              ? "var(--copper)"
+                              : "var(--fg-4)",
+                        }}
+                      >
+                        {done ? "done" : active ? "running…" : cmd}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
 
-            <p aria-live="polite" aria-atomic="true" className="sr-only">
-              {statusText}
-            </p>
-
-            <img
-              src="/images/resume-scan.gif"
-              alt=""
-              aria-hidden="true"
-              className="w-40"
-            />
-            <p className="text-[#525252] text-sm text-center">{statusText}</p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "12px 16px",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-md)",
+              }}
+            >
+              <span className="rl-dot" />
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-2)",
+                }}
+                aria-live="polite"
+              >
+                {statusText}
+              </span>
+            </div>
           </div>
         ) : (
+          /* Upload form */
           <form
             id="upload-form"
             onSubmit={handleSubmit}
-            className="w-full max-w-2xl flex flex-col gap-5 text-left bg-white border border-[#e5e5e5] p-6 sm:p-8 animate-in fade-in duration-500"
+            className="rl-card is-raised rl-fade-in"
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: 640,
+              display: "flex",
+              flexDirection: "column",
+              gap: 24,
+            }}
             noValidate
           >
-            <div className="form-div">
-              <label htmlFor="company-name">Company Name</label>
+            <span className="rl-corner tl" />
+            <span className="rl-corner tr" />
+            <span className="rl-corner bl" />
+            <span className="rl-corner br" />
+
+            {/* Company name */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label htmlFor="company-name">// company_name</label>
               <input
                 type="text"
                 name="company-name"
-                placeholder="e.g. Acme Corp"
                 id="company-name"
+                placeholder="e.g. Acme Corp"
                 aria-invalid={!!errors.companyName}
-                aria-describedby={
-                  errors.companyName ? "company-name-error" : undefined
-                }
                 onChange={() =>
                   setErrors((prev) => ({ ...prev, companyName: "" }))
                 }
               />
               {errors.companyName && (
                 <p
-                  id="company-name-error"
                   role="alert"
-                  className="text-[#e11d48] text-sm"
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--ember)",
+                  }}
                 >
-                  {errors.companyName}
+                  ✕ {errors.companyName}
                 </p>
               )}
             </div>
 
-            <div className="form-div">
-              <label htmlFor="job-title">Job Title</label>
+            {/* Job title */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label htmlFor="job-title">// job_title</label>
               <input
                 type="text"
                 name="job-title"
-                placeholder="e.g. Senior Frontend Engineer"
                 id="job-title"
+                placeholder="e.g. Senior Frontend Engineer"
                 aria-invalid={!!errors.jobTitle}
-                aria-describedby={
-                  errors.jobTitle ? "job-title-error" : undefined
-                }
                 onChange={() =>
                   setErrors((prev) => ({ ...prev, jobTitle: "" }))
                 }
               />
               {errors.jobTitle && (
                 <p
-                  id="job-title-error"
                   role="alert"
-                  className="text-[#e11d48] text-sm"
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--ember)",
+                  }}
                 >
-                  {errors.jobTitle}
+                  ✕ {errors.jobTitle}
                 </p>
               )}
             </div>
 
-            <div className="form-div">
-              <label htmlFor="job-description">Job Description</label>
+            {/* Job description */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label htmlFor="job-description">// job_description</label>
               <textarea
-                rows={5}
+                rows={6}
                 name="job-description"
-                placeholder="Paste the full job description here…"
                 id="job-description"
+                placeholder="Paste the full job description here…"
                 aria-invalid={!!errors.jobDescription}
-                aria-describedby={
-                  errors.jobDescription ? "job-description-error" : undefined
-                }
                 onChange={() =>
                   setErrors((prev) => ({ ...prev, jobDescription: "" }))
                 }
               />
               {errors.jobDescription && (
                 <p
-                  id="job-description-error"
                   role="alert"
-                  className="text-[#e11d48] text-sm"
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--ember)",
+                  }}
                 >
-                  {errors.jobDescription}
+                  ✕ {errors.jobDescription}
                 </p>
               )}
             </div>
 
-            <div className="form-div">
-              <label htmlFor="uploader">Upload Resume (PDF, max 20 MB)</label>
+            {/* File uploader */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label htmlFor="uploader">// resume_pdf (max 20 MB)</label>
               <FileUploader onFileSelect={handleFileSelect} />
               {errors.file && (
                 <p
-                  id="file-error"
                   role="alert"
-                  className="text-[#e11d48] text-sm"
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--ember)",
+                  }}
                 >
-                  {errors.file}
+                  ✕ {errors.file}
                 </p>
               )}
             </div>
 
+            {/* Feature chips */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {[
+                ["ATS", "ats_check"],
+                ["KW", "keyword_diff"],
+                ["RW", "rewrite_tips"],
+                ["TS", "tone_style"],
+                ["IV", "interview_prep"],
+              ].map(([k, label]) => (
+                <span key={k} className="rl-chip">
+                  <span style={{ color: "var(--copper)" }}>[{k}]</span>
+                  <span>{label}</span>
+                </span>
+              ))}
+            </div>
+
             <button
-              className="primary-button text-base font-semibold py-3"
               type="submit"
+              className="rl-btn rl-btn-primary"
+              style={{ alignSelf: "flex-start", fontSize: 14 }}
             >
-              Analyze Resume
+              $ run analyze →
             </button>
           </form>
         )}
-      </section>
+      </div>
 
       <Footer />
     </main>
@@ -359,20 +478,60 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
-      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
-        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-          Error
-        </p>
+    <main
+      className="rl-page"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        className="rl-card is-raised"
+        style={{
+          position: "relative",
+          maxWidth: 440,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          textAlign: "center",
+        }}
+      >
+        <span className="rl-corner tl" />
+        <span className="rl-corner tr" />
+        <span className="rl-corner bl" />
+        <span className="rl-corner br" />
+        <span className="rl-pill rl-pill-bad" style={{ alignSelf: "center" }}>
+          ERROR
+        </span>
         <h1
-          className="text-3xl font-normal text-[#0a0a0a]"
-          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 28,
+            fontWeight: 500,
+            color: "var(--fg-1)",
+            margin: 0,
+          }}
         >
-          Upload failed.
+          upload_failed
         </h1>
-        <p className="text-[#525252]">{message}</p>
-        <a href="/upload" className="primary-button w-fit mx-auto">
-          Try Again
+        <p
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--fg-2)",
+            margin: 0,
+          }}
+        >
+          {message}
+        </p>
+        <a
+          href="/upload"
+          className="rl-btn rl-btn-primary"
+          style={{ alignSelf: "center" }}
+        >
+          ↺ try_again
         </a>
       </div>
     </main>

@@ -35,22 +35,47 @@ const RewriteSuggestions = ({
   };
 
   return (
-    <div className="bg-white border border-[#e5e5e5] w-full overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-[#e5e5e5] flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-base font-semibold text-[#0a0a0a]">
-            Rewrite Suggestions
-          </h3>
-          <p className="text-xs text-[#525252] mt-0.5">
+    <div
+      className="rl-card"
+      style={{ position: "relative", padding: 0, overflow: "hidden" }}
+    >
+      <span className="rl-corner tl" />
+      <span className="rl-corner tr" />
+      <span className="rl-corner bl" />
+      <span className="rl-corner br" />
+
+      {/* Header */}
+      <div
+        style={{
+          padding: "16px 20px",
+          borderBottom: "1px dashed var(--border)",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span className="rl-eyebrow-prompt">rewrite_suggestions</span>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+            }}
+          >
             Turn weak resume lines into strong ones.
           </p>
         </div>
+
         {!suggestions && !loading && (
           <button
             onClick={handleGenerate}
-            className="primary-button flex-shrink-0 text-xs px-4 py-1.5"
+            className="rl-btn rl-btn-primary"
+            style={{ fontSize: 11, padding: "8px 14px", flexShrink: 0 }}
           >
-            Get Rewrites
+            $ get_rewrites →
           </button>
         )}
         {suggestions && (
@@ -59,63 +84,185 @@ const RewriteSuggestions = ({
               setSuggestions(null);
               setError("");
             }}
-            className="flex-shrink-0 text-xs font-medium text-[#525252] hover:text-[#0a0a0a] border border-[#e5e5e5] px-3 py-1.5 transition-colors"
+            className="rl-btn rl-btn-secondary"
+            style={{ fontSize: 11, padding: "6px 12px", flexShrink: 0 }}
           >
-            Regenerate
+            ↺ regenerate
           </button>
         )}
       </div>
 
-      <div className="px-5 py-4">
+      {/* Body */}
+      <div style={{ padding: "16px 20px" }}>
         {loading && (
-          <div className="flex items-center gap-3 text-sm text-[#525252]">
-            <span className="w-4 h-4 border-2 border-[#0a0a0a] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-            Generating rewrite examples…
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+            }}
+          >
+            <span className="rl-dot" />
+            generating rewrite examples…
           </div>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-[#e11d48]">
-            {error}
+          <p
+            role="alert"
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--ember)",
+            }}
+          >
+            ✕ {error}
           </p>
         )}
 
         {!loading && !suggestions && !error && (
-          <p className="text-sm text-[#525252] text-center py-4">
-            Click "Get Rewrites" to see 3 before/after examples tailored to your
-            resume gaps.
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-3)",
+              textAlign: "center",
+              padding: "16px 0",
+            }}
+          >
+            // click get_rewrites for 3 before/after examples
           </p>
         )}
 
         {suggestions && (
-          <div className="flex flex-col gap-6">
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {suggestions.map((s, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-                  Example {i + 1}
-                </p>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  <div className="bg-red-50 border border-red-100 p-3">
-                    <p className="text-[10px] font-semibold text-red-500 mb-1.5 uppercase tracking-widest">
-                      Before
+              <div
+                key={i}
+                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--fg-3)",
+                    letterSpacing: "0.12em",
+                  }}
+                >
+                  // example_{String(i + 1).padStart(2, "0")}
+                </span>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 8,
+                  }}
+                >
+                  {/* Before */}
+                  <div
+                    style={{
+                      background: "rgba(227,83,74,0.06)",
+                      border: "1px solid var(--ember-dim)",
+                      borderRadius: "var(--radius-md)",
+                      padding: "12px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        color: "var(--ember)",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      − before
                     </p>
-                    <p className="text-sm text-red-800 leading-relaxed">
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 13,
+                        color: "var(--fg-2)",
+                        lineHeight: 1.65,
+                      }}
+                    >
                       {s.weak}
                     </p>
                   </div>
-                  <div className="bg-green-50 border border-green-100 p-3">
-                    <p className="text-[10px] font-semibold text-green-600 mb-1.5 uppercase tracking-widest">
-                      After
+
+                  {/* After */}
+                  <div
+                    style={{
+                      background: "rgba(168,230,163,0.06)",
+                      border: "1px solid var(--phos-dim)",
+                      borderRadius: "var(--radius-md)",
+                      padding: "12px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 8px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        color: "var(--phos)",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      + after
                     </p>
-                    <p className="text-sm text-green-800 leading-relaxed">
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 13,
+                        color: "var(--fg-1)",
+                        lineHeight: 1.65,
+                      }}
+                    >
                       {s.strong}
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-[#525252] bg-[#f8f7f4] border border-[#e5e5e5] px-3 py-2">
-                  <span className="font-semibold text-[#0a0a0a]">Why: </span>
-                  {s.why}
-                </p>
+
+                {/* Why */}
+                <div
+                  style={{
+                    background: "var(--surface-2)",
+                    border: "1px dashed var(--border)",
+                    borderRadius: "var(--radius-sm)",
+                    padding: "10px 14px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: "var(--font-body)",
+                      fontSize: 12,
+                      color: "var(--fg-2)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        color: "var(--copper)",
+                        marginRight: 6,
+                      }}
+                    >
+                      //
+                    </span>
+                    {s.why}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

@@ -1,47 +1,86 @@
 const ScoreCircle = ({ score = 75 }: { score: number }) => {
-  const radius = 40;
-  const stroke = 8;
-  const normalizedRadius = radius - stroke / 2;
-  const circumference = 2 * Math.PI * normalizedRadius;
-  const strokeDashoffset = circumference * (1 - score / 100);
+  const stroke = 4;
+  const r = 50 - stroke / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - score / 100);
 
-  const trackColor = "#e5e5e5";
-  const fillColor =
-    score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#e11d48";
+  const color =
+    score > 69
+      ? "var(--phos)"
+      : score > 49
+        ? "var(--copper-hi)"
+        : "var(--ember)";
+
+  const glow =
+    score > 69
+      ? "rgba(168,230,163,0.5)"
+      : score > 49
+        ? "rgba(230,153,104,0.5)"
+        : "rgba(227,83,74,0.5)";
 
   return (
-    <div className="relative w-[88px] h-[88px]">
+    <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0 }}>
       <svg
-        height="100%"
         width="100%"
+        height="100%"
         viewBox="0 0 100 100"
-        className="transform -rotate-90"
+        style={{ transform: "rotate(-90deg)" }}
       >
         <circle
           cx="50"
           cy="50"
-          r={normalizedRadius}
-          stroke={trackColor}
+          r={r}
+          stroke="var(--border-hi)"
           strokeWidth={stroke}
           fill="transparent"
         />
         <circle
           cx="50"
           cy="50"
-          r={normalizedRadius}
-          stroke={fillColor}
+          r={r}
+          stroke={color}
           strokeWidth={stroke}
           fill="transparent"
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="butt"
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{
+            transition: "stroke-dashoffset 1200ms cubic-bezier(0.16,1,0.3,1)",
+            filter: `drop-shadow(0 0 6px ${glow})`,
+          }}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-bold text-sm text-[#0a0a0a] tabular-nums">
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--font-mono)",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 22,
+            fontWeight: 500,
+            color: "var(--fg-1)",
+            letterSpacing: "-0.5px",
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1,
+          }}
+        >
           {score}
         </span>
-        <span className="text-[9px] text-[#525252] uppercase tracking-widest">
+        <span
+          style={{
+            fontSize: 9,
+            color: "var(--fg-3)",
+            letterSpacing: "0.18em",
+            marginTop: 2,
+          }}
+        >
           /100
         </span>
       </div>

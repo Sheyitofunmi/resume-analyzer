@@ -3,21 +3,24 @@ import { useEffect, useRef, useState } from "react";
 const STEPS = [
   {
     step: "01",
-    title: "Upload Your Resume",
-    description:
-      "Drop your PDF resume and paste the job description you're targeting.",
+    cmd: "upload",
+    title: "Drop your PDF",
+    desc: "A PDF resume and the job description you're targeting. That's it.",
+    color: "var(--copper)",
   },
   {
     step: "02",
-    title: "AI Analyzes Everything",
-    description:
-      "Scored across 5 dimensions: ATS compatibility, tone, content, structure, and skills.",
+    cmd: "analyze",
+    title: "AI scores 5 dimensions",
+    desc: "ATS, tone, content, structure, skills. With reasoning attached.",
+    color: "var(--phos)",
   },
   {
     step: "03",
-    title: "Get Actionable Feedback",
-    description:
-      "Keyword gaps, rewrite suggestions, and interview prep questions — specific to the role.",
+    cmd: "rewrite",
+    title: "Apply tips & ship",
+    desc: "Specific rewrites, keyword diff, interview prep — copy/paste-ready.",
+    color: "var(--copper-hi)",
   },
 ];
 
@@ -42,46 +45,87 @@ const HowItWorks = ({ compact = false }: { compact?: boolean }) => {
   }, []);
 
   return (
-    <div ref={ref} className="w-full flex flex-col gap-8">
+    <div ref={ref} style={{ width: "100%" }}>
       {!compact && (
-        <div className="flex flex-col gap-1 border-b border-[#e5e5e5] pb-6">
-          <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-            How It Works
-          </p>
-          <h2
-            className="!text-3xl sm:!text-4xl font-normal !text-[#0a0a0a] mt-1"
-            style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
-          >
-            Three steps to a better resume
-          </h2>
+        <div style={{ marginBottom: 16 }}>
+          <span className="rl-comment">how_it_works</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 w-full border border-[#e5e5e5]">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 16,
+        }}
+      >
         {STEPS.map((s, i) => (
           <div
             key={s.step}
-            className={`flex flex-col gap-4 p-6 sm:p-8 bg-white transition-all duration-700 ${
-              i < STEPS.length - 1
-                ? "border-b sm:border-b-0 sm:border-r border-[#e5e5e5]"
-                : ""
-            } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-            style={{ transitionDelay: `${i * 120}ms` }}
+            className="rl-card rl-glow-hover"
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(12px)",
+              transition: `opacity 400ms ${i * 100}ms, transform 400ms ${i * 100}ms`,
+            }}
           >
-            <span
-              className="text-5xl font-normal text-[#e5e5e5] leading-none"
-              style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
-            >
-              {s.step}
-            </span>
-            <div className="flex flex-col gap-2">
-              <h3 className="font-semibold text-[#0a0a0a] text-base">
-                {s.title}
-              </h3>
-              <p className="text-sm text-[#525252] leading-relaxed">
-                {s.description}
-              </p>
+            <span className="rl-corner tl" />
+            <span className="rl-corner tr" />
+            <span className="rl-corner bl" />
+            <span className="rl-corner br" />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  color: s.color,
+                  letterSpacing: "0.1em",
+                  borderLeft: `2px solid ${s.color}`,
+                  paddingLeft: 8,
+                }}
+              >
+                STEP_{s.step}
+              </span>
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  color: "var(--fg-3)",
+                }}
+              >
+                <span style={{ color: "var(--fg-3)" }}>$</span> {s.cmd}
+              </span>
             </div>
+
+            <h3
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 18,
+                fontWeight: 500,
+                color: "var(--fg-1)",
+                margin: 0,
+              }}
+            >
+              {s.title}
+            </h3>
+
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
+                color: "var(--fg-2)",
+                lineHeight: 1.7,
+              }}
+            >
+              {s.desc}
+            </p>
           </div>
         ))}
       </div>

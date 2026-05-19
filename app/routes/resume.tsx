@@ -33,7 +33,6 @@ const Resume = () => {
   const [resumeUrl, setResumeUrl] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
-
   const [storedJobTitle, setStoredJobTitle] = useState("");
   const [storedCompanyName, setStoredCompanyName] = useState("");
   const [storedImagePath, setStoredImagePath] = useState("");
@@ -67,15 +66,11 @@ const Resume = () => {
 
   useEffect(() => {
     if (isLoading || !auth.isAuthenticated) return;
-
     let cancelled = false;
-
     const loadResume = async () => {
       const resume = await kv.get(`resume:${id}`);
       if (!resume || cancelled) return;
-
       const data = JSON.parse(resume);
-
       if (!cancelled) {
         setFeedback(data.feedback);
         if (data.pageCount) setPageCount(data.pageCount);
@@ -85,19 +80,15 @@ const Resume = () => {
         setNewJobTitle(data.jobTitle ?? "");
         setNewJobDescription(data.jobDescription ?? "");
       }
-
       const historyRaw = await kv.get(`resume-history:${id}`);
       if (historyRaw && !cancelled) {
         setScoreHistory(JSON.parse(historyRaw) as ScoreHistoryEntry[]);
       }
-
       const [resumeBlob, imageBlob] = await Promise.all([
         fs.read(data.resumePath),
         fs.read(data.imagePath),
       ]);
-
       if (cancelled) return;
-
       if (resumeBlob) {
         const pdfBlob = new Blob([resumeBlob], { type: "application/pdf" });
         setResumeUrl(URL.createObjectURL(pdfBlob));
@@ -106,7 +97,6 @@ const Resume = () => {
         setImageUrl(URL.createObjectURL(imageBlob));
       }
     };
-
     loadResume();
     return () => {
       cancelled = true;
@@ -116,14 +106,11 @@ const Resume = () => {
   const handleReanalyze = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!newJobTitle.trim() || !newJobDescription.trim()) return;
-
     setIsReanalyzing(true);
     setReanalyzeStatus("Analyzing resume against new job description…");
     setShowReanalyze(false);
     setSuccessToast(false);
-
     const trimmedDescription = newJobDescription.slice(0, MAX_JOB_DESC_CHARS);
-
     const runAnalysis = async () => {
       const result = await ai.feedback(
         storedImagePath,
@@ -139,7 +126,6 @@ const Resume = () => {
           : result.message.content[0].text;
       return JSON.parse(extractJSON(raw)) as Feedback;
     };
-
     try {
       let newFeedback: Feedback;
       try {
@@ -148,7 +134,6 @@ const Resume = () => {
         setReanalyzeStatus("Retrying analysis…");
         newFeedback = await runAnalysis();
       }
-
       const raw = await kv.get(`resume:${id}`);
       if (raw) {
         const data = JSON.parse(raw);
@@ -157,10 +142,8 @@ const Resume = () => {
         data.jobDescription = newJobDescription;
         await kv.set(`resume:${id}`, JSON.stringify(data));
       }
-
       setFeedback(newFeedback);
       setStoredJobTitle(newJobTitle);
-
       const newEntry: ScoreHistoryEntry = {
         date: new Date().toISOString(),
         overall: newFeedback.overallScore,
@@ -177,7 +160,6 @@ const Resume = () => {
       const updatedHistory = [...existing, newEntry];
       await kv.set(`resume-history:${id}`, JSON.stringify(updatedHistory));
       setScoreHistory(updatedHistory);
-
       setReanalyzeStatus("");
       setSuccessToast(true);
       setTimeout(() => setSuccessToast(false), 4000);
@@ -191,52 +173,111 @@ const Resume = () => {
   };
 
   return (
-    <main className="!pt-0">
+    <main
+      style={{
+        background: "var(--bg)",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        paddingTop: 0,
+      }}
+    >
       {/* Skip link */}
       <a
         href="#resume-feedback"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:shadow focus:text-[#e11d48] focus:font-semibold"
+        style={{
+          position: "absolute",
+          top: -9999,
+          left: 8,
+          zIndex: 50,
+          background: "var(--phos)",
+          color: "var(--bg)",
+          padding: "8px 16px",
+          fontFamily: "var(--font-mono)",
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+        onFocus={(e) => (e.currentTarget.style.top = "8px")}
+        onBlur={(e) => (e.currentTarget.style.top = "-9999px")}
       >
-        Skip to feedback
+        skip to feedback
       </a>
 
-      {/* Nav */}
-      <nav className="resume-nav print:hidden">
-        <Link to="/" className="back-button">
-          <img
-            src="/icons/back.svg"
-            alt=""
-            aria-hidden="true"
-            className="w-2.5 h-2.5"
-          />
-          <span className="text-gray-800 text-sm font-semibold">
-            Back to Homepage
-          </span>
+      {/* Top nav bar */}
+      <nav
+        className="print:hidden"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 24px",
+          borderBottom: "1px solid var(--border)",
+          background: "rgba(11,11,10,0.88)",
+          backdropFilter: "blur(8px)",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          gap: 12,
+        }}
+      >
+        <Link
+          to="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            color: "var(--fg-2)",
+            textDecoration: "none",
+            transition: "color var(--dur-fast)",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-2)")}
+        >
+          ← back_to_dashboard
         </Link>
 
-        <div className="flex items-center gap-2">
+        {storedCompanyName && (
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-3)",
+            }}
+            className="rl-mobile-hide"
+          >
+            // {storedCompanyName}
+            {storedJobTitle ? ` · ${storedJobTitle}` : ""}
+          </span>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {feedback && !isReanalyzing && (
             <button
               onClick={() => setShowReanalyze(true)}
-              className="back-button text-sm font-semibold text-[#0a0a0a] hover:bg-[#f8f7f4] transition-colors"
+              className="rl-btn rl-btn-secondary"
+              style={{ fontSize: 11, padding: "6px 12px" }}
             >
-              Re-analyze
+              ↺ re-analyze
             </button>
           )}
           {feedback && (
             <Link
               to={`/resume/${id}/edit`}
-              className="back-button text-sm font-semibold text-[#0a0a0a] hover:bg-[#f8f7f4] transition-colors"
+              className="rl-btn rl-btn-secondary"
+              style={{ fontSize: 11, padding: "6px 12px" }}
             >
-              Edit Resume
+              ✎ edit_resume
             </Link>
           )}
           {feedback && (
             <button
               onClick={() => window.print()}
-              className="back-button text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+              className="rl-btn rl-btn-ghost"
+              style={{ fontSize: 11, padding: "6px 12px" }}
             >
-              Download Report
+              ↓ download
             </button>
           )}
         </div>
@@ -246,35 +287,36 @@ const Resume = () => {
       {isUsingDemoFeedback && (
         <div
           role="alert"
-          className="print:hidden flex items-start gap-3 bg-amber-50 border-b border-amber-200 px-6 py-3"
+          className="print:hidden"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: "rgba(230,153,104,0.08)",
+            borderBottom: "1px solid var(--copper-deep)",
+            padding: "10px 24px",
+          }}
         >
-          <span
-            className="text-amber-500 text-lg leading-none mt-0.5"
-            aria-hidden="true"
+          <span style={{ color: "var(--copper-hi)", fontSize: 14 }}>!</span>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--copper-hi)",
+            }}
           >
-            ⚠
-          </span>
-          <p className="text-sm text-amber-800">
-            <span className="font-semibold">AI unavailable.</span> The analysis
-            below is sample data — the AI service could not be reached. Try
-            re-analyzing when service is restored.
+            <span style={{ fontWeight: 600 }}>AI unavailable.</span> Analysis
+            below is sample data — the AI service could not be reached.
           </p>
         </div>
       )}
 
       {/* Success toast */}
       {successToast && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="print:hidden flex items-center gap-2 bg-green-50 border-b border-green-200 px-6 py-3"
-        >
-          <span className="text-green-600" aria-hidden="true">
-            ✓
-          </span>
-          <p className="text-sm text-green-800 font-medium">
-            Re-analysis complete — feedback updated.
-          </p>
+        <div className="rl-toast">
+          <span style={{ color: "var(--phos)" }}>✓</span>
+          re-analysis complete — feedback updated
         </div>
       )}
 
@@ -284,35 +326,71 @@ const Resume = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="reanalyze-title"
-          className="print:hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="print:hidden"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
         >
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(4px)",
+            }}
             onClick={() => setShowReanalyze(false)}
             aria-hidden="true"
           />
-          <div className="relative bg-white border border-[#e5e5e5] w-full max-w-lg p-6 animate-in fade-in duration-200">
-            <h2
+          <div
+            className="rl-card is-raised rl-fade-in"
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: 520,
+              zIndex: 1,
+            }}
+          >
+            <span className="rl-corner tl" />
+            <span className="rl-corner tr" />
+            <span className="rl-corner bl" />
+            <span className="rl-corner br" />
+
+            <span
               id="reanalyze-title"
-              className="!text-base !text-gray-900 font-semibold mb-1"
+              className="rl-eyebrow-prompt"
+              style={{ marginBottom: 16, display: "block" }}
             >
-              Re-analyze Resume
-            </h2>
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 mb-4 w-fit">
-              ⚠ This will replace your current analysis.
-            </p>
+              re-analyze resume
+            </span>
+
+            <div
+              style={{
+                background: "rgba(230,153,104,0.06)",
+                border: "1px dashed var(--copper-deep)",
+                borderRadius: "var(--radius-sm)",
+                padding: "8px 12px",
+                marginBottom: 16,
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--copper-hi)",
+              }}
+            >
+              ! this will replace your current analysis
+            </div>
+
             <form
               onSubmit={handleReanalyze}
-              className="flex flex-col gap-3"
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
               noValidate
             >
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="reanalyze-job-title"
-                  className="text-xs font-medium text-gray-600"
-                >
-                  Job Title
-                </label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label htmlFor="reanalyze-job-title">// job_title</label>
                 <input
                   id="reanalyze-job-title"
                   type="text"
@@ -320,16 +398,10 @@ const Resume = () => {
                   onChange={(e) => setNewJobTitle(e.target.value)}
                   placeholder="e.g. Senior Frontend Engineer"
                   required
-                  className="text-sm"
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="reanalyze-job-desc"
-                  className="text-xs font-medium text-gray-600"
-                >
-                  Job Description
-                </label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label htmlFor="reanalyze-job-desc">// job_description</label>
                 <textarea
                   id="reanalyze-job-desc"
                   rows={5}
@@ -337,22 +409,23 @@ const Resume = () => {
                   onChange={(e) => setNewJobDescription(e.target.value)}
                   placeholder="Paste job description here…"
                   required
-                  className="text-sm"
                 />
               </div>
-              <div className="flex gap-2 pt-1">
+              <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
                 <button
                   type="submit"
-                  className="primary-button w-fit px-6 text-sm"
+                  className="rl-btn rl-btn-primary"
+                  style={{ fontSize: 12 }}
                 >
-                  Analyze
+                  $ analyze →
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowReanalyze(false)}
-                  className="back-button text-sm"
+                  className="rl-btn rl-btn-ghost"
+                  style={{ fontSize: 12 }}
                 >
-                  Cancel
+                  cancel
                 </button>
               </div>
             </form>
@@ -360,20 +433,32 @@ const Resume = () => {
         </div>
       )}
 
-      {/* Re-analyze loading */}
+      {/* Re-analyzing status */}
       {isReanalyzing && (
         <div
-          className="print:hidden flex flex-col items-center gap-3 py-8"
+          className="print:hidden"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "16px 24px",
+            borderBottom: "1px dashed var(--border)",
+            background: "var(--surface)",
+          }}
           aria-live="polite"
           aria-busy="true"
         >
-          <img
-            src="/images/resume-scan.gif"
-            alt=""
-            aria-hidden="true"
-            className="w-[160px]"
-          />
-          <p className="text-gray-600 text-sm">{reanalyzeStatus}</p>
+          <span className="rl-dot" />
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-2)",
+            }}
+          >
+            {reanalyzeStatus}
+          </p>
         </div>
       )}
 
@@ -381,20 +466,34 @@ const Resume = () => {
       {reanalyzeStatus && !isReanalyzing && (
         <p
           role="alert"
-          className="print:hidden text-red-700 text-sm px-8 py-3 bg-red-50 border-b border-red-100"
+          className="print:hidden"
+          style={{
+            margin: 0,
+            padding: "10px 24px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            color: "var(--ember)",
+            background: "rgba(227,83,74,0.06)",
+            borderBottom: "1px solid var(--ember-dim)",
+          }}
         >
-          {reanalyzeStatus}
+          ✕ {reanalyzeStatus}
         </p>
       )}
 
       {/* Print header */}
       {feedback && (
-        <div className="hidden print:block px-8 pt-6 pb-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-black">
+        <div
+          className="hidden print:block"
+          style={{ padding: "24px 32px 16px", borderBottom: "1px solid #ccc" }}
+        >
+          <h1
+            style={{ fontSize: 22, fontWeight: 700, color: "#000", margin: 0 }}
+          >
             Resume Feedback Report
           </h1>
           {storedCompanyName && (
-            <p className="text-gray-600 text-sm mt-1">
+            <p style={{ color: "#555", fontSize: 13, marginTop: 4 }}>
               {storedCompanyName}
               {storedJobTitle ? ` · ${storedJobTitle}` : ""}
             </p>
@@ -402,15 +501,56 @@ const Resume = () => {
         </div>
       )}
 
-      <div className="flex flex-row w-full max-lg:flex-col-reverse">
-        {/* Left: resume image */}
+      {/* Main two-column layout */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          width: "100%",
+          flex: 1,
+        }}
+        className="max-lg:flex-col-reverse"
+      >
+        {/* Left: sticky resume preview */}
         <section
           aria-label="Resume preview"
-          className="feedback-section print:hidden bg-[#f8f7f4] lg:h-screen lg:sticky lg:top-0 flex items-center justify-center border-r border-[#e5e5e5]"
+          className="print:hidden"
+          style={{
+            width: "40%",
+            minWidth: 280,
+            maxWidth: 520,
+            padding: "24px 20px",
+            background: "var(--bg-2)",
+            borderRight: "1px solid var(--border)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            position: "sticky",
+            top: 52,
+            height: "calc(100vh - 52px)",
+            overflowY: "auto",
+          }}
         >
           {imageUrl && resumeUrl ? (
-            <div className="flex flex-col items-center gap-3 animate-in fade-in duration-1000 w-full">
-              <div className="resume-image-card w-full max-w-sm mx-auto">
+            <div
+              className="rl-fade-in"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 12,
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  overflow: "hidden",
+                  width: "100%",
+                }}
+              >
                 <a
                   href={resumeUrl}
                   target="_blank"
@@ -420,35 +560,87 @@ const Resume = () => {
                   <img
                     src={imageUrl}
                     alt={`Resume preview${storedCompanyName ? ` for ${storedCompanyName}` : ""}`}
-                    className="w-full object-contain max-h-[70vh]"
+                    style={{
+                      width: "100%",
+                      objectFit: "contain",
+                      maxHeight: "72vh",
+                      filter: "saturate(0.4) brightness(0.85)",
+                    }}
                   />
                 </a>
               </div>
               {pageCount && pageCount > 1 && (
-                <p className="text-xs text-gray-400 text-center">
-                  Showing page 1 of {pageCount} — click to view full PDF
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--fg-3)",
+                    textAlign: "center",
+                  }}
+                >
+                  // page 1 of {pageCount} — click to view full PDF
                 </p>
               )}
             </div>
           ) : (
             !imageUrl && (
-              <div className="resume-image-card w-full max-w-sm mx-auto">
-                <div className="w-full h-[400px] bg-[#e5e5e5] animate-pulse" />
+              <div
+                style={{
+                  width: "100%",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    height: 480,
+                    background: "var(--surface-2)",
+                  }}
+                  className="rl-shimmer"
+                  aria-label="Loading resume preview"
+                />
               </div>
             )
           )}
         </section>
 
-        {/* Right: feedback */}
+        {/* Right: feedback panels */}
         <section
           id="resume-feedback"
-          className="feedback-section print:w-full print:px-0"
+          style={{
+            flex: 1,
+            padding: "32px 28px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 24,
+            minWidth: 0,
+          }}
+          className="print:w-full print:px-0"
         >
-          <h2 className="!text-2xl sm:!text-3xl !text-black font-bold print:hidden">
-            Resume Review
-          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span className="rl-eyebrow-prompt">resume_report</span>
+            {storedCompanyName && (
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-3)",
+                }}
+              >
+                // {storedCompanyName}
+                {storedJobTitle ? ` · ${storedJobTitle}` : ""}
+              </p>
+            )}
+          </div>
+
           {feedback ? (
-            <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
+            <div
+              className="rl-fade-in"
+              style={{ display: "flex", flexDirection: "column", gap: 20 }}
+            >
               <Summary feedback={feedback} />
               {scoreHistory.length > 0 && (
                 <ScoreHistory history={scoreHistory} />
@@ -471,12 +663,28 @@ const Resume = () => {
               />
             </div>
           ) : !isReanalyzing ? (
-            <div aria-live="polite" aria-busy="true">
-              <img
-                src="/images/resume-scan-2.gif"
-                alt="Loading resume analysis…"
-                className="w-full"
-              />
+            <div
+              aria-live="polite"
+              aria-busy="true"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                padding: "48px 0",
+              }}
+            >
+              <span className="rl-dot" style={{ width: 12, height: 12 }} />
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-3)",
+                  margin: 0,
+                }}
+              >
+                loading analysis…
+              </p>
             </div>
           ) : null}
         </section>
@@ -484,6 +692,7 @@ const Resume = () => {
     </main>
   );
 };
+
 export default Resume;
 
 export function ErrorBoundary() {
@@ -495,20 +704,60 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
-      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
-        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-          Error
-        </p>
+    <main
+      className="rl-page"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        className="rl-card is-raised"
+        style={{
+          position: "relative",
+          maxWidth: 440,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          textAlign: "center",
+        }}
+      >
+        <span className="rl-corner tl" />
+        <span className="rl-corner tr" />
+        <span className="rl-corner bl" />
+        <span className="rl-corner br" />
+        <span className="rl-pill rl-pill-bad" style={{ alignSelf: "center" }}>
+          ERROR
+        </span>
         <h1
-          className="text-3xl font-normal text-[#0a0a0a]"
-          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 28,
+            fontWeight: 500,
+            color: "var(--fg-1)",
+            margin: 0,
+          }}
         >
-          Failed to load resume.
+          failed_to_load
         </h1>
-        <p className="text-[#525252]">{message}</p>
-        <a href="/" className="primary-button w-fit mx-auto">
-          Back to Dashboard
+        <p
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--fg-2)",
+            margin: 0,
+          }}
+        >
+          {message}
+        </p>
+        <a
+          href="/"
+          className="rl-btn rl-btn-primary"
+          style={{ alignSelf: "center" }}
+        >
+          ← back_to_dashboard
         </a>
       </div>
     </main>

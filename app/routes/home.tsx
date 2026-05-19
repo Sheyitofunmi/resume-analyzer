@@ -13,20 +13,27 @@ import {
 } from "react-router";
 import { useEffect, useRef, useState } from "react";
 
-// ── Comparison panel ────────────────────────────────────────────────────────
-
 const SECTIONS: { key: keyof Feedback; label: string }[] = [
   { key: "ATS", label: "ATS" },
-  { key: "toneAndStyle", label: "Tone & Style" },
-  { key: "content", label: "Content" },
-  { key: "structure", label: "Structure" },
-  { key: "skills", label: "Skills" },
+  { key: "toneAndStyle", label: "tone_style" },
+  { key: "content", label: "content" },
+  { key: "structure", label: "structure" },
+  { key: "skills", label: "skills" },
 ];
 
 function scoreColor(s: number) {
-  if (s > 69) return "bg-green-500";
-  if (s > 49) return "bg-amber-400";
-  return "bg-red-500";
+  return s > 69 ? "var(--phos)" : s > 49 ? "var(--copper-hi)" : "var(--ember)";
+}
+
+function ScoreBar({ score }: { score: number }) {
+  const filled = Math.round((score / 100) * 20);
+  const color = scoreColor(score);
+  return (
+    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
+      <span style={{ color }}>{"█".repeat(filled)}</span>
+      <span style={{ color: "var(--fg-4)" }}>{"░".repeat(20 - filled)}</span>
+    </span>
+  );
 }
 
 const ComparePanel = ({
@@ -39,7 +46,6 @@ const ComparePanel = ({
   onClose: () => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
@@ -56,60 +62,145 @@ const ComparePanel = ({
   return (
     <div
       ref={panelRef}
-      className="w-full bg-white border border-[#e5e5e5] overflow-hidden animate-in fade-in duration-300"
+      className="rl-card is-accent rl-fade-in"
+      style={{ position: "relative", width: "100%", padding: 0 }}
     >
+      <span className="rl-corner tl" />
+      <span className="rl-corner tr" />
+      <span className="rl-corner bl" />
+      <span className="rl-corner br" />
+
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e5e5] bg-[#f8f7f4]">
-        <h2 className="!text-base !text-[#0a0a0a] font-semibold tracking-tight">
-          Resume Comparison
-        </h2>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 20px",
+          borderBottom: "1px dashed var(--border)",
+          background: "var(--bg-2)",
+        }}
+      >
+        <span className="rl-eyebrow-prompt">compare_mode</span>
         <button
           onClick={onClose}
-          className="text-sm text-[#525252] hover:text-[#0a0a0a] border border-[#e5e5e5] px-3 py-1 transition-colors"
+          className="rl-btn rl-btn-ghost"
+          style={{ fontSize: 12, padding: "4px 10px" }}
         >
-          Close
+          ✕ close
         </button>
       </div>
 
       {/* Title row */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-[#e5e5e5]">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "160px 1fr 1fr",
+          gap: 0,
+          padding: "14px 20px",
+          borderBottom: "1px dashed var(--border)",
+        }}
+      >
         <div />
         {[a, b].map((r) => (
-          <div key={r.id} className="text-center">
-            <p className="font-semibold text-[#0a0a0a] text-sm truncate">
-              {r.companyName || "Resume"}
+          <div key={r.id} style={{ textAlign: "center", padding: "0 8px" }}>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-mono)",
+                fontSize: 13,
+                color: "var(--fg-1)",
+                fontWeight: 500,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {r.companyName || "resume"}
             </p>
             {r.jobTitle && (
-              <p className="text-xs text-[#525252] truncate">{r.jobTitle}</p>
+              <p
+                style={{
+                  margin: "2px 0 0",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  color: "var(--fg-3)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {r.jobTitle}
+              </p>
             )}
           </div>
         ))}
       </div>
 
       {/* Overall score */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-[#f8f7f4] border-b border-[#e5e5e5]">
-        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest self-center">
-          Overall
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "160px 1fr 1fr",
+          gap: 0,
+          padding: "12px 20px",
+          borderBottom: "1px dashed var(--border)",
+          background: "var(--surface-2)",
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--fg-3)",
+            letterSpacing: "0.12em",
+            alignSelf: "center",
+          }}
+        >
+          overall
         </p>
         {[a, b].map((r) => {
           const s = r.feedback.overallScore;
-          const better =
+          const winner =
             r === a
               ? a.feedback.overallScore >= b.feedback.overallScore
               : b.feedback.overallScore > a.feedback.overallScore;
           return (
-            <div key={r.id} className="flex flex-col items-center gap-1">
+            <div
+              key={r.id}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
               <span
-                className={`text-2xl font-bold ${better ? "text-[#0a0a0a]" : "text-[#a3a3a3]"}`}
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 28,
+                  fontWeight: 700,
+                  color: winner ? scoreColor(s) : "var(--fg-4)",
+                  letterSpacing: "-1px",
+                  fontVariantNumeric: "tabular-nums",
+                  textShadow: winner ? `0 0 12px ${scoreColor(s)}88` : "none",
+                }}
               >
                 {s}
+                {winner && (
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      fontSize: 12,
+                      color: "var(--phos)",
+                    }}
+                  >
+                    ◆
+                  </span>
+                )}
               </span>
-              <div className="w-full bg-[#e5e5e5] h-1">
-                <div
-                  className={`h-1 ${scoreColor(s)}`}
-                  style={{ width: `${s}%` }}
-                />
-              </div>
+              <ScoreBar score={s} />
             </div>
           );
         })}
@@ -122,22 +213,49 @@ const ComparePanel = ({
         return (
           <div
             key={key}
-            className="grid grid-cols-3 gap-4 px-6 py-2.5 border-b border-[#e5e5e5]"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "160px 1fr 1fr",
+              gap: 0,
+              padding: "10px 20px",
+              borderBottom: "1px dashed var(--border)",
+            }}
           >
-            <p className="text-xs text-[#525252] self-center">{label}</p>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--fg-3)",
+                alignSelf: "center",
+              }}
+            >
+              {label}
+            </p>
             {[
               { score: sA, winner: sA >= sB },
               { score: sB, winner: sB > sA },
             ].map(({ score, winner }, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="flex-1 bg-[#e5e5e5] h-1">
-                  <div
-                    className={`h-1 transition-all ${scoreColor(score)}`}
-                    style={{ width: `${score}%` }}
-                  />
-                </div>
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "0 8px",
+                }}
+              >
+                <ScoreBar score={score} />
                 <span
-                  className={`text-xs font-semibold w-8 text-right ${winner ? "text-[#0a0a0a]" : "text-[#a3a3a3]"}`}
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: winner ? scoreColor(score) : "var(--fg-4)",
+                    width: 28,
+                    textAlign: "right",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
                 >
                   {score}
                 </span>
@@ -149,21 +267,48 @@ const ComparePanel = ({
 
       {/* Keyword overlap */}
       {kwA && kwB && (
-        <div className="px-6 py-4 border-t border-[#e5e5e5]">
-          <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest mb-3">
-            Keyword Overlap
-          </p>
-          <div className="grid sm:grid-cols-3 gap-3">
+        <div style={{ padding: "16px 20px" }}>
+          <span
+            className="rl-comment"
+            style={{ marginBottom: 12, display: "block" }}
+          >
+            keyword_overlap
+          </span>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: 12,
+              marginTop: 12,
+            }}
+          >
             {inBoth.length > 0 && (
-              <div className="bg-[#f0fdf4] border border-[#bbf7d0] p-3">
-                <p className="text-[10px] font-semibold text-green-700 mb-1.5 uppercase tracking-widest">
-                  In both ({inBoth.length})
+              <div
+                style={{
+                  background: "rgba(168,230,163,0.06)",
+                  border: "1px solid var(--phos-dim)",
+                  borderRadius: "var(--radius-md)",
+                  padding: 12,
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    color: "var(--phos)",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  + in both ({inBoth.length})
                 </p>
-                <div className="flex flex-wrap gap-1">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {inBoth.map((k) => (
                     <span
                       key={k}
-                      className="text-[10px] bg-white border border-[#bbf7d0] text-green-800 px-1.5 py-0.5"
+                      className="rl-chip rl-chip-phos"
+                      style={{ fontSize: 10 }}
                     >
                       {k}
                     </span>
@@ -172,16 +317,32 @@ const ComparePanel = ({
               </div>
             )}
             {onlyA.length > 0 && (
-              <div className="bg-[#f8f7f4] border border-[#e5e5e5] p-3">
-                <p className="text-[10px] font-semibold text-[#0a0a0a] mb-1.5 uppercase tracking-widest truncate">
-                  Only in {a.companyName || "Resume A"} ({onlyA.length})
+              <div
+                style={{
+                  background: "var(--surface-2)",
+                  border: "1px dashed var(--border-hi)",
+                  borderRadius: "var(--radius-md)",
+                  padding: 12,
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    color: "var(--copper-hi)",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  only in {a.companyName || "A"} ({onlyA.length})
                 </p>
-                <div className="flex flex-wrap gap-1">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {onlyA.map((k) => (
-                    <span
-                      key={k}
-                      className="text-[10px] bg-white border border-[#e5e5e5] text-[#525252] px-1.5 py-0.5"
-                    >
+                    <span key={k} className="rl-chip" style={{ fontSize: 10 }}>
                       {k}
                     </span>
                   ))}
@@ -189,16 +350,32 @@ const ComparePanel = ({
               </div>
             )}
             {onlyB.length > 0 && (
-              <div className="bg-[#fff7f0] border border-[#fed7aa] p-3">
-                <p className="text-[10px] font-semibold text-orange-700 mb-1.5 uppercase tracking-widest truncate">
-                  Only in {b.companyName || "Resume B"} ({onlyB.length})
+              <div
+                style={{
+                  background: "var(--surface-2)",
+                  border: "1px dashed var(--border-hi)",
+                  borderRadius: "var(--radius-md)",
+                  padding: 12,
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    color: "var(--copper)",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  only in {b.companyName || "B"} ({onlyB.length})
                 </p>
-                <div className="flex flex-wrap gap-1">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {onlyB.map((k) => (
-                    <span
-                      key={k}
-                      className="text-[10px] bg-white border border-[#fed7aa] text-orange-800 px-1.5 py-0.5"
-                    >
+                    <span key={k} className="rl-chip" style={{ fontSize: 10 }}>
                       {k}
                     </span>
                   ))}
@@ -210,15 +387,28 @@ const ComparePanel = ({
       )}
 
       {/* CTA links */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-[#f8f7f4] border-t border-[#e5e5e5]">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "160px 1fr 1fr",
+          padding: "12px 20px",
+          borderTop: "1px dashed var(--border)",
+          background: "var(--bg-2)",
+        }}
+      >
         <div />
         {[a, b].map((r) => (
-          <div key={r.id} className="flex justify-center">
+          <div key={r.id} style={{ display: "flex", justifyContent: "center" }}>
             <Link
               to={`/resume/${r.id}`}
-              className="text-xs font-semibold text-[#e11d48] hover:text-[#be123c] transition-colors"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                color: "var(--phos)",
+                textDecoration: "none",
+              }}
             >
-              View full report →
+              → view_report
             </Link>
           </div>
         ))}
@@ -274,7 +464,6 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoading || !auth.isAuthenticated) return;
-
     const loadResumes = async () => {
       setLoadingResumes(true);
       const items = (await kv.list("resume:*", true)) as KVItem[];
@@ -283,7 +472,6 @@ export default function Home() {
       setResumes(parsed.reverse());
       setLoadingResumes(false);
     };
-
     loadResumes();
   }, [isLoading, auth.isAuthenticated]);
 
@@ -306,68 +494,117 @@ export default function Home() {
   );
 
   return (
-    <main className="bg-[#f8f7f4] min-h-screen flex flex-col">
+    <main className="rl-page">
       <Navbar />
 
-      <section id="main-content" className="main-section flex-1">
-        <div className="page-heading pt-8 sm:pt-12 pb-4">
-          <h1>Track Your Applications & Resume Ratings</h1>
-          {!loadingResumes && resumes?.length === 0 ? (
-            <h2>No resumes yet — upload your first to get AI feedback.</h2>
-          ) : (
-            <h2>Review your submissions and check AI-powered feedback.</h2>
+      <div
+        id="main-content"
+        className="rl-section"
+        style={{ flex: 1, display: "flex", flexDirection: "column", gap: 32 }}
+      >
+        {/* Heading */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            paddingTop: 16,
+          }}
+        >
+          <span className="rl-eyebrow-prompt">resumelens dashboard</span>
+          <h1>track_your_applications</h1>
+          {!loadingResumes && (
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                color: "var(--fg-2)",
+                lineHeight: 1.7,
+              }}
+            >
+              {resumes.length === 0
+                ? "No resumes yet — upload your first to get AI feedback."
+                : "Review your submissions, drill into AI feedback, compare versions side-by-side."}
+            </p>
           )}
         </div>
 
+        {/* Loading */}
         {loadingResumes && (
-          <div className="flex flex-col items-center justify-center gap-4">
-            <img
-              src="/images/resume-scan-2.gif"
-              className="w-[200px]"
-              alt="Loading"
-            />
-            <p className="text-sm text-gray-400 animate-pulse">
-              Loading your resumes…
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+              padding: "48px 0",
+            }}
+          >
+            <span className="rl-dot" style={{ width: 12, height: 12 }} />
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 13,
+                color: "var(--fg-3)",
+              }}
+            >
+              loading resumes…
             </p>
           </div>
         )}
 
+        {/* Populated state */}
         {!loadingResumes && resumes.length > 0 && (
           <>
-            {/* Stats strip */}
             <StatsStrip />
 
             {/* Toolbar */}
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                {compareMode && compareIds.length > 0 && (
-                  <span className="text-sm text-gray-500">
-                    {compareIds.length === 1
-                      ? "Select one more to compare"
-                      : "Ready to compare"}
-                  </span>
-                )}
-                {compareMode && compareIds.length === 0 && (
-                  <span className="text-sm text-gray-400">
-                    Select 2 resumes to compare
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <div>
+                {compareMode && (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 12,
+                      color: "var(--fg-3)",
+                    }}
+                  >
+                    {compareIds.length === 0
+                      ? "// select 2 resumes to compare"
+                      : compareIds.length === 1
+                        ? "// select one more"
+                        : "// ready — scroll down"}
                   </span>
                 )}
               </div>
               {resumes.length >= 2 && (
                 <button
                   onClick={toggleCompareMode}
-                  className={`text-sm font-semibold px-4 py-1.5 border transition-colors ${
-                    compareMode
-                      ? "bg-[#0a0a0a] text-white border-[#0a0a0a]"
-                      : "text-[#0a0a0a] border-[#e5e5e5] hover:border-[#0a0a0a]"
-                  }`}
+                  className={`rl-btn ${compareMode ? "rl-btn-copper" : "rl-btn-secondary"}`}
+                  style={{ fontSize: 12 }}
                 >
-                  {compareMode ? "✕ Cancel Compare" : "Compare Resumes"}
+                  {compareMode ? "✕ cancel_compare" : "⇄ compare_resumes"}
                 </button>
               )}
             </div>
 
-            <div className="resumes-section">
+            {/* Resume grid */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 20,
+                width: "100%",
+              }}
+            >
               {paginatedResumes.map((resume) => (
                 <ResumeCard
                   key={resume.id}
@@ -382,6 +619,7 @@ export default function Home() {
               ))}
             </div>
 
+            {/* Compare panel */}
             {compareResumes && (
               <ComparePanel
                 a={compareResumes[0]}
@@ -393,26 +631,38 @@ export default function Home() {
               />
             )}
 
+            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center gap-4 mt-4">
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-[#e5e5e5] text-sm font-medium disabled:opacity-40 hover:border-[#0a0a0a] transition-colors"
+                  className="rl-btn rl-btn-secondary"
+                  style={{ fontSize: 12, opacity: currentPage === 1 ? 0.4 : 1 }}
                 >
-                  ← Previous
+                  ← prev
                 </button>
-                <span className="text-sm text-[#525252]">
-                  Page {currentPage} of {totalPages}
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    color: "var(--fg-3)",
+                  }}
+                >
+                  {currentPage} / {totalPages}
                 </span>
                 <button
                   onClick={() =>
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 border border-[#e5e5e5] text-sm font-medium disabled:opacity-40 hover:border-[#0a0a0a] transition-colors"
+                  className="rl-btn rl-btn-secondary"
+                  style={{
+                    fontSize: 12,
+                    opacity: currentPage === totalPages ? 0.4 : 1,
+                  }}
                 >
-                  Next →
+                  next →
                 </button>
               </div>
             )}
@@ -420,49 +670,94 @@ export default function Home() {
         )}
 
         {/* Empty state */}
-        {!loadingResumes && resumes?.length === 0 && (
-          <div className="flex flex-col items-center gap-12 w-full max-w-3xl animate-in fade-in duration-500">
-            {/* Intro */}
-            <div className="flex flex-col items-center gap-6 text-center w-full border border-[#e5e5e5] bg-white p-10">
-              <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-                Resume Analysis
-              </p>
-              <h2
-                className="!text-3xl sm:!text-4xl font-normal !text-[#0a0a0a]"
-                style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+        {!loadingResumes && resumes.length === 0 && (
+          <div
+            className="rl-fade-in"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 40,
+              width: "100%",
+              maxWidth: 720,
+              alignSelf: "center",
+            }}
+          >
+            {/* Hero card */}
+            <div
+              className="rl-card is-raised"
+              style={{
+                position: "relative",
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                textAlign: "center",
+                padding: "48px 32px",
+              }}
+            >
+              <span className="rl-corner tl" />
+              <span className="rl-corner tr" />
+              <span className="rl-corner bl" />
+              <span className="rl-corner br" />
+
+              <span className="rl-eyebrow">// resume_analysis</span>
+              <h1 style={{ fontSize: "clamp(28px, 5vw, 40px)" }}>
+                Drop your first resume
+                <span className="rl-cursor" />
+              </h1>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  color: "var(--fg-2)",
+                  lineHeight: 1.75,
+                  maxWidth: 480,
+                }}
               >
-                Upload your resume.
-                <br />
-                Get honest feedback.
-              </h2>
-              <p className="text-[#525252] text-base leading-relaxed max-w-md">
-                Paste a job description alongside your resume and ResumeLens
-                scores it across ATS compatibility, tone, content, structure,
-                and skills — with specific tips to improve.
+                Upload a PDF + paste a job description. ResumeLens diffs them,
+                scores five dimensions, and tells you exactly what to rewrite.
               </p>
-              <div className="flex flex-wrap justify-center gap-x-8 gap-y-1.5 text-sm text-[#525252] border-t border-[#e5e5e5] pt-5 w-full">
-                <span>ATS compatibility</span>
-                <span>Keyword gaps</span>
-                <span>Tone &amp; structure</span>
-                <span>Interview prep</span>
-                <span>Rewrite suggestions</span>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "16px 0 8px",
+                  borderTop: "1px dashed var(--border)",
+                  width: "100%",
+                }}
+              >
+                {[
+                  ["ATS", "ats_compatibility"],
+                  ["KW", "keyword_gaps"],
+                  ["TS", "tone_structure"],
+                  ["IV", "interview_prep"],
+                  ["RW", "rewrite_tips"],
+                ].map(([k, label]) => (
+                  <span key={k} className="rl-chip">
+                    <span style={{ color: "var(--copper)" }}>[{k}]</span>
+                    <span>{label}</span>
+                  </span>
+                ))}
               </div>
               <Link
                 to="/upload"
-                className="primary-button w-fit text-base px-8 py-3"
+                className="rl-btn rl-btn-primary"
+                style={{ fontSize: 14 }}
               >
-                Upload Your First Resume
+                $ upload_resume →
               </Link>
             </div>
 
-            {/* How it works */}
             <HowItWorks />
-
-            {/* Stats strip */}
             <StatsStrip />
           </div>
         )}
-      </section>
+      </div>
 
       <Footer />
     </main>
@@ -478,20 +773,60 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
-      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
-        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
-          Error
-        </p>
+    <main
+      className="rl-page"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        className="rl-card is-raised"
+        style={{
+          position: "relative",
+          maxWidth: 440,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          textAlign: "center",
+        }}
+      >
+        <span className="rl-corner tl" />
+        <span className="rl-corner tr" />
+        <span className="rl-corner bl" />
+        <span className="rl-corner br" />
+        <span className="rl-pill rl-pill-bad" style={{ alignSelf: "center" }}>
+          ERROR
+        </span>
         <h1
-          className="text-3xl font-normal text-[#0a0a0a]"
-          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 28,
+            fontWeight: 500,
+            color: "var(--fg-1)",
+            margin: 0,
+          }}
         >
-          Something went wrong.
+          something_went_wrong
         </h1>
-        <p className="text-[#525252]">{message}</p>
-        <a href="/" className="primary-button w-fit mx-auto">
-          Go Home
+        <p
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+            color: "var(--fg-2)",
+            margin: 0,
+          }}
+        >
+          {message}
+        </p>
+        <a
+          href="/"
+          className="rl-btn rl-btn-primary"
+          style={{ alignSelf: "center" }}
+        >
+          ← go_home
         </a>
       </div>
     </main>

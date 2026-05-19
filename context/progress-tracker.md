@@ -4,13 +4,30 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Rich text resume editor implemented
+- CIPHER design system implemented — full dark terminal aesthetic
 
 ## Current Goal
 
-- End-to-end testing of the new editor features, then deployment.
+- Verify visual output in browser; iterate on any component-level polish needed.
 
 ## Completed
+
+### CIPHER Design System Overhaul (2026-05-19)
+
+- **`app/app.css`:** Replaced light Mona Sans / Instrument Serif theme with full CIPHER dark token system. 70+ CSS vars (`--bg`, `--fg-1…4`, `--phos`, `--copper`, `--ember`, spacing, radii, shadows, glows, motion). JetBrains Mono as default UI font; Inter for body copy > 2 lines. Page grid background (40×40 px). Utility classes: `.rl-page`, `.rl-section`, `.rl-card`, `.rl-corner`, `.rl-btn-*`, `.rl-pill-*`, `.rl-chip`, `.rl-dot`, `.rl-cursor`, `.rl-fade-in`, `.rl-toast`, etc.
+- **`Navbar.tsx`:** Warm-black sticky nav with `backdrop-filter: blur(8px)`. Phosphor "R" logo mark, live dot + terminal prompt label, copper user avatar, context-aware CTA (`$ upload_resume →` / `← my_resumes`). Mobile: center prompt and username hidden via `.rl-mobile-hide`.
+- **`Footer.tsx`:** CIPHER footer with `[ATS][KW][RW][TS][IV]` feature chip strip, 4-column grid (brand / product links / powered_by / status), phosphor dot live indicator, `//` comment-style copyright.
+- **`StatsStrip.tsx`:** Warm-oxide card with copper corner crosshairs. Phosphor count-up numbers with `text-shadow` glow. IntersectionObserver trigger, staggered fade in.
+- **`HowItWorks.tsx`:** Three step cards with copper/phosphor STEP_0N accent borders, corner crosshairs, staggered slide-up on intersection.
+- **`ScoreCircle.tsx`:** SVG ring colored by score tier (phos > 69, copper-hi 50–69, ember < 50) with drop-shadow glow. Tabular-num score + `/100` label.
+- **`ResumeCard.tsx`:** Dark `.rl-card` with copper corner crosshairs. `//` comment eyebrow for company, filtered image preview (`saturate(0.5)`). CIPHER delete confirm popover.
+- **`FileUploader.tsx`:** Terminal drop zone — `↓` glyph, `click_to_upload` / `drop_resume_here` copy, phosphor border + glow on drag-active. File selected state shows phosphor ✓ chip.
+- **`InterviewQuestions.tsx`:** Terminal card with `rl-eyebrow-prompt`, `$ predict →` / `↺ regenerate` buttons, numbered `.rl-row` list, per-category color labels.
+- **`RewriteSuggestions.tsx`:** BEFORE/AFTER grid — ember-tinted `−` panel vs phosphor-tinted `+` panel. `// comment` why-block below each pair.
+- **`auth.tsx`:** Mac-window-chrome dots, `welcome_back_` headline with blinking cursor, Puter info box, `$ log_in_with_puter →` primary CTA.
+- **`home.tsx`:** `rl-page` grid background. `track_your_applications` hero h1. Empty state hero card with feature chips + upload CTA. ComparePanel rewritten in CIPHER — ASCII score bars, `◆` winner marker, keyword overlap with `rl-chip-phos`. Pagination with secondary buttons.
+- **`upload.tsx`:** `smart_feedback for_your dream_job_` hero. Form fields with `// label` prefixes. Progress pipeline as a `is-phos` card with `▶ running…` / `✓ done` step states. Feature chip row. `$ run analyze →` submit button.
+- **`resume.tsx`:** Dark sticky top nav (`← back_to_dashboard`, `↺ re-analyze`, `✎ edit_resume`, `↓ download`). Left preview panel with desaturated image on `var(--bg-2)`. Re-analyze modal with backdrop blur, `! warning` amber strip, terminal form. CIPHER error boundary and toast.
 
 ### Feature Additions (recent)
 
