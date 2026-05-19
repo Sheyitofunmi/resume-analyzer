@@ -195,7 +195,7 @@ const Resume = () => {
       {/* Skip link */}
       <a
         href="#resume-feedback"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:rounded focus:shadow focus:text-indigo-700 focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:shadow focus:text-[#e11d48] focus:font-semibold"
       >
         Skip to feedback
       </a>
@@ -218,7 +218,7 @@ const Resume = () => {
           {feedback && !isReanalyzing && (
             <button
               onClick={() => setShowReanalyze(true)}
-              className="back-button text-sm font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+              className="back-button text-sm font-semibold text-[#0a0a0a] hover:bg-[#f8f7f4] transition-colors"
             >
               Re-analyze
             </button>
@@ -226,7 +226,7 @@ const Resume = () => {
           {feedback && (
             <Link
               to={`/resume/${id}/edit`}
-              className="back-button text-sm font-semibold text-emerald-700 border-emerald-200 hover:bg-emerald-50 transition-colors"
+              className="back-button text-sm font-semibold text-[#0a0a0a] hover:bg-[#f8f7f4] transition-colors"
             >
               Edit Resume
             </Link>
@@ -291,14 +291,14 @@ const Resume = () => {
             onClick={() => setShowReanalyze(false)}
             aria-hidden="true"
           />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white border border-[#e5e5e5] w-full max-w-lg p-6 animate-in fade-in duration-200">
             <h2
               id="reanalyze-title"
               className="!text-base !text-gray-900 font-semibold mb-1"
             >
               Re-analyze Resume
             </h2>
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4 w-fit">
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 mb-4 w-fit">
               ⚠ This will replace your current analysis.
             </p>
             <form
@@ -406,11 +406,11 @@ const Resume = () => {
         {/* Left: resume image */}
         <section
           aria-label="Resume preview"
-          className="feedback-section print:hidden bg-[url('/images/bg-small.svg')] bg-cover lg:h-screen lg:sticky lg:top-0 flex items-center justify-center"
+          className="feedback-section print:hidden bg-[#f8f7f4] lg:h-screen lg:sticky lg:top-0 flex items-center justify-center border-r border-[#e5e5e5]"
         >
           {imageUrl && resumeUrl ? (
             <div className="flex flex-col items-center gap-3 animate-in fade-in duration-1000 w-full">
-              <div className="gradient-border w-full max-w-sm mx-auto">
+              <div className="resume-image-card w-full max-w-sm mx-auto">
                 <a
                   href={resumeUrl}
                   target="_blank"
@@ -420,7 +420,7 @@ const Resume = () => {
                   <img
                     src={imageUrl}
                     alt={`Resume preview${storedCompanyName ? ` for ${storedCompanyName}` : ""}`}
-                    className="w-full object-contain rounded-2xl max-h-[70vh]"
+                    className="w-full object-contain max-h-[70vh]"
                   />
                 </a>
               </div>
@@ -432,8 +432,8 @@ const Resume = () => {
             </div>
           ) : (
             !imageUrl && (
-              <div className="w-full max-w-sm mx-auto gradient-border">
-                <div className="w-full h-[400px] bg-gray-100 rounded-2xl animate-pulse" />
+              <div className="resume-image-card w-full max-w-sm mx-auto">
+                <div className="w-full h-[400px] bg-[#e5e5e5] animate-pulse" />
               </div>
             )
           )}
@@ -495,12 +495,18 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-red-500">
-          Failed to Load Resume
+    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
+      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
+        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
+          Error
+        </p>
+        <h1
+          className="text-3xl font-normal text-[#0a0a0a]"
+          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+        >
+          Failed to load resume.
         </h1>
-        <p className="text-gray-600">{message}</p>
+        <p className="text-[#525252]">{message}</p>
         <a href="/" className="primary-button w-fit mx-auto">
           Back to Dashboard
         </a>

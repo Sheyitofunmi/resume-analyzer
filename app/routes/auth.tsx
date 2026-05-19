@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 export const meta = () => [
-  { title: "ResumeLens | Auth" },
+  { title: "ResumeLens | Sign In" },
   { name: "description", content: "Log into your account" },
 ];
 
@@ -18,49 +18,56 @@ const Auth = () => {
   }, [auth.isAuthenticated, next]);
 
   return (
-    <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center px-4">
-      <div className="gradient-border shadow-lg w-full max-w-lg">
-        <section className="flex flex-col gap-6 bg-white rounded-2xl p-6 sm:p-10 w-full">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1>Welcome</h1>
-            <h2>Log In to Continue Your Job Journey</h2>
-          </div>
+    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center px-4">
+      <section className="flex flex-col gap-6 bg-white border border-[#e5e5e5] p-8 sm:p-12 w-full max-w-lg">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
+            ResumeLens
+          </p>
+          <h1
+            className="text-4xl font-normal text-[#0a0a0a]"
+            style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+          >
+            Welcome back.
+          </h1>
+          <p className="text-[#525252] text-sm">
+            Log in to continue your job search.
+          </p>
+        </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-4 text-sm text-blue-800 flex flex-col gap-1">
-            <p className="font-semibold">What is Puter?</p>
-            <p className="text-blue-700">
-              ResumeLens uses <span className="font-medium">Puter</span> — a
-              free cloud platform — to securely store your resumes and AI
-              analysis. No separate sign-up required; your Puter account holds
-              everything.
-            </p>
-          </div>
+        <div className="border border-[#e5e5e5] px-5 py-4 text-sm text-[#525252] flex flex-col gap-1 bg-[#f8f7f4]">
+          <p className="font-semibold text-[#0a0a0a]">What is Puter?</p>
+          <p>
+            ResumeLens uses <span className="font-medium">Puter</span> — a free
+            cloud platform — to securely store your resumes and AI analysis. No
+            separate sign-up required; your Puter account holds everything.
+          </p>
+        </div>
 
-          <div>
-            {isLoading ? (
-              <button
-                className="auth-button animate-pulse"
-                disabled
-                aria-busy="true"
-              >
-                <p>Signing you in…</p>
-              </button>
-            ) : (
-              <>
-                {auth.isAuthenticated ? (
-                  <button className="auth-button" onClick={auth.signOut}>
-                    <p>Log Out</p>
-                  </button>
-                ) : (
-                  <button className="auth-button" onClick={auth.signIn}>
-                    <p>Log In with Puter</p>
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-      </div>
+        <div>
+          {isLoading ? (
+            <button
+              className="auth-button opacity-60"
+              disabled
+              aria-busy="true"
+            >
+              Signing you in…
+            </button>
+          ) : (
+            <>
+              {auth.isAuthenticated ? (
+                <button className="auth-button" onClick={auth.signOut}>
+                  Log Out
+                </button>
+              ) : (
+                <button className="auth-button" onClick={auth.signIn}>
+                  Log In with Puter
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </section>
     </main>
   );
 };

@@ -277,8 +277,8 @@ const ToolBtn = ({ onCmd, active, title, children, disabled }: BtnProps) => (
     disabled={disabled}
     className={`inline-flex items-center justify-center w-7 h-7 rounded transition-colors disabled:opacity-30 ${
       active
-        ? "bg-indigo-100 text-indigo-700"
-        : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+        ? "bg-[#0a0a0a] text-white"
+        : "text-[#525252] hover:bg-[#f8f7f4] hover:text-[#0a0a0a]"
     }`}
   >
     {children}
@@ -667,7 +667,7 @@ const ResumeEdit = () => {
                   if (e.key === "Escape") setLinkOpen(false);
                 }}
                 placeholder="https://example.com"
-                className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full border border-[#e5e5e5] px-3 py-2.5 text-sm focus:outline-none focus:border-[#0a0a0a]"
                 style={{ boxShadow: "none" }}
               />
             </div>
@@ -693,7 +693,7 @@ const ResumeEdit = () => {
                 <button
                   type="button"
                   onClick={handleLinkApply}
-                  className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
+                  className="text-sm px-4 py-2 bg-[#0a0a0a] text-white hover:bg-[#2a2a2a] transition-colors"
                 >
                   Apply
                 </button>
@@ -756,7 +756,7 @@ const ResumeEdit = () => {
           <button
             onClick={handleSave}
             disabled={saving || extracting || !isDirty}
-            className="back-button text-sm font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="back-button text-sm font-semibold text-[#0a0a0a] hover:bg-[#f8f7f4] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -821,7 +821,7 @@ const ResumeEdit = () => {
               exec("formatBlock", e.target.value);
               editorRef.current?.focus();
             }}
-            className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 h-7"
+            className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-700 bg-white focus:outline-none focus:border-[#0a0a0a] h-7"
             style={{ boxShadow: "none" }}
             aria-label="Block format"
           >
@@ -836,7 +836,7 @@ const ResumeEdit = () => {
             value={fontSize}
             onMouseDown={(e) => e.stopPropagation()}
             onChange={(e) => applyFontSize(e.target.value)}
-            className="text-xs border border-gray-200 rounded-md px-1.5 py-1 ml-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 h-7 w-16"
+            className="text-xs border border-gray-200 rounded-md px-1.5 py-1 ml-1 text-gray-700 bg-white focus:outline-none focus:border-[#0a0a0a] h-7 w-16"
             style={{ boxShadow: "none" }}
             aria-label="Font size"
           >
@@ -916,8 +916,8 @@ const ResumeEdit = () => {
                       }}
                       className={`w-7 h-7 rounded-lg border-2 transition-transform hover:scale-110 ${
                         textColor === hex
-                          ? "border-indigo-500 scale-110"
-                          : "border-gray-200"
+                          ? "border-[#0a0a0a] scale-110"
+                          : "border-[#e5e5e5]"
                       }`}
                       style={{ backgroundColor: hex }}
                     />
@@ -1052,7 +1052,7 @@ const ResumeEdit = () => {
         <div className="resume-paper-wrap flex-1 overflow-y-auto bg-gray-100 flex flex-col items-center py-8 px-4">
           {extracting ? (
             <div className="flex flex-col items-center justify-center gap-3 mt-24">
-              <div className="w-8 h-8 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+              <div className="w-8 h-8 rounded-full border-4 border-[#e5e5e5] border-t-[#0a0a0a] animate-spin" />
               <p className="text-sm text-gray-500">Extracting resume text…</p>
             </div>
           ) : extractError ? (

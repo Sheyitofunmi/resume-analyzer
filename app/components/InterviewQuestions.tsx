@@ -7,10 +7,10 @@ const CATEGORY_STYLES: Record<
 > = {
   behavioral: {
     label: "Behavioral",
-    bg: "bg-indigo-50",
-    text: "text-indigo-700",
+    bg: "bg-[#f8f7f4]",
+    text: "text-[#525252]",
   },
-  technical: { label: "Technical", bg: "bg-blue-50", text: "text-blue-700" },
+  technical: { label: "Technical", bg: "bg-[#f8f7f4]", text: "text-[#525252]" },
   situational: {
     label: "Situational",
     bg: "bg-amber-50",
@@ -18,8 +18,8 @@ const CATEGORY_STYLES: Record<
   },
   "role-specific": {
     label: "Role-Specific",
-    bg: "bg-purple-50",
-    text: "text-purple-700",
+    bg: "bg-[#f8f7f4]",
+    text: "text-[#525252]",
   },
 };
 
@@ -63,20 +63,20 @@ const InterviewQuestions = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md w-full overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-gray-100 flex items-start justify-between gap-4">
+    <div className="bg-white border border-[#e5e5e5] w-full overflow-hidden">
+      <div className="px-5 pt-4 pb-3 border-b border-[#e5e5e5] flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-base font-semibold text-gray-800">
+          <h3 className="text-base font-semibold text-[#0a0a0a]">
             Interview Question Predictor
           </h3>
-          <p className="text-xs text-gray-400 mt-0.5">
-            AI-predicted questions based on this role and your resume gaps.
+          <p className="text-xs text-[#525252] mt-0.5">
+            Predicted questions based on this role and your resume gaps.
           </p>
         </div>
         {!questions && !loading && (
           <button
             onClick={handleGenerate}
-            className="flex-shrink-0 text-xs font-semibold text-white primary-gradient rounded-full px-4 py-1.5 cursor-pointer"
+            className="primary-button flex-shrink-0 text-xs px-4 py-1.5"
           >
             Predict Questions
           </button>
@@ -87,7 +87,7 @@ const InterviewQuestions = ({
               setQuestions(null);
               setError("");
             }}
-            className="flex-shrink-0 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-full px-3 py-1.5"
+            className="flex-shrink-0 text-xs font-medium text-[#525252] hover:text-[#0a0a0a] border border-[#e5e5e5] px-3 py-1.5 transition-colors"
           >
             Regenerate
           </button>
@@ -96,45 +96,45 @@ const InterviewQuestions = ({
 
       <div className="px-5 py-4">
         {loading && (
-          <div className="flex items-center gap-3 text-sm text-gray-500">
-            <span className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <div className="flex items-center gap-3 text-sm text-[#525252]">
+            <span className="w-4 h-4 border-2 border-[#0a0a0a] border-t-transparent rounded-full animate-spin flex-shrink-0" />
             Predicting interview questions…
           </div>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-[#e11d48]">
             {error}
           </p>
         )}
 
         {!loading && !questions && !error && (
-          <p className="text-sm text-gray-400 text-center py-4">
+          <p className="text-sm text-[#525252] text-center py-4">
             Click "Predict Questions" to generate 5 likely interview questions
             for this role.
           </p>
         )}
 
         {questions && (
-          <ol className="flex flex-col gap-3">
+          <ol className="flex flex-col gap-4">
             {questions.map((q, i) => {
               const cat = q.category?.toLowerCase() ?? "";
               const style = CATEGORY_STYLES[cat] ?? {
                 label: q.category,
-                bg: "bg-gray-50",
-                text: "text-gray-600",
+                bg: "bg-[#f8f7f4]",
+                text: "text-[#525252]",
               };
               return (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center mt-0.5">
+                  <span className="flex-shrink-0 w-6 h-6 bg-[#0a0a0a] text-white text-xs font-bold flex items-center justify-center mt-0.5">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-relaxed">
+                    <p className="text-sm text-[#0a0a0a] leading-relaxed">
                       {q.question}
                     </p>
                     <span
-                      className={`inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}
+                      className={`inline-block mt-1.5 text-[10px] font-semibold px-2 py-0.5 uppercase tracking-widest border border-[#e5e5e5] ${style.bg} ${style.text}`}
                     >
                       {style.label}
                     </span>

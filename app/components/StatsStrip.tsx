@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 const STATS = [
-  { value: 5, suffix: "", label: "AI Metrics Scored", icon: "🎯" },
-  { value: 100, suffix: "+", label: "Keyword Signals", icon: "🔑" },
-  { value: 3, suffix: "s", label: "Avg Analysis Time", icon: "⚡" },
-  { value: 98, suffix: "%", label: "ATS Check Coverage", icon: "✅" },
+  { value: 5, suffix: "", label: "AI Metrics Scored" },
+  { value: 100, suffix: "+", label: "Keyword Signals" },
+  { value: 3, suffix: "s", label: "Avg Analysis Time" },
+  { value: 98, suffix: "%", label: "ATS Check Coverage" },
 ];
 
 function useCountUp(target: number, duration: number, active: boolean) {
@@ -29,14 +29,12 @@ function StatItem({
   value,
   suffix,
   label,
-  icon,
   animate,
   delay,
 }: {
   value: number;
   suffix: string;
   label: string;
-  icon: string;
   animate: boolean;
   delay: number;
 }) {
@@ -51,16 +49,18 @@ function StatItem({
 
   return (
     <div
-      className={`flex flex-col items-center gap-1.5 px-4 py-5 transition-all duration-500 ${
+      className={`flex flex-col items-center gap-2 px-4 py-6 transition-all duration-500 ${
         show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
       }`}
     >
-      <span className="text-2xl">{icon}</span>
-      <span className="text-3xl sm:text-4xl font-bold text-gradient tabular-nums">
+      <span
+        className="text-4xl sm:text-5xl font-bold text-[#0a0a0a] tabular-nums"
+        style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+      >
         {count}
         {suffix}
       </span>
-      <span className="text-xs sm:text-sm text-gray-500 text-center">
+      <span className="text-xs font-semibold text-[#525252] uppercase tracking-widest text-center">
         {label}
       </span>
     </div>
@@ -88,13 +88,11 @@ const StatsStrip = () => {
   }, []);
 
   return (
-    <div ref={ref} className="w-full gradient-border">
-      <div className="bg-white rounded-xl w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-gray-100">
-          {STATS.map((s, i) => (
-            <StatItem key={s.label} {...s} animate={animate} delay={i * 120} />
-          ))}
-        </div>
+    <div ref={ref} className="w-full border border-[#e5e5e5] bg-white">
+      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-[#e5e5e5]">
+        {STATS.map((s, i) => (
+          <StatItem key={s.label} {...s} animate={animate} delay={i * 120} />
+        ))}
       </div>
     </div>
   );

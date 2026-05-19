@@ -42,7 +42,7 @@ const WipeApp = () => {
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-4 border-indigo-300 border-t-indigo-600 animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-[#e5e5e5] border-t-[#0a0a0a] animate-spin" />
       </main>
     );
   }

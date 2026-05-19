@@ -56,40 +56,40 @@ const ComparePanel = ({
   return (
     <div
       ref={panelRef}
-      className="w-full bg-white rounded-2xl shadow-lg border border-indigo-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+      className="w-full bg-white border border-[#e5e5e5] overflow-hidden animate-in fade-in duration-300"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-indigo-50/60">
-        <h2 className="!text-base !text-gray-800 font-semibold">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e5e5] bg-[#f8f7f4]">
+        <h2 className="!text-base !text-[#0a0a0a] font-semibold tracking-tight">
           Resume Comparison
         </h2>
         <button
           onClick={onClose}
-          className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-full px-3 py-1"
+          className="text-sm text-[#525252] hover:text-[#0a0a0a] border border-[#e5e5e5] px-3 py-1 transition-colors"
         >
           Close
         </button>
       </div>
 
       {/* Title row */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-gray-100">
+      <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-[#e5e5e5]">
         <div />
         {[a, b].map((r) => (
           <div key={r.id} className="text-center">
-            <p className="font-semibold text-gray-800 text-sm truncate">
+            <p className="font-semibold text-[#0a0a0a] text-sm truncate">
               {r.companyName || "Resume"}
             </p>
             {r.jobTitle && (
-              <p className="text-xs text-gray-400 truncate">{r.jobTitle}</p>
+              <p className="text-xs text-[#525252] truncate">{r.jobTitle}</p>
             )}
           </div>
         ))}
       </div>
 
       {/* Overall score */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-gray-50/50 border-b border-gray-100">
-        <p className="text-xs font-semibold text-gray-500 self-center">
-          Overall Score
+      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-[#f8f7f4] border-b border-[#e5e5e5]">
+        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest self-center">
+          Overall
         </p>
         {[a, b].map((r) => {
           const s = r.feedback.overallScore;
@@ -100,13 +100,13 @@ const ComparePanel = ({
           return (
             <div key={r.id} className="flex flex-col items-center gap-1">
               <span
-                className={`text-2xl font-bold ${better ? "text-indigo-600" : "text-gray-400"}`}
+                className={`text-2xl font-bold ${better ? "text-[#0a0a0a]" : "text-[#a3a3a3]"}`}
               >
                 {s}
               </span>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div className="w-full bg-[#e5e5e5] h-1">
                 <div
-                  className={`h-1.5 rounded-full ${scoreColor(s)}`}
+                  className={`h-1 ${scoreColor(s)}`}
                   style={{ width: `${s}%` }}
                 />
               </div>
@@ -122,22 +122,22 @@ const ComparePanel = ({
         return (
           <div
             key={key}
-            className="grid grid-cols-3 gap-4 px-6 py-2.5 border-b border-gray-50"
+            className="grid grid-cols-3 gap-4 px-6 py-2.5 border-b border-[#e5e5e5]"
           >
-            <p className="text-xs text-gray-500 self-center">{label}</p>
+            <p className="text-xs text-[#525252] self-center">{label}</p>
             {[
               { score: sA, winner: sA >= sB },
               { score: sB, winner: sB > sA },
             ].map(({ score, winner }, i) => (
               <div key={i} className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                <div className="flex-1 bg-[#e5e5e5] h-1">
                   <div
-                    className={`h-1.5 rounded-full transition-all ${scoreColor(score)}`}
+                    className={`h-1 transition-all ${scoreColor(score)}`}
                     style={{ width: `${score}%` }}
                   />
                 </div>
                 <span
-                  className={`text-xs font-semibold w-8 text-right ${winner ? "text-gray-800" : "text-gray-400"}`}
+                  className={`text-xs font-semibold w-8 text-right ${winner ? "text-[#0a0a0a]" : "text-[#a3a3a3]"}`}
                 >
                   {score}
                 </span>
@@ -149,21 +149,21 @@ const ComparePanel = ({
 
       {/* Keyword overlap */}
       {kwA && kwB && (
-        <div className="px-6 py-4 border-t border-gray-100">
-          <p className="text-xs font-semibold text-gray-500 mb-3">
+        <div className="px-6 py-4 border-t border-[#e5e5e5]">
+          <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest mb-3">
             Keyword Overlap
           </p>
           <div className="grid sm:grid-cols-3 gap-3">
             {inBoth.length > 0 && (
-              <div className="bg-green-50 rounded-xl p-3">
-                <p className="text-[10px] font-semibold text-green-700 mb-1.5">
+              <div className="bg-[#f0fdf4] border border-[#bbf7d0] p-3">
+                <p className="text-[10px] font-semibold text-green-700 mb-1.5 uppercase tracking-widest">
                   In both ({inBoth.length})
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {inBoth.map((k) => (
                     <span
                       key={k}
-                      className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full"
+                      className="text-[10px] bg-white border border-[#bbf7d0] text-green-800 px-1.5 py-0.5"
                     >
                       {k}
                     </span>
@@ -172,15 +172,15 @@ const ComparePanel = ({
               </div>
             )}
             {onlyA.length > 0 && (
-              <div className="bg-indigo-50 rounded-xl p-3">
-                <p className="text-[10px] font-semibold text-indigo-700 mb-1.5 truncate">
+              <div className="bg-[#f8f7f4] border border-[#e5e5e5] p-3">
+                <p className="text-[10px] font-semibold text-[#0a0a0a] mb-1.5 uppercase tracking-widest truncate">
                   Only in {a.companyName || "Resume A"} ({onlyA.length})
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {onlyA.map((k) => (
                     <span
                       key={k}
-                      className="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-full"
+                      className="text-[10px] bg-white border border-[#e5e5e5] text-[#525252] px-1.5 py-0.5"
                     >
                       {k}
                     </span>
@@ -189,15 +189,15 @@ const ComparePanel = ({
               </div>
             )}
             {onlyB.length > 0 && (
-              <div className="bg-purple-50 rounded-xl p-3">
-                <p className="text-[10px] font-semibold text-purple-700 mb-1.5 truncate">
+              <div className="bg-[#fff7f0] border border-[#fed7aa] p-3">
+                <p className="text-[10px] font-semibold text-orange-700 mb-1.5 uppercase tracking-widest truncate">
                   Only in {b.companyName || "Resume B"} ({onlyB.length})
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {onlyB.map((k) => (
                     <span
                       key={k}
-                      className="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded-full"
+                      className="text-[10px] bg-white border border-[#fed7aa] text-orange-800 px-1.5 py-0.5"
                     >
                       {k}
                     </span>
@@ -210,13 +210,13 @@ const ComparePanel = ({
       )}
 
       {/* CTA links */}
-      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-gray-50/50 border-t border-gray-100">
+      <div className="grid grid-cols-3 gap-4 px-6 py-3 bg-[#f8f7f4] border-t border-[#e5e5e5]">
         <div />
         {[a, b].map((r) => (
           <div key={r.id} className="flex justify-center">
             <Link
               to={`/resume/${r.id}`}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+              className="text-xs font-semibold text-[#e11d48] hover:text-[#be123c] transition-colors"
             >
               View full report →
             </Link>
@@ -306,7 +306,7 @@ export default function Home() {
   );
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
+    <main className="bg-[#f8f7f4] min-h-screen flex flex-col">
       <Navbar />
 
       <section id="main-content" className="main-section flex-1">
@@ -344,7 +344,7 @@ export default function Home() {
                   <span className="text-sm text-gray-500">
                     {compareIds.length === 1
                       ? "Select one more to compare"
-                      : "Ready to compare ✓"}
+                      : "Ready to compare"}
                   </span>
                 )}
                 {compareMode && compareIds.length === 0 && (
@@ -356,10 +356,10 @@ export default function Home() {
               {resumes.length >= 2 && (
                 <button
                   onClick={toggleCompareMode}
-                  className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-all duration-200 ${
+                  className={`text-sm font-semibold px-4 py-1.5 border transition-colors ${
                     compareMode
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                      : "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                      ? "bg-[#0a0a0a] text-white border-[#0a0a0a]"
+                      : "text-[#0a0a0a] border-[#e5e5e5] hover:border-[#0a0a0a]"
                   }`}
                 >
                   {compareMode ? "✕ Cancel Compare" : "Compare Resumes"}
@@ -398,11 +398,11 @@ export default function Home() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-full border border-gray-200 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-[#e5e5e5] text-sm font-medium disabled:opacity-40 hover:border-[#0a0a0a] transition-colors"
                 >
                   ← Previous
                 </button>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-[#525252]">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
@@ -410,7 +410,7 @@ export default function Home() {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-full border border-gray-200 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-[#e5e5e5] text-sm font-medium disabled:opacity-40 hover:border-[#0a0a0a] transition-colors"
                 >
                   Next →
                 </button>
@@ -421,36 +421,37 @@ export default function Home() {
 
         {/* Empty state */}
         {!loadingResumes && resumes?.length === 0 && (
-          <div className="flex flex-col items-center gap-10 w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Intro card */}
-            <div className="flex flex-col items-center gap-5 text-center bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 w-full">
-              <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5">
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
-                  Get Started
-                </span>
+          <div className="flex flex-col items-center gap-12 w-full max-w-3xl animate-in fade-in duration-500">
+            {/* Intro */}
+            <div className="flex flex-col items-center gap-6 text-center w-full border border-[#e5e5e5] bg-white p-10">
+              <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
+                Resume Analysis
+              </p>
+              <h2
+                className="!text-3xl sm:!text-4xl font-normal !text-[#0a0a0a]"
+                style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+              >
+                Upload your resume.
+                <br />
+                Get honest feedback.
+              </h2>
+              <p className="text-[#525252] text-base leading-relaxed max-w-md">
+                Paste a job description alongside your resume and ResumeLens
+                scores it across ATS compatibility, tone, content, structure,
+                and skills — with specific tips to improve.
+              </p>
+              <div className="flex flex-wrap justify-center gap-x-8 gap-y-1.5 text-sm text-[#525252] border-t border-[#e5e5e5] pt-5 w-full">
+                <span>ATS compatibility</span>
+                <span>Keyword gaps</span>
+                <span>Tone &amp; structure</span>
+                <span>Interview prep</span>
+                <span>Rewrite suggestions</span>
               </div>
-
-              <div className="flex flex-col gap-3">
-                <p className="text-gray-700 text-base leading-relaxed">
-                  Upload your resume and paste a job description — ResumeLens
-                  will score it against ATS systems and give you actionable tips
-                  to improve your chances.
-                </p>
-                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-500">
-                  <span>✓ ATS compatibility score</span>
-                  <span>✓ Keyword gap analysis</span>
-                  <span>✓ Tone, structure &amp; content feedback</span>
-                  <span>✓ Interview prep questions</span>
-                  <span>✓ Rewrite suggestions</span>
-                </div>
-              </div>
-
               <Link
                 to="/upload"
-                className="primary-button w-fit text-lg font-semibold px-8 py-3"
+                className="primary-button w-fit text-base px-8 py-3"
               >
-                ✨ Upload Your First Resume
+                Upload Your First Resume
               </Link>
             </div>
 
@@ -477,10 +478,18 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-red-500">Oops!</h1>
-        <p className="text-gray-600">{message}</p>
+    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
+      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
+        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
+          Error
+        </p>
+        <h1
+          className="text-3xl font-normal text-[#0a0a0a]"
+          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+        >
+          Something went wrong.
+        </h1>
+        <p className="text-[#525252]">{message}</p>
         <a href="/" className="primary-button w-fit mx-auto">
           Go Home
         </a>

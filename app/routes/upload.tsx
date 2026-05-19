@@ -16,15 +16,6 @@ const STEPS = [
   "Save analysis",
 ];
 
-const FEATURE_PILLS = [
-  { icon: "🎯", label: "ATS Score" },
-  { icon: "🔑", label: "Keyword Analysis" },
-  { icon: "✍️", label: "Rewrite Tips" },
-  { icon: "💬", label: "Tone & Style" },
-  { icon: "🧠", label: "Interview Prep" },
-  { icon: "📊", label: "Structure Check" },
-];
-
 const Upload = () => {
   const { fs, ai, kv } = usePuterStore();
   const navigate = useNavigate();
@@ -176,45 +167,23 @@ const Upload = () => {
   };
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
+    <main className="bg-[#f8f7f4] min-h-screen flex flex-col">
       <Navbar />
 
       <section id="main-content" className="main-section flex-1">
-        {/* Hero heading */}
+        {/* Heading */}
         <div className="page-heading pt-8 sm:pt-12 pb-2">
-          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-2 animate-in fade-in duration-500">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
-              AI-Powered Analysis
-            </span>
-          </div>
           <h1>Smart feedback for your dream job</h1>
           {!isProcessing && (
             <h2>Drop your resume for an ATS score and improvement tips</h2>
           )}
         </div>
 
-        {/* Feature pills — hidden during processing */}
-        {!isProcessing && (
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-700">
-            {FEATURE_PILLS.map((pill, i) => (
-              <span
-                key={pill.label}
-                className="flex items-center gap-1.5 bg-white border border-gray-100 rounded-full px-3 py-1.5 text-xs sm:text-sm text-gray-600 shadow-sm hover:border-indigo-200 hover:text-indigo-600 hover:shadow-md transition-all duration-200 cursor-default animate-in fade-in duration-500"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <span>{pill.icon}</span>
-                <span className="font-medium">{pill.label}</span>
-              </span>
-            ))}
-          </div>
-        )}
-
         {isProcessing ? (
           <div className="w-full max-w-lg flex flex-col items-center gap-6 animate-in fade-in duration-300">
             <ol
               aria-label="Upload progress"
-              className="w-full flex flex-col gap-2"
+              className="w-full flex flex-col gap-1 border border-[#e5e5e5] bg-white"
             >
               {STEPS.map((label, i) => {
                 const done = i < currentStep;
@@ -222,29 +191,29 @@ const Upload = () => {
                 return (
                   <li
                     key={label}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-b border-[#e5e5e5] last:border-b-0 transition-all duration-300 ${
                       done
-                        ? "bg-green-50 text-green-700"
+                        ? "text-green-700 bg-[#f0fdf4]"
                         : active
-                          ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                          : "bg-gray-50 text-gray-400"
+                          ? "text-[#0a0a0a] bg-white"
+                          : "text-[#a3a3a3] bg-white"
                     }`}
                   >
                     <span
                       aria-hidden="true"
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-300 ${
+                      className={`w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-300 ${
                         done
-                          ? "bg-green-500 text-white"
+                          ? "text-green-600"
                           : active
-                            ? "bg-indigo-500 text-white animate-pulse"
-                            : "bg-gray-200 text-gray-400"
+                            ? "text-[#e11d48]"
+                            : "text-[#a3a3a3]"
                       }`}
                     >
-                      {done ? "✓" : i + 1}
+                      {done ? "✓" : `${i + 1}.`}
                     </span>
                     {label}
                     {active && (
-                      <span className="ml-auto text-xs text-indigo-400 animate-pulse">
+                      <span className="ml-auto text-xs text-[#525252]">
                         In progress…
                       </span>
                     )}
@@ -261,15 +230,15 @@ const Upload = () => {
               src="/images/resume-scan.gif"
               alt=""
               aria-hidden="true"
-              className="w-40 rounded-2xl"
+              className="w-40"
             />
-            <p className="text-gray-500 text-sm text-center">{statusText}</p>
+            <p className="text-[#525252] text-sm text-center">{statusText}</p>
           </div>
         ) : (
           <form
             id="upload-form"
             onSubmit={handleSubmit}
-            className="w-full max-w-2xl flex flex-col gap-5 text-left bg-white/70 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="w-full max-w-2xl flex flex-col gap-5 text-left bg-white border border-[#e5e5e5] p-6 sm:p-8 animate-in fade-in duration-500"
             noValidate
           >
             <div className="form-div">
@@ -291,7 +260,7 @@ const Upload = () => {
                 <p
                   id="company-name-error"
                   role="alert"
-                  className="text-red-500 text-sm"
+                  className="text-[#e11d48] text-sm"
                 >
                   {errors.companyName}
                 </p>
@@ -317,7 +286,7 @@ const Upload = () => {
                 <p
                   id="job-title-error"
                   role="alert"
-                  className="text-red-500 text-sm"
+                  className="text-[#e11d48] text-sm"
                 >
                   {errors.jobTitle}
                 </p>
@@ -343,7 +312,7 @@ const Upload = () => {
                 <p
                   id="job-description-error"
                   role="alert"
-                  className="text-red-500 text-sm"
+                  className="text-[#e11d48] text-sm"
                 >
                   {errors.jobDescription}
                 </p>
@@ -357,7 +326,7 @@ const Upload = () => {
                 <p
                   id="file-error"
                   role="alert"
-                  className="text-red-500 text-sm"
+                  className="text-[#e11d48] text-sm"
                 >
                   {errors.file}
                 </p>
@@ -365,10 +334,10 @@ const Upload = () => {
             </div>
 
             <button
-              className="primary-button text-lg font-semibold py-3"
+              className="primary-button text-base font-semibold py-3"
               type="submit"
             >
-              ✨ Analyze Resume
+              Analyze Resume
             </button>
           </form>
         )}
@@ -390,10 +359,18 @@ export function ErrorBoundary() {
       : "Something went wrong.";
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-red-500">Upload Failed</h1>
-        <p className="text-gray-600">{message}</p>
+    <main className="bg-[#f8f7f4] min-h-screen flex items-center justify-center">
+      <div className="bg-white border border-[#e5e5e5] p-10 max-w-md text-center flex flex-col gap-4">
+        <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
+          Error
+        </p>
+        <h1
+          className="text-3xl font-normal text-[#0a0a0a]"
+          style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+        >
+          Upload failed.
+        </h1>
+        <p className="text-[#525252]">{message}</p>
         <a href="/upload" className="primary-button w-fit mx-auto">
           Try Again
         </a>

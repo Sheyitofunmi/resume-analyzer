@@ -55,11 +55,11 @@ const ResumeCard = ({
 
   return (
     <div
-      className={`resume-card animate-in fade-in duration-1000 group relative transition-all ${
+      className={`resume-card animate-in fade-in duration-500 group relative transition-all ${
         compareMode
           ? isSelected
-            ? "ring-2 ring-indigo-500 cursor-pointer"
-            : "cursor-pointer opacity-80 hover:opacity-100 hover:ring-2 hover:ring-indigo-300"
+            ? "ring-2 ring-[#e11d48] cursor-pointer"
+            : "cursor-pointer opacity-70 hover:opacity-100 hover:ring-2 hover:ring-[#e5e5e5]"
           : ""
       }`}
       onClick={compareMode ? onSelect : undefined}
@@ -74,13 +74,13 @@ const ResumeCard = ({
           : undefined
       }
     >
-      {/* Compare mode selection indicator */}
+      {/* Compare selection indicator */}
       {compareMode && (
         <div
-          className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+          className={`absolute top-2 left-2 z-10 w-5 h-5 border flex items-center justify-center transition-colors ${
             isSelected
-              ? "bg-indigo-500 border-indigo-500"
-              : "bg-white border-gray-300"
+              ? "bg-[#e11d48] border-[#e11d48]"
+              : "bg-white border-[#e5e5e5]"
           }`}
           aria-hidden="true"
         >
@@ -93,7 +93,7 @@ const ResumeCard = ({
       {onDelete && !confirmDelete && !compareMode && (
         <button
           onClick={handleDeleteClick}
-          className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-md hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          className="absolute top-2 right-2 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white w-7 h-7 flex items-center justify-center border border-[#e5e5e5] hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
           aria-label="Delete resume"
         >
           <span
@@ -110,24 +110,24 @@ const ResumeCard = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby={`confirm-delete-${id}`}
-          className="absolute top-2 right-2 z-10 bg-white rounded-xl shadow-lg px-3 py-2 flex flex-col gap-2 min-w-[140px]"
+          className="absolute top-2 right-2 z-10 bg-white px-3 py-2 flex flex-col gap-2 min-w-[140px] border border-[#e5e5e5]"
         >
           <p
             id={`confirm-delete-${id}`}
-            className="text-sm font-semibold text-gray-800"
+            className="text-sm font-semibold text-[#0a0a0a]"
           >
             Delete resume?
           </p>
           <div className="flex gap-2">
             <button
               onClick={handleConfirm}
-              className="flex-1 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white rounded-lg py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              className="flex-1 text-xs font-semibold bg-red-500 hover:bg-red-600 text-white py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             >
               Delete
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+              className="flex-1 text-xs font-semibold bg-[#f8f7f4] hover:bg-[#e5e5e5] text-[#0a0a0a] py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
             >
               Cancel
             </button>
@@ -139,15 +139,15 @@ const ResumeCard = ({
         <div className="resume-card-header">
           <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
             {companyName && (
-              <h2 className="!text-base sm:!text-lg !text-black font-bold break-words leading-snug">
+              <h2 className="!text-base sm:!text-lg !text-[#0a0a0a] font-bold break-words leading-snug">
                 {companyName}
               </h2>
             )}
             {jobTitle && (
-              <p className="text-sm break-words text-gray-500">{jobTitle}</p>
+              <p className="text-sm break-words text-[#525252]">{jobTitle}</p>
             )}
             {!companyName && !jobTitle && (
-              <h2 className="!text-base !text-black font-bold">Resume</h2>
+              <h2 className="!text-base !text-[#0a0a0a] font-bold">Resume</h2>
             )}
           </div>
           <div className="flex-shrink-0">
@@ -155,21 +155,21 @@ const ResumeCard = ({
           </div>
         </div>
 
-        <div className="gradient-border animate-in fade-in duration-1000">
+        <div className="resume-image-card animate-in fade-in duration-500">
           {imageLoading ? (
             <div
-              className="w-full aspect-[3/4] rounded-2xl bg-gray-100 animate-pulse"
+              className="w-full aspect-[3/4] bg-[#e5e5e5] animate-pulse"
               aria-label="Loading resume preview"
             />
           ) : resumeUrl ? (
             <img
               src={resumeUrl}
               alt={`Resume preview for ${companyName || jobTitle || "this position"}`}
-              className="w-full aspect-[3/4] object-cover object-top rounded-2xl"
+              className="w-full aspect-[3/4] object-cover object-top"
             />
           ) : (
-            <div className="w-full aspect-[3/4] rounded-2xl bg-gray-50 flex items-center justify-center">
-              <p className="text-gray-400 text-sm">Preview unavailable</p>
+            <div className="w-full aspect-[3/4] bg-[#f8f7f4] flex items-center justify-center border border-[#e5e5e5]">
+              <p className="text-[#525252] text-sm">Preview unavailable</p>
             </div>
           )}
         </div>
@@ -177,4 +177,5 @@ const ResumeCard = ({
     </div>
   );
 };
+
 export default ResumeCard;

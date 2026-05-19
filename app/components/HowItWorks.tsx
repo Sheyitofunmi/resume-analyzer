@@ -3,36 +3,21 @@ import { useEffect, useRef, useState } from "react";
 const STEPS = [
   {
     step: "01",
-    icon: "📄",
     title: "Upload Your Resume",
     description:
       "Drop your PDF resume and paste the job description you're targeting.",
-    gradient: "from-indigo-50 to-blue-50",
-    accent: "text-indigo-600",
-    border: "border-indigo-100",
-    dot: "bg-indigo-500",
   },
   {
     step: "02",
-    icon: "🤖",
     title: "AI Analyzes Everything",
     description:
-      "Our AI scores your resume across 5 key dimensions: ATS, tone, content, structure, and skills.",
-    gradient: "from-purple-50 to-indigo-50",
-    accent: "text-purple-600",
-    border: "border-purple-100",
-    dot: "bg-purple-500",
+      "Scored across 5 dimensions: ATS compatibility, tone, content, structure, and skills.",
   },
   {
     step: "03",
-    icon: "✨",
     title: "Get Actionable Feedback",
     description:
-      "Receive specific tips, keyword gaps, rewrite suggestions, and interview prep questions.",
-    gradient: "from-rose-50 to-purple-50",
-    accent: "text-rose-500",
-    border: "border-rose-100",
-    dot: "bg-rose-500",
+      "Keyword gaps, rewrite suggestions, and interview prep questions — specific to the role.",
   },
 ];
 
@@ -57,47 +42,43 @@ const HowItWorks = ({ compact = false }: { compact?: boolean }) => {
   }, []);
 
   return (
-    <div ref={ref} className="w-full flex flex-col gap-6">
+    <div ref={ref} className="w-full flex flex-col gap-8">
       {!compact && (
-        <div className="text-center flex flex-col gap-1">
-          <p className="text-xs font-semibold text-indigo-500 uppercase tracking-widest">
+        <div className="flex flex-col gap-1 border-b border-[#e5e5e5] pb-6">
+          <p className="text-xs font-semibold text-[#525252] uppercase tracking-widest">
             How It Works
           </p>
-          <h2 className="!text-2xl sm:!text-3xl font-bold !text-gray-800">
+          <h2
+            className="!text-3xl sm:!text-4xl font-normal !text-[#0a0a0a] mt-1"
+            style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+          >
             Three steps to a better resume
           </h2>
         </div>
       )}
 
-      <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-        {/* connector line desktop */}
-        <div className="hidden sm:block absolute top-8 left-[calc(16.67%+12px)] right-[calc(16.67%+12px)] h-0.5 bg-gradient-to-r from-indigo-200 via-purple-200 to-rose-200 z-0" />
-
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 w-full border border-[#e5e5e5]">
         {STEPS.map((s, i) => (
           <div
             key={s.step}
-            className={`relative z-10 flex flex-col gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br ${s.gradient} border ${s.border} transition-all duration-700 ${
-              visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-            }`}
-            style={{ transitionDelay: `${i * 150}ms` }}
+            className={`flex flex-col gap-4 p-6 sm:p-8 bg-white transition-all duration-700 ${
+              i < STEPS.length - 1
+                ? "border-b sm:border-b-0 sm:border-r border-[#e5e5e5]"
+                : ""
+            } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            style={{ transitionDelay: `${i * 120}ms` }}
           >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-xl flex-shrink-0`}
-              >
-                {s.icon}
-              </div>
-              <span
-                className={`text-xs font-bold ${s.accent} bg-white/80 px-2.5 py-1 rounded-full border ${s.border}`}
-              >
-                STEP {s.step}
-              </span>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="font-bold text-gray-800 text-sm sm:text-base">
+            <span
+              className="text-5xl font-normal text-[#e5e5e5] leading-none"
+              style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}
+            >
+              {s.step}
+            </span>
+            <div className="flex flex-col gap-2">
+              <h3 className="font-semibold text-[#0a0a0a] text-base">
                 {s.title}
               </h3>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-[#525252] leading-relaxed">
                 {s.description}
               </p>
             </div>
