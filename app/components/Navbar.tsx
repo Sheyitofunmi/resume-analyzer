@@ -39,7 +39,7 @@ const Navbar = () => {
       }}
     >
       {/* Logo */}
-      <Link to="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+      <Link to="/landing" style={{ textDecoration: "none", flexShrink: 0 }}>
         <Logo size={15} />
       </Link>
 
@@ -150,7 +150,7 @@ const Navbar = () => {
             className="rl-btn rl-btn-primary"
             style={{ fontSize: 12 }}
           >
-            $ upload_resume →
+            $ upload<span className="rl-mobile-hide">_resume</span> →
           </Link>
         )}
 

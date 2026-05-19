@@ -5,14 +5,15 @@ import ResumeCard from "~/components/ResumeCard";
 import StatsStrip from "~/components/StatsStrip";
 import HowItWorks from "~/components/HowItWorks";
 import MobileBottomNav from "~/components/MobileBottomNav";
+import {
+  DIMS,
+  DimSparklineCard,
+  LineChart,
+  scoreTierColor,
+} from "~/components/ScoreCharts";
 import Landing from "~/routes/landing";
 import { usePuterStore } from "~/lib/puter";
-import {
-  isRouteErrorResponse,
-  Link,
-  useNavigate,
-  useRouteError,
-} from "react-router";
+import { isRouteErrorResponse, Link, useRouteError } from "react-router";
 import { useEffect, useRef, useState } from "react";
 
 const SECTIONS: { key: keyof Feedback; label: string }[] = [
@@ -95,10 +96,8 @@ const ComparePanel = ({
 
       {/* Title row */}
       <div
+        className="rl-compare-row"
         style={{
-          display: "grid",
-          gridTemplateColumns: "160px 1fr 1fr",
-          gap: 0,
           padding: "14px 20px",
           borderBottom: "1px dashed var(--border)",
         }}
@@ -141,10 +140,8 @@ const ComparePanel = ({
 
       {/* Overall score */}
       <div
+        className="rl-compare-row"
         style={{
-          display: "grid",
-          gridTemplateColumns: "160px 1fr 1fr",
-          gap: 0,
           padding: "12px 20px",
           borderBottom: "1px dashed var(--border)",
           background: "var(--surface-2)",
@@ -215,10 +212,8 @@ const ComparePanel = ({
         return (
           <div
             key={key}
+            className="rl-compare-row"
             style={{
-              display: "grid",
-              gridTemplateColumns: "160px 1fr 1fr",
-              gap: 0,
               padding: "10px 20px",
               borderBottom: "1px dashed var(--border)",
             }}
@@ -247,7 +242,9 @@ const ComparePanel = ({
                   padding: "0 8px",
                 }}
               >
-                <ScoreBar score={score} />
+                <span className="rl-run-score-bar">
+                  <ScoreBar score={score} />
+                </span>
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
@@ -390,9 +387,8 @@ const ComparePanel = ({
 
       {/* CTA links */}
       <div
+        className="rl-compare-row"
         style={{
-          display: "grid",
-          gridTemplateColumns: "160px 1fr 1fr",
           padding: "12px 20px",
           borderTop: "1px dashed var(--border)",
           background: "var(--bg-2)",
@@ -430,7 +426,6 @@ const RESUMES_PER_PAGE = 6;
 
 export default function Home() {
   const { auth, isLoading, kv, fs } = usePuterStore();
-  const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -671,6 +666,189 @@ export default function Home() {
                 </button>
               </div>
             )}
+
+            {/* ── Score timeline ───────────────────────────────────── */}
+            {(() => {
+              const chronoResumes = [...resumes].reverse();
+              const scores = chronoResumes.map((r) => r.feedback.overallScore);
+              const firstScore = scores[0] ?? 0;
+              const currentScore = scores[scores.length - 1] ?? 0;
+              const avgLift =
+                scores.length > 1
+                  ? Math.round(
+                      scores
+                        .slice(1)
+                        .reduce((sum, s, i) => sum + (s - scores[i]), 0) /
+                        (scores.length - 1),
+                    )
+                  : 0;
+
+              const kpis = [
+                { label: "first_score", value: firstScore, prefix: "" },
+                { label: "current_score", value: currentScore, prefix: "" },
+                { label: "total_runs", value: resumes.length, prefix: "" },
+                {
+                  label: "avg_lift",
+                  value: Math.abs(avgLift),
+                  prefix: avgLift >= 0 ? "▲ +" : "▼ -",
+                },
+              ];
+
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 20,
+                    paddingTop: 12,
+                    borderTop: "1px dashed var(--border)",
+                  }}
+                >
+                  {/* Section header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span className="rl-eyebrow-prompt">score_timeline</span>
+                    <Link
+                      to="/history"
+                      className="rl-btn rl-btn-ghost"
+                      style={{ fontSize: 12 }}
+                    >
+                      → full_history
+                    </Link>
+                  </div>
+
+                  {/* KPI cards */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(140px, 1fr))",
+                      gap: 16,
+                    }}
+                  >
+                    {kpis.map((kpi) => (
+                      <div
+                        key={kpi.label}
+                        className="rl-card"
+                        style={{ position: "relative" }}
+                      >
+                        <span className="rl-corner tl" />
+                        <span className="rl-corner tr" />
+                        <span className="rl-corner bl" />
+                        <span className="rl-corner br" />
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 4,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "var(--font-mono)",
+                              fontSize: 28,
+                              fontWeight: 700,
+                              color: scoreTierColor(
+                                kpi.label === "avg_lift" ? 70 : kpi.value,
+                              ),
+                              letterSpacing: "-1px",
+                              fontVariantNumeric: "tabular-nums",
+                              textShadow: "0 0 14px currentColor",
+                            }}
+                          >
+                            {kpi.prefix}
+                            {kpi.value}
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: "var(--font-mono)",
+                              fontSize: 10,
+                              color: "var(--fg-3)",
+                              letterSpacing: "0.12em",
+                            }}
+                          >
+                            {kpi.label}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Overall score trend chart */}
+                  {chronoResumes.length >= 2 && (
+                    <div className="rl-card" style={{ position: "relative" }}>
+                      <span className="rl-corner tl" />
+                      <span className="rl-corner tr" />
+                      <span className="rl-corner bl" />
+                      <span className="rl-corner br" />
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 16,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span className="rl-eyebrow-prompt">
+                            overall_score_trend
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: "var(--font-mono)",
+                              fontSize: 11,
+                              color: "var(--fg-4)",
+                            }}
+                          >
+                            {chronoResumes.length} run
+                            {chronoResumes.length !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        <LineChart runs={chronoResumes} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Per-dimension sparklines */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(180px, 1fr))",
+                      gap: 16,
+                    }}
+                  >
+                    {DIMS.map(({ key, label }) => {
+                      const dimScores = chronoResumes.map(
+                        (r) =>
+                          (
+                            r.feedback[key as keyof Feedback] as {
+                              score: number;
+                            }
+                          ).score,
+                      );
+                      return (
+                        <DimSparklineCard
+                          key={key}
+                          label={label}
+                          dimScores={dimScores}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </>
         )}
 

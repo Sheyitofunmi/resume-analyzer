@@ -393,11 +393,11 @@ function LandingNavbar() {
 
   return (
     <nav
+      className="rl-landing-nav"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "14px 32px",
         borderBottom: "1px solid var(--border)",
         background: "rgba(11,11,10,0.88)",
         backdropFilter: "blur(8px)",
@@ -528,16 +528,13 @@ export default function Landing() {
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section
+        className="rl-hero-grid rl-hero-section"
         style={{
           width: "100%",
           maxWidth: 1280,
           margin: "0 auto",
           padding: "80px 32px 64px",
           boxSizing: "border-box",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 48,
-          alignItems: "center",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -641,12 +638,13 @@ export default function Landing() {
           width: "100%",
           borderTop: "1px dashed var(--border)",
           borderBottom: "1px dashed var(--border)",
-          padding: "20px 32px",
+          padding: "20px 16px",
           display: "flex",
           alignItems: "center",
-          gap: 32,
+          gap: 16,
           overflow: "hidden",
           flexWrap: "wrap",
+          boxSizing: "border-box",
         }}
       >
         <span className="rl-eyebrow" style={{ flexShrink: 0 }}>
@@ -682,12 +680,11 @@ export default function Landing() {
       {/* ── FEATURES ─────────────────────────────────────────────── */}
       <section
         id="features"
+        className="rl-landing-section"
         style={{
           width: "100%",
           maxWidth: 1280,
           margin: "0 auto",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -755,11 +752,10 @@ export default function Landing() {
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section
         id="how_it_works"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -888,11 +884,10 @@ export default function Landing() {
       {/* ── BEFORE / AFTER ───────────────────────────────────────── */}
       <section
         id="before_after"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -929,14 +924,7 @@ export default function Landing() {
             </h2>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto 1fr",
-              gap: 20,
-              alignItems: "start",
-            }}
-          >
+          <div className="rl-ba-grid">
             {/* Before */}
             <div className="rl-card" style={{ position: "relative" }}>
               <Corners />
@@ -1000,6 +988,7 @@ export default function Landing() {
 
             {/* Rewrite button */}
             <div
+              className="rl-ba-mid"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -1095,11 +1084,10 @@ export default function Landing() {
       {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
       <section
         id="signal_from_users"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -1218,11 +1206,10 @@ export default function Landing() {
       {/* ── PRICING ──────────────────────────────────────────────── */}
       <section
         id="pricing"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -1263,11 +1250,10 @@ export default function Landing() {
       {/* ── FAQ ──────────────────────────────────────────────────── */}
       <section
         id="faq"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "80px 32px",
-          boxSizing: "border-box",
         }}
       >
         <div
@@ -1316,11 +1302,10 @@ export default function Landing() {
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <section
         id="ship_it"
+        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          padding: "100px 32px",
-          boxSizing: "border-box",
           textAlign: "center",
         }}
       >

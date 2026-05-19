@@ -1,11 +1,29 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { Corners } from "~/components/atoms";
 
-export const TIERS = [
+type FeatureItem = string | { type: "inherit"; label: string };
+
+interface Tier {
+  id: string;
+  tier: string;
+  monthlyPrice: string;
+  yearlyPrice: string;
+  period: string;
+  tagline: string;
+  recommended: boolean;
+  features: FeatureItem[];
+  cta: string;
+  ctaTo: string;
+  variant: "primary" | "secondary";
+}
+
+export const TIERS: Tier[] = [
   {
     id: "free",
     tier: "FREE",
-    price: "$0",
+    monthlyPrice: "$0",
+    yearlyPrice: "$0",
     period: "/month",
     tagline: "enough to land your first offer",
     recommended: false,
@@ -18,18 +36,19 @@ export const TIERS = [
     ],
     cta: "$ start_free →",
     ctaTo: "/auth",
-    variant: "secondary" as const,
+    variant: "secondary",
   },
   {
     id: "pro",
     tier: "PRO",
-    price: "$12",
+    monthlyPrice: "$12",
+    yearlyPrice: "$9",
     period: "/month",
     tagline: "for active job searches",
     recommended: true,
     features: [
+      { type: "inherit", label: "all of free, plus:" },
       "unlimited analyses",
-      "all of free, plus:",
       "interview question prep",
       "AI rewrite — every bullet",
       "unlimited score history + trends",
@@ -38,17 +57,18 @@ export const TIERS = [
     ],
     cta: "$ try_pro_free →",
     ctaTo: "/auth",
-    variant: "primary" as const,
+    variant: "primary",
   },
   {
     id: "recruiter",
     tier: "RECRUITER",
-    price: "$49",
+    monthlyPrice: "$49",
+    yearlyPrice: "$39",
     period: "/month",
     tagline: "evaluate candidates in seconds",
     recommended: false,
     features: [
-      "all of pro, plus:",
+      { type: "inherit", label: "all of pro, plus:" },
       "bulk analyze (50+ resumes)",
       "team workspaces",
       "JD-to-candidate matching",
@@ -56,147 +76,109 @@ export const TIERS = [
       "sso · audit log · sla",
     ],
     cta: "$ contact_us →",
-    ctaTo: "/auth",
-    variant: "secondary" as const,
+    ctaTo: "/contact",
+    variant: "secondary",
   },
 ];
 
 export default function PricingTiers() {
+  const [annual, setAnnual] = useState(false);
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: 20,
-        width: "100%",
-        maxWidth: 960,
-        margin: "0 auto",
-      }}
-    >
-      {TIERS.map((t) => (
-        <div
-          key={t.id}
-          className={`rl-card${t.recommended ? " is-phos" : ""}`}
-          style={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-            boxShadow: t.recommended
-              ? "0 0 32px rgba(168,230,163,0.12)"
-              : undefined,
-          }}
-        >
-          <Corners />
-
-          {t.recommended && (
-            <div
-              style={{
-                position: "absolute",
-                top: -1,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: "var(--phos)",
-                color: "var(--bg)",
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.2em",
-                padding: "3px 14px",
-                borderRadius: "0 0 var(--radius-md) var(--radius-md)",
-              }}
-            >
-              RECOMMENDED
-            </div>
-          )}
-
-          {/* Header */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: t.recommended ? "var(--phos)" : "var(--fg-3)",
-                letterSpacing: "0.2em",
-              }}
-            >
-              {t.tier}
-            </span>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 4,
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 48,
-                  fontWeight: 700,
-                  color: "var(--fg-1)",
-                  letterSpacing: "-2px",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {t.price}
-              </span>
-              <span style={{ fontSize: 13, color: "var(--fg-3)" }}>
-                {t.period}
-              </span>
-            </div>
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                color: "var(--fg-2)",
-              }}
-            >
-              {t.tagline}
-            </span>
-          </div>
-
-          <hr className="rl-divider" style={{ margin: 0 }} />
-
-          {/* Features */}
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-              flex: 1,
-            }}
+    <div className="rl-pricing-wrap">
+      {/* Billing toggle */}
+      <div
+        style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}
+      >
+        <div className="rl-pricing-toggle">
+          <button
+            className={`rl-pricing-toggle-btn${!annual ? " is-active" : ""}`}
+            onClick={() => setAnnual(false)}
           >
-            {t.features.map((f) => (
-              <li
-                key={f}
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 12,
-                  color: "var(--fg-2)",
-                  display: "flex",
-                  gap: 8,
-                }}
-              >
-                <span style={{ color: "var(--phos)", flexShrink: 0 }}>+</span>
-                {f}
-              </li>
-            ))}
-          </ul>
-
-          {/* CTA */}
-          <Link
-            to={t.ctaTo}
-            className={`rl-btn rl-btn-${t.variant} rl-btn-block`}
-            style={{ fontSize: 13 }}
+            monthly
+          </button>
+          <button
+            className={`rl-pricing-toggle-btn${annual ? " is-active" : ""}`}
+            onClick={() => setAnnual(true)}
           >
-            {t.cta}
-          </Link>
+            annual
+          </button>
         </div>
-      ))}
+        {annual && <span className="rl-pricing-save-badge">save ~25%</span>}
+      </div>
+
+      {/* Cards */}
+      <div className="rl-pricing-grid">
+        {TIERS.map((t) => {
+          const price = annual ? t.yearlyPrice : t.monthlyPrice;
+          return (
+            <div
+              key={t.id}
+              className={`rl-card rl-pricing-card${t.recommended ? " is-phos" : ""}`}
+              aria-label={`${t.tier} plan${t.recommended ? " — recommended" : ""}`}
+            >
+              <Corners />
+
+              {t.recommended && (
+                <div className="rl-pricing-badge" aria-hidden="true">
+                  RECOMMENDED
+                </div>
+              )}
+
+              {/* Header */}
+              <div className="rl-pricing-header">
+                <span
+                  className="rl-pricing-tier-name"
+                  style={{
+                    color: t.recommended ? "var(--phos)" : "var(--fg-3)",
+                  }}
+                >
+                  {t.tier}
+                </span>
+                <div className="rl-pricing-price-row">
+                  <span className="rl-pricing-price">{price}</span>
+                  <span className="rl-pricing-period">{t.period}</span>
+                </div>
+                <div className="rl-pricing-annual-note">
+                  {annual && price !== "$0" ? "billed annually" : ""}
+                </div>
+                <span className="rl-pricing-tagline">{t.tagline}</span>
+              </div>
+
+              <hr className="rl-divider" style={{ margin: 0 }} />
+
+              {/* Features */}
+              <ul className="rl-pricing-features">
+                {t.features.map((f, i) =>
+                  typeof f === "object" ? (
+                    <li key={i} className="rl-pricing-inherit">
+                      {f.label}
+                    </li>
+                  ) : (
+                    <li key={i} className="rl-pricing-feature">
+                      <span
+                        className="rl-pricing-feature-icon"
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                      {f}
+                    </li>
+                  ),
+                )}
+              </ul>
+
+              {/* CTA */}
+              <Link
+                to={t.ctaTo}
+                className={`rl-btn rl-btn-${t.variant} rl-btn-block`}
+              >
+                {t.cta}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -4,13 +4,37 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Navigation & pricing component refactor complete
+- Full responsiveness pass complete
 
 ## Current Goal
 
-- Verify navigation works across all pages; iterate on mobile UX if needed.
+- Testing and iteration
 
 ## Completed
+
+### History components on dashboard (2026-05-19)
+
+- **`components/ScoreCharts.tsx`:** New shared file — exports `scoreTierColor`, `scoreTier`, `Sparkline`, `DimSparklineCard`, `DIMS`, and `LineChart`. Extracted from `history.tsx` to avoid duplication.
+- **`routes/history.tsx`:** Now imports `DIMS`, `DimSparklineCard`, `LineChart`, `scoreTier`, `scoreTierColor` from `ScoreCharts`. Removed ~130 lines of duplicated component code.
+- **`routes/home.tsx`:** Added `score_timeline` section at the bottom of the populated dashboard state — KPI cards (first_score, current_score, total_runs, avg_lift), overall score line chart (shown when ≥2 runs), and per-dimension sparklines. Uses chronologically sorted resumes for the chart. Links to `/history` for the full view.
+
+### PricingTiers refactor (2026-05-19)
+
+- **`components/PricingTiers.tsx`:** Added monthly/annual billing toggle (`useState`); annual shows ~25% discounted prices. Typed `FeatureItem` union — "all of X, plus:" items now render as dimmed section separators (`.rl-pricing-inherit`) instead of plain feature rows. Recruiter CTA now routes to `/contact` instead of `/auth`. Replaced all inline layout styles with CSS classes. Added `aria-label` on each card and `aria-hidden` on the RECOMMENDED badge. Removed `key={feature-text}` in favour of index keys.
+- **`app.css`:** Added `.rl-pricing-wrap`, `.rl-pricing-grid`, `.rl-pricing-toggle`, `.rl-pricing-toggle-btn`, `.rl-pricing-save-badge`, `.rl-pricing-card`, `.rl-pricing-header`, `.rl-pricing-price-row`, `.rl-pricing-price`, `.rl-pricing-period`, `.rl-pricing-annual-note`, `.rl-pricing-tagline`, `.rl-pricing-features`, `.rl-pricing-feature`, `.rl-pricing-feature-icon`, `.rl-pricing-inherit`, `.rl-pricing-badge`. Updated `.rl-card.is-phos` to include `box-shadow: 0 0 32px var(--phos-glow)` (was hardcoded inline RGBA).
+
+### Responsive fixes — ComparePanel, history run log, navbar (2026-05-19)
+
+- **`app.css`:** Added `.rl-mobile-show` utility (hidden by default, `display: inline` on ≤720px). Added `.rl-compare-row` CSS class for the compare panel grid (`160px 1fr 1fr` desktop → `72px 1fr 1fr` on ≤720px). Added `.rl-run-score-bar` hide rule on mobile.
+- **`components/Navbar.tsx`:** Upload button text now reads `$ upload →` on mobile and `$ upload_resume →` on desktop via `<span className="rl-mobile-hide">`.
+- **`routes/home.tsx`:** All 4 hardcoded `gridTemplateColumns: "160px 1fr 1fr"` divs in `ComparePanel` replaced with `className="rl-compare-row"`. Section score `ScoreBar` wrapped in `<span className="rl-run-score-bar">` to hide on mobile.
+- **`routes/history.tsx`:** Run log `ScoreBar` wrapped in `<span className="rl-run-score-bar">` to prevent overflow on narrow screens.
+
+### Logo navigation + full responsiveness (2026-05-19)
+
+- **`components/Navbar.tsx`:** Logo now links to `/landing` (was `/`) so clicking it from any app page returns to the landing/marketing page.
+- **`app.css`:** Added `.rl-hero-grid`, `.rl-ba-grid`, `.rl-ba-mid`, `.rl-landing-section`, `.rl-landing-nav` utility classes with `@media (max-width: 720px)` overrides — hero collapses to single column, before/after stacks vertically, all landing sections reduce padding on mobile.
+- **`routes/landing.tsx`:** Applied new responsive classes to `LandingNavbar`, hero section, all content sections, before/after grid and its middle button. Trust strip now uses `boxSizing: border-box` and reduced padding for narrow viewports.
 
 ### Landing ↔ Dashboard Navigation + Upload Button (2026-05-19)
 
