@@ -1,160 +1,166 @@
-import { cn } from "~/lib/utils";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionItem,
-} from "./Accordion";
+import { useState } from "react";
 
-const ScoreBadge = ({ score }: { score: number }) => {
+type Tip = { type: "good" | "improve"; tip: string; explanation: string };
+
+const SECTIONS: {
+  key: keyof Pick<
+    Feedback,
+    "toneAndStyle" | "content" | "structure" | "skills"
+  >;
+  label: string;
+  id: string;
+}[] = [
+  { key: "toneAndStyle", label: "tone_&_style", id: "tone-style" },
+  { key: "content", label: "content", id: "content" },
+  { key: "structure", label: "structure", id: "structure" },
+  { key: "skills", label: "skills", id: "skills" },
+];
+
+function TipCard({ tip }: { tip: Tip }) {
+  const isGood = tip.type === "good";
   return (
     <div
-      className={cn(
-        "flex flex-row gap-1 items-center px-2 py-0.5 rounded-[96px]",
-        score > 69
-          ? "bg-badge-green"
-          : score > 39
-            ? "bg-badge-yellow"
-            : "bg-badge-red",
-      )}
+      style={{
+        display: "flex",
+        gap: 10,
+        padding: "10px 12px",
+        background: isGood
+          ? "rgba(168,230,163,0.05)"
+          : "rgba(230,153,104,0.06)",
+        border: `1px solid ${isGood ? "var(--phos-dim)" : "var(--copper-deep)"}`,
+        borderRadius: "var(--radius-md)",
+      }}
     >
-      <img
-        src={score > 69 ? "/icons/check.svg" : "/icons/warning.svg"}
-        alt="score"
-        className="size-4"
-      />
-      <p
-        className={cn(
-          "text-sm font-medium",
-          score > 69
-            ? "text-badge-green-text"
-            : score > 39
-              ? "text-badge-yellow-text"
-              : "text-badge-red-text",
-        )}
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 13,
+          color: isGood ? "var(--phos)" : "var(--copper-hi)",
+          flexShrink: 0,
+          marginTop: 1,
+        }}
       >
-        {score}/100
-      </p>
-    </div>
-  );
-};
-
-const CategoryHeader = ({
-  title,
-  categoryScore,
-}: {
-  title: string;
-  categoryScore: number;
-}) => {
-  return (
-    <div className="flex flex-row gap-4 items-center py-2">
-      <p className="text-2xl font-semibold">{title}</p>
-      <ScoreBadge score={categoryScore} />
-    </div>
-  );
-};
-
-const CategoryContent = ({
-  tips,
-}: {
-  tips: { type: "good" | "improve"; tip: string; explanation: string }[];
-}) => {
-  return (
-    <div className="flex flex-col gap-4 items-center w-full">
-      <div className="bg-gray-50 w-full rounded-lg px-5 py-4 grid grid-cols-2 gap-4">
-        {tips.map((tip, index) => (
-          <div className="flex flex-row gap-2 items-center" key={index}>
-            <img
-              src={
-                tip.type === "good" ? "/icons/check.svg" : "/icons/warning.svg"
-              }
-              alt={tip.type === "good" ? "Good" : "Needs improvement"}
-              className="size-5"
-            />
-            <p className="text-xl text-gray-500 ">{tip.tip}</p>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col gap-4 w-full">
-        {tips.map((tip, index) => (
-          <div
-            key={index + tip.tip}
-            className={cn(
-              "flex flex-col gap-2 rounded-2xl p-4",
-              tip.type === "good"
-                ? "bg-green-50 border border-green-200 text-green-700"
-                : "bg-yellow-50 border border-yellow-200 text-yellow-700",
-            )}
+        {isGood ? "+" : "!"}
+      </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            color: "var(--fg-1)",
+            fontWeight: 500,
+          }}
+        >
+          {tip.tip}
+        </span>
+        {tip.explanation && (
+          <span
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              color: "var(--fg-2)",
+              lineHeight: 1.6,
+            }}
           >
-            <div className="flex flex-row gap-2 items-center">
-              <img
-                src={
-                  tip.type === "good"
-                    ? "/icons/check.svg"
-                    : "/icons/warning.svg"
-                }
-                alt={tip.type === "good" ? "Good" : "Needs improvement"}
-                className="size-5"
-              />
-              <p className="text-xl font-semibold">{tip.tip}</p>
-            </div>
-            <p>{tip.explanation}</p>
-          </div>
-        ))}
+            {tip.explanation}
+          </span>
+        )}
       </div>
     </div>
   );
-};
+}
 
 const Details = ({ feedback }: { feedback: Feedback }) => {
+  const [open, setOpen] = useState<string>("tone-style");
+
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <Accordion>
-        <AccordionItem id="tone-style">
-          <AccordionHeader itemId="tone-style">
-            <CategoryHeader
-              title="Tone & Style"
-              categoryScore={feedback.toneAndStyle.score}
-            />
-          </AccordionHeader>
-          <AccordionContent itemId="tone-style">
-            <CategoryContent tips={feedback.toneAndStyle.tips} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem id="content">
-          <AccordionHeader itemId="content">
-            <CategoryHeader
-              title="Content"
-              categoryScore={feedback.content.score}
-            />
-          </AccordionHeader>
-          <AccordionContent itemId="content">
-            <CategoryContent tips={feedback.content.tips} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem id="structure">
-          <AccordionHeader itemId="structure">
-            <CategoryHeader
-              title="Structure"
-              categoryScore={feedback.structure.score}
-            />
-          </AccordionHeader>
-          <AccordionContent itemId="structure">
-            <CategoryContent tips={feedback.structure.tips} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem id="skills">
-          <AccordionHeader itemId="skills">
-            <CategoryHeader
-              title="Skills"
-              categoryScore={feedback.skills.score}
-            />
-          </AccordionHeader>
-          <AccordionContent itemId="skills">
-            <CategoryContent tips={feedback.skills.tips} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {SECTIONS.map(({ key, label, id }) => {
+        const section = feedback[key] as { score: number; tips: Tip[] };
+        const score = section.score;
+        const isOpen = open === id;
+        const tier = score > 69 ? "good" : score > 49 ? "warn" : "bad";
+        const pillClass =
+          tier === "good"
+            ? "rl-pill rl-pill-good"
+            : tier === "warn"
+              ? "rl-pill rl-pill-warn"
+              : "rl-pill rl-pill-bad";
+
+        return (
+          <div
+            key={id}
+            className="rl-card"
+            style={{ position: "relative", padding: 0, overflow: "hidden" }}
+          >
+            {/* Accordion header */}
+            <button
+              onClick={() => setOpen(isOpen ? "" : id)}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                padding: "14px 16px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                textAlign: "left",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: "var(--fg-3)",
+                    width: 12,
+                    transition: "transform var(--dur-fast)",
+                    transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+                    display: "inline-block",
+                  }}
+                >
+                  ▼
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "var(--fg-1)",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className={pillClass} style={{ fontSize: 10 }}>
+                  {score}
+                </span>
+              </div>
+            </button>
+
+            {/* Accordion content */}
+            {isOpen && (
+              <div
+                style={{
+                  padding: "0 16px 16px",
+                  borderTop: "1px dashed var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
+                <div style={{ height: 12 }} />
+                {section.tips.map((tip, i) => (
+                  <TipCard key={i} tip={tip} />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

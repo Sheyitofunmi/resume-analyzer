@@ -1,5 +1,3 @@
-import React from "react";
-
 interface Suggestion {
   type: "good" | "improve";
   tip: string;
@@ -12,105 +10,189 @@ interface ATSProps {
   keywords?: { found: string[]; missing: string[] };
 }
 
-const ATS: React.FC<ATSProps> = ({ score, suggestions, keywords }) => {
-  const gradientClass =
-    score > 69
-      ? "from-green-100"
-      : score > 49
-        ? "from-yellow-100"
-        : "from-red-100";
-
-  const iconSrc =
-    score > 69
-      ? "/icons/ats-good.svg"
-      : score > 49
-        ? "/icons/ats-warning.svg"
-        : "/icons/ats-bad.svg";
-
-  const subtitle =
-    score > 69 ? "Great Job!" : score > 49 ? "Good Start" : "Needs Improvement";
+const ATS = ({ score, suggestions, keywords }: ATSProps) => {
+  const tier = score > 69 ? "good" : score > 49 ? "warn" : "bad";
+  const tierLabel =
+    tier === "good" ? "PASS" : tier === "warn" ? "WARN" : "FAIL";
+  const pillClass =
+    tier === "good"
+      ? "rl-pill rl-pill-good"
+      : tier === "warn"
+        ? "rl-pill rl-pill-warn"
+        : "rl-pill rl-pill-bad";
+  const scoreColor =
+    tier === "good"
+      ? "var(--phos)"
+      : tier === "warn"
+        ? "var(--copper-hi)"
+        : "var(--ember)";
 
   const hasKeywords =
     keywords && (keywords.found.length > 0 || keywords.missing.length > 0);
 
   return (
-    <div
-      className={`bg-gradient-to-b ${gradientClass} to-white rounded-2xl shadow-md w-full p-6`}
-    >
-      <div className="flex items-center gap-4 mb-6">
-        <img src={iconSrc} alt="ATS Score Icon" className="w-12 h-12" />
-        <div>
-          <h2 className="text-2xl font-bold">ATS Score - {score}/100</h2>
+    <div className="rl-card is-accent" style={{ position: "relative" }}>
+      <span className="rl-corner tl" />
+      <span className="rl-corner tr" />
+      <span className="rl-corner bl" />
+      <span className="rl-corner br" />
+
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <span className="rl-comment" style={{ fontSize: 11 }}>
+          ats_compatibility
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className={pillClass}>{tierLabel}</span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 40,
+              fontWeight: 500,
+              lineHeight: 1,
+              letterSpacing: "-1.5px",
+              color: scoreColor,
+              textShadow: `0 0 16px ${scoreColor}55`,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {score}
+            <span
+              style={{ fontSize: 14, color: "var(--fg-3)", fontWeight: 400 }}
+            >
+              /100
+            </span>
+          </span>
         </div>
       </div>
 
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">{subtitle}</h3>
-        <p className="text-gray-600 mb-4">
-          This score represents how well your resume is likely to perform in
-          Applicant Tracking Systems used by employers.
-        </p>
-
-        <div className="space-y-3">
-          {suggestions.map((suggestion, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <img
-                src={
-                  suggestion.type === "good"
-                    ? "/icons/check.svg"
-                    : "/icons/warning.svg"
-                }
-                alt={suggestion.type === "good" ? "Check" : "Warning"}
-                className="w-5 h-5 mt-1"
-              />
-              <p
-                className={
-                  suggestion.type === "good"
-                    ? "text-green-700"
-                    : "text-amber-700"
-                }
+      {/* Suggestions */}
+      {suggestions.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            marginBottom: hasKeywords ? 20 : 0,
+          }}
+        >
+          {suggestions.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: 10,
+                padding: "10px 12px",
+                background:
+                  s.type === "good"
+                    ? "rgba(168,230,163,0.05)"
+                    : "rgba(230,153,104,0.06)",
+                border: `1px solid ${s.type === "good" ? "var(--phos-dim)" : "var(--copper-deep)"}`,
+                borderRadius: "var(--radius-md)",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: s.type === "good" ? "var(--phos)" : "var(--copper-hi)",
+                  flexShrink: 0,
+                  marginTop: 1,
+                }}
               >
-                {suggestion.tip}
-              </p>
+                {s.type === "good" ? "+" : "!"}
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 13,
+                    color: "var(--fg-1)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {s.tip}
+                </span>
+                {s.explanation && (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: 12,
+                      color: "var(--fg-2)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {s.explanation}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      )}
 
+      {/* Keyword diff */}
       {hasKeywords && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3">Keyword Match</h3>
-          <div className="flex flex-wrap gap-2">
+        <div>
+          <div
+            style={{
+              paddingTop: 14,
+              borderTop: "1px dashed var(--border)",
+              marginBottom: 12,
+            }}
+          >
+            <span className="rl-comment" style={{ fontSize: 11 }}>
+              keyword_match
+            </span>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {keywords!.found.map((kw) => (
               <span
                 key={kw}
-                className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full"
+                className="rl-chip rl-chip-phos"
+                style={{ fontSize: 11 }}
               >
-                <span>✓</span> {kw}
+                + {kw}
               </span>
             ))}
             {keywords!.missing.map((kw) => (
               <span
                 key={kw}
-                className="inline-flex items-center gap-1 bg-red-100 text-red-600 text-xs font-medium px-2.5 py-1 rounded-full"
+                className="rl-chip"
+                style={{
+                  fontSize: 11,
+                  background: "rgba(227,83,74,0.08)",
+                  borderColor: "var(--ember-dim)",
+                  color: "var(--ember)",
+                }}
               >
-                <span>✗</span> {kw}
+                − {kw}
               </span>
             ))}
           </div>
           {keywords!.missing.length > 0 && (
-            <p className="text-xs text-gray-500 mt-2">
-              Red keywords are in the job description but not found in your
-              resume — consider adding them where relevant.
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--fg-3)",
+              }}
+            >
+              // {keywords!.missing.length} keyword
+              {keywords!.missing.length !== 1 ? "s" : ""} missing from job
+              description
             </p>
           )}
         </div>
       )}
-
-      <p className="text-gray-700 italic">
-        Keep refining your resume to improve your chances of getting past ATS
-        filters and into the hands of recruiters.
-      </p>
     </div>
   );
 };

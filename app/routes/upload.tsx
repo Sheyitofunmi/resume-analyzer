@@ -173,10 +173,11 @@ const Upload = () => {
           }}
         >
           <span className="rl-eyebrow-prompt">resumelens analyze</span>
-          <h1>
-            smart_feedback for_your
+          <h1 className="rl-h1">
+            smart_feedback
             <br />
-            dream_job
+            for_your_
+            <span style={{ color: "var(--phos)" }}>dream_job</span>
             <span className="rl-cursor" />
           </h1>
           {!isProcessing && (

@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- CIPHER design system implemented — full dark terminal aesthetic
+- CIPHER design system fully implemented — all components match terminal-luxury design spec
 
 ## Current Goal
 
@@ -28,6 +28,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - **`home.tsx`:** `rl-page` grid background. `track_your_applications` hero h1. Empty state hero card with feature chips + upload CTA. ComparePanel rewritten in CIPHER — ASCII score bars, `◆` winner marker, keyword overlap with `rl-chip-phos`. Pagination with secondary buttons.
 - **`upload.tsx`:** `smart_feedback for_your dream_job_` hero. Form fields with `// label` prefixes. Progress pipeline as a `is-phos` card with `▶ running…` / `✓ done` step states. Feature chip row. `$ run analyze →` submit button.
 - **`resume.tsx`:** Dark sticky top nav (`← back_to_dashboard`, `↺ re-analyze`, `✎ edit_resume`, `↓ download`). Left preview panel with desaturated image on `var(--bg-2)`. Re-analyze modal with backdrop blur, `! warning` amber strip, terminal form. CIPHER error boundary and toast.
+
+### CIPHER Component Rewrites — Round 2 (2026-05-19)
+
+- **`Summary.tsx`:** Full rewrite — ScoreNumber (88px phosphor digit) + ASCII ScoreBar grid for 5 categories. `is-accent` card with copper corner crosshairs. Overall tier pill (PASS/BORDERLINE/FAIL). Footer with date.
+- **`ATS.tsx`:** Full rewrite — terminal report card. Score number (40px) + tier pill in header. Suggestions rendered as `+`/`!` lines with phos/copper-tinted bg cards. Keyword diff using `rl-chip-phos` for found, ember-tinted chip for missing. `rl-comment` section divider.
+- **`Details.tsx`:** Full rewrite — custom accordion with `▼/▶` toggle triangles, StatusPill per-section score, TipCard items with `+`/`!` prefix and phos/copper borders. No external Accordion dependency.
+- **`ResumeChecklist.tsx`:** Full rewrite — `rl-card` with copper corners. Items as `✓`/`!`/`✕` rows with tier-colored bg and border. Header summary pills for critical/warn/pass counts.
+- **`ResumeCard.tsx`:** Moved resume preview image to **top** of card (full-width, 3:4 aspect). Company/job info + ScoreCircle moved to bottom info strip.
+- **`home.tsx`:** Added `rl-h1` class to h1; "applications" highlighted in `var(--phos)`; added `rl-cursor` span.
+- **`upload.tsx`:** Added `rl-h1` class to h1; "dream_job" highlighted in `var(--phos)`.
 
 ### Feature Additions (recent)
 

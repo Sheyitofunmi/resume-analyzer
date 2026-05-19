@@ -512,7 +512,11 @@ export default function Home() {
           }}
         >
           <span className="rl-eyebrow-prompt">resumelens dashboard</span>
-          <h1>track_your_applications</h1>
+          <h1 className="rl-h1">
+            track_your_
+            <span style={{ color: "var(--phos)" }}>applications</span>
+            <span className="rl-cursor" />
+          </h1>
           {!loadingResumes && (
             <p
               style={{

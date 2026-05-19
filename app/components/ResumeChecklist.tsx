@@ -46,7 +46,6 @@ function deriveChecklist(feedback: Feedback): CheckItem[] {
     }
   }
 
-  // Keyword gap check
   const kw = feedback.ATS.keywords;
   if (kw) {
     const missingCount = kw.missing.length;
@@ -71,7 +70,6 @@ function deriveChecklist(feedback: Feedback): CheckItem[] {
     }
   }
 
-  // Overall score summary
   const overall = feedback.overallScore;
   if (overall >= 75) {
     items.push({
@@ -93,35 +91,31 @@ function deriveChecklist(feedback: Feedback): CheckItem[] {
     });
   }
 
-  // Sort: critical first, then warn, then good
   const order = { critical: 0, warn: 1, good: 2 };
   return items.sort((a, b) => order[a.status] - order[b.status]);
 }
 
-const statusConfig = {
+const STATUS = {
   good: {
     icon: "✓",
-    bg: "bg-green-50",
-    border: "border-green-200",
-    iconColor: "text-green-600",
-    labelColor: "text-green-800",
-    detailColor: "text-green-700",
+    color: "var(--phos)",
+    bg: "rgba(168,230,163,0.05)",
+    border: "var(--phos-dim)",
+    pillClass: "rl-pill rl-pill-good",
   },
   warn: {
     icon: "!",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-    iconColor: "text-amber-600",
-    labelColor: "text-amber-800",
-    detailColor: "text-amber-700",
+    color: "var(--copper-hi)",
+    bg: "rgba(230,153,104,0.06)",
+    border: "var(--copper-deep)",
+    pillClass: "rl-pill rl-pill-warn",
   },
   critical: {
     icon: "✕",
-    bg: "bg-red-50",
-    border: "border-red-200",
-    iconColor: "text-red-600",
-    labelColor: "text-red-800",
-    detailColor: "text-red-700",
+    color: "var(--ember)",
+    bg: "rgba(227,83,74,0.06)",
+    border: "var(--ember-dim)",
+    pillClass: "rl-pill rl-pill-bad",
   },
 };
 
@@ -132,56 +126,96 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
   const goodCount = items.filter((i) => i.status === "good").length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md w-full overflow-hidden">
-      <div className="px-5 pt-4 pb-3 border-b border-gray-100">
-        <h3 className="text-base font-semibold text-gray-800">
-          Resume Checklist
-        </h3>
-        <div className="flex gap-3 mt-1.5">
+    <div className="rl-card" style={{ position: "relative" }}>
+      <span className="rl-corner tl" />
+      <span className="rl-corner tr" />
+      <span className="rl-corner bl" />
+      <span className="rl-corner br" />
+
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+        }}
+      >
+        <span className="rl-comment" style={{ fontSize: 11 }}>
+          resume_checklist
+        </span>
+        <div style={{ display: "flex", gap: 6 }}>
           {criticalCount > 0 && (
-            <span className="text-xs font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
+            <span className="rl-pill rl-pill-bad" style={{ fontSize: 10 }}>
               {criticalCount} critical
             </span>
           )}
           {warnCount > 0 && (
-            <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-              {warnCount} to improve
+            <span className="rl-pill rl-pill-warn" style={{ fontSize: 10 }}>
+              {warnCount} warn
             </span>
           )}
           {goodCount > 0 && (
-            <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-              {goodCount} strong
+            <span className="rl-pill rl-pill-good" style={{ fontSize: 10 }}>
+              {goodCount} pass
             </span>
           )}
         </div>
       </div>
 
-      <ul className="divide-y divide-gray-50 px-2 py-2">
+      {/* Items */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {items.map((item, i) => {
-          const cfg = statusConfig[item.status];
+          const cfg = STATUS[item.status];
           return (
-            <li
+            <div
               key={i}
-              className={`flex items-start gap-3 px-3 py-3 rounded-xl mx-1 my-0.5 ${cfg.bg} border ${cfg.border}`}
+              style={{
+                display: "flex",
+                gap: 10,
+                padding: "10px 12px",
+                background: cfg.bg,
+                border: `1px solid ${cfg.border}`,
+                borderRadius: "var(--radius-md)",
+              }}
             >
               <span
-                className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${cfg.iconColor} border ${cfg.border}`}
-                aria-hidden="true"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  color: cfg.color,
+                  flexShrink: 0,
+                  width: 14,
+                  marginTop: 1,
+                }}
               >
                 {cfg.icon}
               </span>
-              <div className="min-w-0">
-                <p className={`text-sm font-semibold ${cfg.labelColor}`}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    color: "var(--fg-1)",
+                    fontWeight: 500,
+                  }}
+                >
                   {item.label}
-                </p>
-                <p className={`text-xs mt-0.5 ${cfg.detailColor}`}>
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--fg-3)",
+                  }}
+                >
                   {item.detail}
-                </p>
+                </span>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 };

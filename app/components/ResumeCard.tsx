@@ -234,7 +234,7 @@ const ResumeCard = ({
           textDecoration: "none",
           display: "flex",
           flexDirection: "column",
-          gap: 16,
+          gap: 0,
         }}
         onMouseEnter={(e) => {
           const card = e.currentTarget.closest(".rl-card") as HTMLElement;
@@ -255,22 +255,77 @@ const ResumeCard = ({
           }
         }}
       >
-        {/* Header */}
+        {/* Resume preview image — top */}
+        <div
+          style={{
+            background: "var(--bg-2)",
+            borderBottom: "1px solid var(--border)",
+            overflow: "hidden",
+          }}
+        >
+          {imageLoading ? (
+            <div
+              style={{
+                width: "100%",
+                aspectRatio: "3/4",
+                background: "var(--surface-2)",
+                animation: "rl-pulse 1.5s ease-in-out infinite",
+              }}
+              aria-label="Loading resume preview"
+            />
+          ) : resumeUrl ? (
+            <img
+              src={resumeUrl}
+              alt={`Resume preview for ${companyName || jobTitle || "this position"}`}
+              style={{
+                width: "100%",
+                aspectRatio: "3/4",
+                objectFit: "cover",
+                objectPosition: "top",
+                filter: "saturate(0.5) brightness(0.85)",
+                display: "block",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                aspectRatio: "3/4",
+                background: "var(--surface)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "var(--fg-3)",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                // preview unavailable
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Info section — bottom */}
         <div
           style={{
             display: "flex",
             flexDirection: "row",
             gap: 12,
             justifyContent: "space-between",
-            alignItems: "flex-start",
-            minHeight: 80,
+            alignItems: "center",
+            padding: "12px 16px",
           }}
         >
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 4,
+              gap: 3,
               flex: 1,
               minWidth: 0,
             }}
@@ -302,61 +357,6 @@ const ResumeCard = ({
             )}
           </div>
           <ScoreCircle score={feedback.overallScore} />
-        </div>
-
-        {/* Resume preview image */}
-        <div
-          style={{
-            background: "var(--bg-2)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)",
-            overflow: "hidden",
-          }}
-        >
-          {imageLoading ? (
-            <div
-              style={{
-                width: "100%",
-                aspectRatio: "3/4",
-                background: "var(--surface-2)",
-                animation: "rl-pulse 1.5s ease-in-out infinite",
-              }}
-              aria-label="Loading resume preview"
-            />
-          ) : resumeUrl ? (
-            <img
-              src={resumeUrl}
-              alt={`Resume preview for ${companyName || jobTitle || "this position"}`}
-              style={{
-                width: "100%",
-                aspectRatio: "3/4",
-                objectFit: "cover",
-                objectPosition: "top",
-                filter: "saturate(0.5) brightness(0.85)",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                aspectRatio: "3/4",
-                background: "var(--surface)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "var(--fg-3)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                // preview unavailable
-              </span>
-            </div>
-          )}
         </div>
       </Link>
     </div>
