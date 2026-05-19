@@ -1,0 +1,58 @@
+import { Link, useLocation } from "react-router";
+
+const SLOTS = [
+  { label: "home", icon: "⌂", to: "/" },
+  { label: "upload", icon: "↑", to: "/upload" },
+  { label: "history", icon: "◈", to: "/history" },
+  { label: "pricing", icon: "$", to: "/pricing" },
+  { label: "settings", icon: "⚙", to: "/settings" },
+];
+
+const MobileBottomNav = () => {
+  const location = useLocation();
+
+  return (
+    <nav className="rl-bottom-nav">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          padding: "0 8px",
+        }}
+      >
+        {SLOTS.map((slot) => {
+          const active =
+            slot.to === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(slot.to);
+          return (
+            <Link
+              key={slot.to}
+              to={slot.to}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 3,
+                padding: "6px 12px",
+                textDecoration: "none",
+                fontFamily: "var(--font-mono)",
+                color: active ? "var(--phos)" : "var(--fg-3)",
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                transition: "color var(--dur-fast)",
+                filter: active ? "drop-shadow(0 0 6px var(--phos))" : "none",
+              }}
+            >
+              <span style={{ fontSize: 18, lineHeight: 1 }}>{slot.icon}</span>
+              <span>{slot.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
+
+export default MobileBottomNav;

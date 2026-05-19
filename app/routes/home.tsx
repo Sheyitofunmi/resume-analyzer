@@ -4,6 +4,8 @@ import Footer from "~/components/Footer";
 import ResumeCard from "~/components/ResumeCard";
 import StatsStrip from "~/components/StatsStrip";
 import HowItWorks from "~/components/HowItWorks";
+import MobileBottomNav from "~/components/MobileBottomNav";
+import Landing from "~/routes/landing";
 import { usePuterStore } from "~/lib/puter";
 import {
   isRouteErrorResponse,
@@ -458,9 +460,8 @@ export default function Home() {
         ].filter(Boolean) as Resume[])
       : null;
 
-  useEffect(() => {
-    if (!isLoading && !auth.isAuthenticated) navigate("/auth?next=/");
-  }, [isLoading, auth.isAuthenticated]);
+  // Show landing page for unauthenticated users
+  if (!isLoading && !auth.isAuthenticated) return <Landing />;
 
   useEffect(() => {
     if (isLoading || !auth.isAuthenticated) return;
@@ -764,6 +765,7 @@ export default function Home() {
       </div>
 
       <Footer />
+      <MobileBottomNav />
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { Logo } from "~/components/atoms";
 
 const FEATURES = [
   { k: "ATS", label: "ats_score" },
@@ -54,34 +55,7 @@ const Footer = () => {
       >
         {/* Brand */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              fontFamily: "var(--font-mono)",
-              fontSize: 16,
-              fontWeight: 500,
-              color: "var(--fg-1)",
-            }}
-          >
-            <span
-              style={{
-                width: 22,
-                height: 22,
-                background: "var(--phos)",
-                color: "var(--bg)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 700,
-              }}
-            >
-              R
-            </span>
-            resumelens<span style={{ color: "var(--phos)" }}>_</span>
-          </span>
+          <Logo size={15} />
           <p
             style={{
               margin: 0,
@@ -104,6 +78,9 @@ const Footer = () => {
           {[
             { to: "/", label: "my_resumes" },
             { to: "/upload", label: "upload_resume" },
+            { to: "/history", label: "score_history" },
+            { to: "/pricing", label: "pricing" },
+            { to: "/settings", label: "settings" },
           ].map((item) => (
             <Link
               key={item.to}

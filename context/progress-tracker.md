@@ -4,11 +4,27 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- CIPHER design system fully implemented — all components match terminal-luxury design spec
+- Navigation & pricing component refactor complete
 
 ## Current Goal
 
-- Verify visual output in browser; iterate on any component-level polish needed.
+- Verify navigation works across all pages; iterate on mobile UX if needed.
+
+## Completed
+
+### Landing ↔ Dashboard Navigation + Upload Button (2026-05-19)
+
+- **`routes.ts`:** Added `/landing` route so the marketing page is accessible at a stable URL regardless of auth state.
+- **`routes/landing.tsx`:** `LandingNavbar` now checks auth — authenticated users see `→ open_dashboard` button; unauthenticated users see `sign_in` + `$ try_free →`. Logo links to `/` (dashboard) when authenticated, `/landing` otherwise.
+- **`components/Navbar.tsx`:** Added `about` link (`/landing`) to `NAV_LINKS` so dashboard users can navigate to the marketing page. Restored `$ upload_resume →` primary button in the right section for authenticated users.
+
+### Navigation & Pricing Refactor (2026-05-19)
+
+- **`Navbar.tsx`:** Replaced center terminal prompt with full nav links (Dashboard, Upload, History, Pricing, Settings). Active link shows `▶` prefix + highlighted background. Uses `Logo` atom. Sign-out button hidden on mobile; unauthenticated users see `$ sign_in →`. Dead mobile upload shortcut removed.
+- **`components/PricingTiers.tsx`:** Extracted pricing cards (FREE / PRO / RECRUITER) from `pricing.tsx` into a standalone reusable component. Uses `Corners` atom.
+- **`routes/pricing.tsx`:** Now uses `<PricingTiers />` component. Removed ~130 lines of duplicated markup.
+- **`routes/landing.tsx`:** Pricing section now renders full `<PricingTiers />` instead of a placeholder teaser. Fixed unused `i` variable in How It Works map.
+- **`Footer.tsx`:** Product link column expanded to include History, Pricing, Settings. Brand uses `Logo` atom instead of inline markup.
 
 ## Completed
 
@@ -98,6 +114,21 @@ Update this file whenever the current phase, active feature, or implementation s
 ## In Progress
 
 - None.
+
+### New Components & Routes (2026-05-19)
+
+- **`app/components/atoms.tsx`:** 18 primitive atoms — Logo, Corners, Cursor, Dot, Button, Input, Textarea, Label, Eyebrow, Comment, StatusPill, Tag, ScoreNumber, ScoreCircle, ScoreBar, ScoreBars, KeywordRow, FeatureChip. Full CIPHER styling with score-tier color logic.
+- **`app/components/MobileBottomNav.tsx`:** Fixed bottom nav visible under 720 px. 5 slots (home / upload / history / pricing / settings). Active slot glows phosphor.
+- **`app/components/Toast.tsx`:** `ToastProvider` + `useToast` hook. Slides up from bottom-center, 3.2 s auto-dismiss. Good / warn / bad tier border colors.
+- **`app/components/CommandPalette.tsx`:** ⌘K global overlay. Fuzzy filter, arrow-key nav, Enter to run. 8 commands across nav / ai_actions / account categories. `openCommandPalette()` escape hatch for programmatic open.
+- **`app/routes/pricing.tsx`:** Full 3-tier pricing page (FREE / PRO recommended / RECRUITER) with feature lists, RECOMMENDED ribbon, phos glow on pro card.
+- **`app/routes/onboarding.tsx`:** 4-step wizard (role → seniority → industries → goal). Visual stepper, continue disabled until step valid, skip available. Saves to Puter KV.
+- **`app/routes/history.tsx`:** Score history page with 4 KPI cards, interactive SVG line chart with hover tooltips, 5 per-dimension sparkline cards, full run log table with StatusPill and score bars.
+- **`app/routes/settings.tsx`:** 6 settings blocks (profile, career, notifications, plan, appearance, data). Terminal toggles, plan card, data wipe confirmation.
+- **`app/routes/landing.tsx`:** Full landing page for unauthenticated users — animated terminal demo, trust strip (7 companies), 6 feature cards with micro-vizzes, HowItWorks 3-step grid, before/after comparison, 3 testimonials, FAQ accordion, final CTA section.
+- **`app/routes.ts`:** Registered `/pricing`, `/onboarding`, `/history`, `/settings`.
+- **`app/root.tsx`:** Wrapped `<Outlet>` in `<ToastProvider>` and added `<CommandPalette>` globally.
+- **`app/routes/home.tsx`:** Unauthenticated users now see the LandingScreen instead of being redirected to `/auth`. MobileBottomNav added.
 
 ---
 

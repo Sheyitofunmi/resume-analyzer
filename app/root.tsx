@@ -11,6 +11,8 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
+import { ToastProvider } from "~/components/Toast";
+import CommandPalette from "~/components/CommandPalette";
 
 function PuterLoadingScreen() {
   return (
@@ -65,7 +67,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ToastProvider>
+      <Outlet />
+      <CommandPalette />
+    </ToastProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
