@@ -22,15 +22,47 @@ const TERMINAL_LINES = [
   { text: "> overall_score: 87  status: PASS", delay: 4400, type: "result" },
 ];
 
+const LOOP_PAUSE_MS = 2000;
+
 function TerminalDemo() {
   const [visible, setVisible] = useState<number[]>([]);
+  const [paused, setPaused] = useState(false);
+  const [cycle, setCycle] = useState(0);
+  const pausedRef = useRef(false);
 
   useEffect(() => {
-    const timers = TERMINAL_LINES.map((line, i) =>
-      setTimeout(() => setVisible((v) => [...v, i]), line.delay),
+    setVisible([]);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    TERMINAL_LINES.forEach((line, i) => {
+      timers.push(
+        setTimeout(() => {
+          if (!pausedRef.current) setVisible((v) => [...v, i]);
+        }, line.delay),
+      );
+    });
+
+    // Loop back after last line + pause
+    const loopTimer = setTimeout(
+      () => {
+        if (!pausedRef.current) setCycle((c) => c + 1);
+      },
+      TERMINAL_LINES[TERMINAL_LINES.length - 1].delay + LOOP_PAUSE_MS,
     );
+    timers.push(loopTimer);
+
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [cycle]);
+
+  const togglePause = () => {
+    const next = !paused;
+    pausedRef.current = next;
+    setPaused(next);
+    // resuming: restart the cycle from scratch
+    if (!next) setCycle((c) => c + 1);
+  };
+
+  const running = visible.length < TERMINAL_LINES.length;
 
   return (
     <div
@@ -78,7 +110,24 @@ function TerminalDemo() {
         >
           resumelens · live_demo
         </span>
-        <span style={{ fontSize: 10, color: "var(--fg-4)" }}>v1.0.0</span>
+        <button
+          type="button"
+          onClick={togglePause}
+          style={{
+            background: "none",
+            border: "1px solid var(--border-hi)",
+            borderRadius: "var(--radius-sm)",
+            padding: "2px 8px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            color: paused ? "var(--copper)" : "var(--fg-3)",
+            cursor: "pointer",
+            letterSpacing: "0.05em",
+            transition: "color 150ms, border-color 150ms",
+          }}
+        >
+          {paused ? "▶ resume" : "⏸ pause"}
+        </button>
       </div>
 
       {/* Lines */}
@@ -112,7 +161,7 @@ function TerminalDemo() {
             </div>
           );
         })}
-        {visible.length > 0 && visible.length < TERMINAL_LINES.length && (
+        {!paused && running && (
           <span className="rl-cursor" style={{ background: "var(--phos)" }} />
         )}
       </div>
@@ -246,7 +295,68 @@ const FEATURES = [
     tag: "TS",
     title: "tone & style analysis",
     desc: "Action-verb density, sentence variety, hedging language. ResumeLens flags weak phrasing and shows you the fix.",
-    viz: null,
+    viz: (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+          marginTop: 8,
+        }}
+      >
+        {[
+          { label: "action verbs", pct: 72, good: true },
+          { label: "hedging words", pct: 38, good: false },
+          { label: "sentence variety", pct: 65, good: true },
+        ].map(({ label, pct, good }) => (
+          <div
+            key={label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+            }}
+          >
+            <span style={{ color: "var(--fg-3)", width: 110, flexShrink: 0 }}>
+              {label}
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 4,
+                background: "var(--border)",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${pct}%`,
+                  height: "100%",
+                  background: good ? "var(--phos)" : "var(--ember)",
+                  borderRadius: 2,
+                  boxShadow: good
+                    ? "0 0 6px var(--phos-glow)"
+                    : "0 0 6px var(--ember-glow)",
+                }}
+              />
+            </div>
+            <span
+              style={{
+                color: good ? "var(--phos)" : "var(--ember)",
+                width: 28,
+                textAlign: "right",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {pct}%
+            </span>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
     tag: "HX",
@@ -277,27 +387,57 @@ const FEATURES = [
 const TESTIMONIALS = [
   {
     quote:
-      "I shipped my resume through three rounds without a single ATS rejection. Got the offer on the fourth interview.",
-    name: "Sam K.",
+      "I ran my resume through three ATS filters without a single rejection. Keyword diff is genuinely that good.",
+    name: "J. Okafor",
     role: "Senior Frontend Engineer",
-    company: "Linear",
+    target: "targeting FAANG roles",
     lift: "+19",
+    avatar: "JO",
   },
   {
     quote:
-      "The keyword diff alone made the difference. I added two words and went from page 3 of applicant search to first round.",
-    name: "Priya M.",
+      "Added two missing terms the keyword analysis flagged. Went from buried in the pile to first-round callback.",
+    name: "A. Mehta",
     role: "Product Designer",
-    company: "Stripe",
+    target: "switching to fintech",
     lift: "+24",
+    avatar: "AM",
   },
   {
     quote:
-      "Best ROI of any career tool I have used. Three seconds per resume, hundreds of applications, actually unfair.",
-    name: "Devon R.",
+      "Three seconds. Five scores. Specific rewrites. Fastest signal I've found on whether a resume will actually land.",
+    name: "D. Rivera",
     role: "Staff Engineer",
-    company: "Vercel",
+    target: "returning from career break",
     lift: "+31",
+    avatar: "DR",
+  },
+  {
+    quote:
+      "The tone analysis caught hedging language I'd never noticed. My bullets went from passive to punchy in one pass.",
+    name: "K. Nwosu",
+    role: "Backend Engineer",
+    target: "first job post-bootcamp",
+    lift: "+22",
+    avatar: "KN",
+  },
+  {
+    quote:
+      "Interview prep questions matched almost word-for-word what the panel actually asked. That is not a coincidence.",
+    name: "S. Park",
+    role: "Engineering Manager",
+    target: "moving from IC to leadership",
+    lift: "+17",
+    avatar: "SP",
+  },
+  {
+    quote:
+      "Score history showing my resume going from 54 to 91 over four iterations is the most satisfying diff I've ever seen.",
+    name: "T. Osei",
+    role: "Full-Stack Developer",
+    target: "relocating internationally",
+    lift: "+37",
+    avatar: "TO",
   },
 ];
 
@@ -325,8 +465,16 @@ const FAQS = [
   },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
+function FAQItem({
+  q,
+  a,
+  defaultOpen = false,
+}: {
+  q: string;
+  a: string;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div
       style={{
@@ -352,18 +500,22 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         <span
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            color: "var(--fg-4)",
+            fontSize: 16,
+            color: open ? "var(--phos)" : "var(--fg-3)",
             flexShrink: 0,
+            width: 16,
+            lineHeight: 1,
+            transition: "color 150ms",
           }}
         >
-          {open ? "▼" : "▶"}
+          {open ? "−" : "+"}
         </span>
         <span
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 14,
-            color: "var(--fg-1)",
+            fontSize: 13,
+            color: open ? "var(--fg-1)" : "var(--fg-2)",
+            transition: "color 150ms",
           }}
         >
           {q}
@@ -373,11 +525,11 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         <div
           style={{
             paddingBottom: 16,
-            paddingLeft: 24,
+            paddingLeft: 28,
             fontFamily: "var(--font-body)",
             fontSize: 14,
             color: "var(--fg-2)",
-            lineHeight: 1.7,
+            lineHeight: 1.75,
           }}
         >
           {a}
@@ -631,123 +783,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── TRUST STRIP ──────────────────────────────────────────── */}
-      <section
-        ref={trustRef}
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-          borderBottom: "1px dashed var(--border)",
-          padding: "20px 16px",
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          overflow: "hidden",
-          flexWrap: "wrap",
-          boxSizing: "border-box",
-        }}
-      >
-        <span className="rl-eyebrow" style={{ flexShrink: 0 }}>
-          trusted by job seekers at
-        </span>
-        <div style={{ display: "flex", gap: 32, flex: 1, flexWrap: "wrap" }}>
-          {[
-            "Linear",
-            "Stripe",
-            "Vercel",
-            "Anthropic",
-            "Figma",
-            "Notion",
-            "Cloudflare",
-          ].map((co, i) => (
-            <span
-              key={co}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 14,
-                fontWeight: 500,
-                color: trustVisible ? "var(--fg-3)" : "transparent",
-                transition: `color 400ms ${i * 80}ms`,
-                letterSpacing: "0.02em",
-              }}
-            >
-              {co}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <section
-        id="features"
-        className="rl-landing-section"
-        style={{
-          width: "100%",
-          maxWidth: 1280,
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            textAlign: "center",
-            marginBottom: 48,
-          }}
-        >
-          <span className="rl-eyebrow">// features</span>
-          <h2
-            style={{
-              fontSize: "clamp(28px, 4vw, 48px)",
-              color: "var(--fg-1)",
-              fontWeight: 500,
-              letterSpacing: "-1.5px",
-            }}
-          >
-            every signal that matters,
-            <br />
-            in one place
-            <Cursor />
-          </h2>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 20,
-          }}
-        >
-          {FEATURES.map((f) => (
-            <div
-              key={f.tag}
-              className="rl-card rl-glow-hover"
-              style={{ position: "relative" }}
-            >
-              <Corners />
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
-                <FeatureChip tag={f.tag} label={f.title} />
-                <p
-                  style={{
-                    margin: 0,
-                    fontFamily: "var(--font-body)",
-                    fontSize: 14,
-                    color: "var(--fg-2)",
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {f.desc}
-                </p>
-                {f.viz}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+     
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section
@@ -801,19 +837,19 @@ export default function Landing() {
                 step: "STEP_01",
                 cmd: "$ upload",
                 title: "Drop your PDF",
-                desc: "A PDF resume and the job description you're targeting. That's it.",
+                desc: "Upload your resume PDF and paste any job description. No account required — your file goes straight to your private Puter cloud, never our servers.",
               },
               {
                 step: "STEP_02",
                 cmd: "$ analyze",
                 title: "AI scores 5 dimensions",
-                desc: "ATS, tone, content, structure, skills. With reasoning attached.",
+                desc: "Claude scores ATS compatibility, tone & style, content quality, structure, and skills gap — each with line-by-line reasoning, not just a number.",
               },
               {
                 step: "STEP_03",
                 cmd: "$ rewrite",
                 title: "Apply tips & ship",
-                desc: "Specific rewrites, keyword diff, interview prep — copy/paste-ready.",
+                desc: "Get specific bullet rewrites, a keyword diff you can copy-paste, and tailored interview questions. Approve or skip each suggestion individually.",
               },
             ].map((s) => (
               <div
@@ -1081,58 +1117,51 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
+      {/* ── TESTIMONIALS MARQUEE ─────────────────────────────────── */}
       <section
         id="signal_from_users"
-        className="rl-landing-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
+          paddingTop: 64,
+          paddingBottom: 64,
+          overflow: "hidden",
         }}
       >
+        {/* Header */}
         <div
           style={{
-            maxWidth: 1280,
-            margin: "0 auto",
             display: "flex",
             flexDirection: "column",
-            gap: 48,
+            alignItems: "center",
+            gap: 8,
+            textAlign: "center",
+            marginBottom: 40,
+            padding: "0 32px",
           }}
         >
-          <div
+          <span className="rl-eyebrow">// user_results</span>
+          <h2
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
+              fontSize: "clamp(28px, 4vw, 48px)",
+              color: "var(--fg-1)",
+              fontWeight: 500,
+              letterSpacing: "-1.5px",
             }}
           >
-            <span className="rl-eyebrow">// signal_from_users</span>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
-              }}
-            >
-              from job-seeker to job-shipper
-            </h2>
-          </div>
+            from job-seeker to job-shipper
+            <Cursor />
+          </h2>
+        </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: 20,
-            }}
-          >
-            {TESTIMONIALS.map((t) => (
+        {/* Marquee track — duplicated for seamless loop */}
+        <div className="rl-marquee-wrap">
+          <div className="rl-marquee-track">
+            {[...TESTIMONIALS, ...TESTIMONIALS].map((t, idx) => (
               <div
-                key={t.name}
-                className="rl-card"
-                style={{ position: "relative" }}
+                key={`${t.name}-${idx}`}
+                className="rl-card rl-marquee-card"
+                style={{ position: "relative", flexShrink: 0 }}
               >
                 <Corners />
                 <div
@@ -1145,7 +1174,6 @@ export default function Landing() {
                       fontSize: 14,
                       color: "var(--fg-1)",
                       lineHeight: 1.7,
-                      flex: 1,
                     }}
                   >
                     "{t.quote}"
@@ -1154,46 +1182,82 @@ export default function Landing() {
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "flex-end",
+                      alignItems: "center",
                       paddingTop: 8,
                       borderTop: "1px dashed var(--border)",
                     }}
                   >
-                    <div>
-                      <p
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <span
                         style={{
-                          margin: 0,
+                          width: 32,
+                          height: 32,
+                          borderRadius: "50%",
+                          background: "var(--surface-2)",
+                          border: "1px solid var(--border-hi)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           fontFamily: "var(--font-mono)",
-                          fontSize: 13,
-                          color: "var(--fg-1)",
-                          fontWeight: 500,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: "var(--copper)",
+                          flexShrink: 0,
                         }}
                       >
-                        {t.name}
-                      </p>
-                      <p
-                        style={{
-                          margin: "2px 0 0",
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          color: "var(--fg-3)",
-                        }}
-                      >
-                        {t.role} · shipped at {t.company}
-                      </p>
+                        {t.avatar}
+                      </span>
+                      <div>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 12,
+                            color: "var(--fg-1)",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {t.name}
+                        </p>
+                        <p
+                          style={{
+                            margin: "2px 0 0",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10,
+                            color: "var(--fg-3)",
+                          }}
+                        >
+                          {t.role}
+                        </p>
+                        <p
+                          style={{
+                            margin: "1px 0 0",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10,
+                            color: "var(--fg-4)",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          {t.target}
+                        </p>
+                      </div>
                     </div>
                     <span
                       style={{
                         fontFamily: "var(--font-mono)",
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: 700,
                         color: "var(--phos)",
                         display: "flex",
                         alignItems: "center",
                         gap: 4,
+                        flexShrink: 0,
+                        textShadow: "0 0 10px var(--phos-glow)",
                       }}
                     >
-                      <span style={{ fontSize: 10 }}>▲</span> {t.lift}
+                      <span style={{ fontSize: 9 }}>▲</span> {t.lift}
                     </span>
                   </div>
                 </div>
@@ -1274,7 +1338,7 @@ export default function Landing() {
               textAlign: "center",
             }}
           >
-            <span className="rl-eyebrow">// frequently_asked</span>
+            <span className="rl-eyebrow">// faq</span>
             <h2
               style={{
                 fontSize: "clamp(28px, 4vw, 48px)",
@@ -1293,7 +1357,7 @@ export default function Landing() {
           >
             <Corners />
             {FAQS.map((f) => (
-              <FAQItem key={f.q} q={f.q} a={f.a} />
+              <FAQItem key={f.q} q={f.q} a={f.a} defaultOpen={f === FAQS[0]} />
             ))}
           </div>
         </div>
@@ -1306,26 +1370,64 @@ export default function Landing() {
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
+          background:
+            "radial-gradient(800px 400px at 50% 100%, rgba(168,230,163,0.05), transparent 70%)",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            maxWidth: 800,
+            maxWidth: 720,
             margin: "0 auto",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 24,
+            gap: 32,
           }}
         >
+          {/* Big stat */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "clamp(64px, 10vw, 96px)",
+                fontWeight: 700,
+                color: "var(--phos)",
+                letterSpacing: "-4px",
+                lineHeight: 1,
+                textShadow: "0 0 40px var(--phos-glow)",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              87
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                color: "var(--fg-3)",
+                letterSpacing: "0.2em",
+              }}
+            >
+              avg score after first revision
+            </span>
+          </div>
+
           <h2
             style={{
-              fontSize: "clamp(32px, 5vw, 56px)",
+              fontSize: "clamp(28px, 4vw, 48px)",
               color: "var(--fg-1)",
               fontWeight: 500,
-              letterSpacing: "-2px",
+              letterSpacing: "-1.5px",
               lineHeight: 1.1,
+              margin: 0,
             }}
           >
             your next offer is one
@@ -1333,43 +1435,26 @@ export default function Landing() {
             analysis away
             <Cursor />
           </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 15,
-              color: "var(--fg-2)",
-              margin: 0,
-              lineHeight: 1.7,
-              maxWidth: 480,
-            }}
+
+          <Link
+            to="/auth"
+            className="rl-btn rl-btn-primary rl-btn-lg"
+            style={{ fontSize: 16, padding: "16px 32px" }}
           >
-            No signup to try. No credit card. Drop a PDF, paste a JD, read the
-            report in three seconds.
-          </p>
-          <Link to="/auth" className="rl-btn rl-btn-primary rl-btn-lg">
             $ analyze_my_resume →
           </Link>
 
-          {/* Feature strip */}
-          <div
+          <p
             style={{
-              display: "flex",
-              gap: 10,
-              flexWrap: "wrap",
-              justifyContent: "center",
-              paddingTop: 8,
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--fg-4)",
+              margin: 0,
+              letterSpacing: "0.08em",
             }}
           >
-            {[
-              ["ATS", "ats_score"],
-              ["KW", "keyword_analysis"],
-              ["RW", "rewrite_tips"],
-              ["TS", "tone_style"],
-              ["IV", "interview_prep"],
-            ].map(([tag, label]) => (
-              <FeatureChip key={tag} tag={tag} label={label} />
-            ))}
-          </div>
+            no signup · no credit card · pdf stays private
+          </p>
         </div>
       </section>
 

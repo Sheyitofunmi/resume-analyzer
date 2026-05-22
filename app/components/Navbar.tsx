@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { to: "/history", label: "history", exact: false },
   { to: "/pricing", label: "pricing", exact: false },
   { to: "/settings", label: "settings", exact: false },
-  { to: "/landing", label: "about", exact: false },
+  { to: "/landing", label: "home", exact: false },
 ];
 
 const Navbar = () => {
