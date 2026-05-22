@@ -157,13 +157,7 @@ const RewriteSuggestions = ({
                   // example_{String(i + 1).padStart(2, "0")}
                 </span>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 8,
-                  }}
-                >
+                <div className="rl-rewrite-grid">
                   {/* Before */}
                   <div
                     style={{

@@ -249,7 +249,7 @@ export default function History() {
                 return (
                   <div
                     key={r.id}
-                    className="rl-row"
+                    className="rl-row rl-history-row"
                     onClick={() => navigate(`/resume/${r.id}`)}
                     style={{ cursor: "pointer", gap: 16, padding: "12px 20px" }}
                   >
@@ -298,21 +298,24 @@ export default function History() {
                     >
                       {s}
                     </span>
-                    <StatusPill tier={tier}>
-                      {tier === "good"
-                        ? "PASS"
-                        : tier === "warn"
-                          ? "WARN"
-                          : "FAIL"}
-                    </StatusPill>
+                    <span className="rl-mobile-hide">
+                      <StatusPill tier={tier}>
+                        {tier === "good"
+                          ? "PASS"
+                          : tier === "warn"
+                            ? "WARN"
+                            : "FAIL"}
+                      </StatusPill>
+                    </span>
                     <span
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: 11,
                         color: "var(--phos)",
+                        flexShrink: 0,
                       }}
                     >
-                      → view
+                      →
                     </span>
                   </div>
                 );

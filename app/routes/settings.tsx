@@ -62,6 +62,7 @@ function SettingRow({
 }) {
   return (
     <div
+      className="rl-setting-row"
       style={{
         display: "flex",
         alignItems: "center",
@@ -69,6 +70,7 @@ function SettingRow({
         gap: 16,
         padding: "12px 0",
         borderBottom: "1px dashed var(--border)",
+        flexWrap: "wrap",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -377,7 +379,7 @@ export default function Settings() {
               </span>
             </SettingRow>
             <SettingRow label="density" desc="ui element spacing">
-              <div style={{ display: "flex", gap: 6 }}>
+              <div className="rl-density-btns">
                 {(["compact", "default", "relaxed"] as const).map((d) => (
                   <button
                     key={d}

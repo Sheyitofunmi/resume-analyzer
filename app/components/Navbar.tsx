@@ -28,14 +28,15 @@ const Navbar = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "12px 24px",
+        padding: "10px 16px",
         borderBottom: "1px solid var(--border)",
         background: "rgba(11,11,10,0.88)",
         backdropFilter: "blur(8px)",
         position: "sticky",
         top: 0,
         zIndex: 50,
-        gap: 16,
+        gap: 12,
+        minWidth: 0,
       }}
     >
       {/* Logo */}
@@ -95,8 +96,9 @@ const Navbar = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 8,
           flexShrink: 0,
+          minWidth: 0,
         }}
       >
         {auth.isAuthenticated && user && (

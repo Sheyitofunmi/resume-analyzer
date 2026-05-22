@@ -317,7 +317,7 @@ const Upload = () => {
           <form
             id="upload-form"
             onSubmit={handleSubmit}
-            className="rl-card is-raised rl-fade-in"
+            className="rl-card is-raised rl-fade-in rl-upload-form"
             style={{
               position: "relative",
               width: "100%",

@@ -115,6 +115,8 @@ body {
   font-feature-settings: "ss01", "calt";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* prevent any element from causing horizontal scroll */
+  overflow-x: hidden;
 }
 
 ::selection {
@@ -143,7 +145,7 @@ h1 {
 
 h2 {
   font-family: var(--font-mono);
-  font-size: var(--text-xl);
+  font-size: clamp(var(--text-lg), 2.5vw, var(--text-xl));
   font-weight: 500;
   color: var(--fg-2);
   letter-spacing: -0.5px;
@@ -152,7 +154,7 @@ h2 {
 
 h3 {
   font-family: var(--font-mono);
-  font-size: var(--text-lg);
+  font-size: clamp(var(--text-base), 2vw, var(--text-lg));
   font-weight: 500;
   color: var(--fg-1);
   margin: 0;
@@ -833,6 +835,11 @@ label {
   width: 100%;
 }
 
+.rl-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
 /* ── Mobile-only show ─────────────────────────────────────────────── */
 .rl-mobile-show {
   display: none !important;
@@ -883,6 +890,172 @@ label {
   padding: 14px 32px;
 }
 
+/* ── Rewrite suggestions: before/after grid ───────────────────────── */
+.rl-rewrite-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ── Resume two-column layout (overrides applied in breakpoints below) */
+
+.rl-resume-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Density buttons (settings) ───────────────────────────────────── */
+.rl-density-btns {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Footer bottom bar ────────────────────────────────────────────── */
+.rl-footer-bottom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--fg-4);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Tablet breakpoint: 768px ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .rl-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .rl-ba-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rl-landing-section {
+    padding: 60px 24px;
+  }
+
+  .rl-pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .rl-section {
+    padding: 20px 16px 80px;
+  }
+}
+
+/* ── Resume page: viewport-locked split panel (≥768px) ────────────── */
+@media (min-width: 768px) {
+  /* Lock the page to viewport height — panels scroll independently */
+  .rl-resume-main {
+    height: 100vh;
+    height: 100dvh; /* dynamic viewport height: handles mobile browser chrome */
+    min-height: unset;
+    overflow: hidden;
+  }
+
+  /* Nav no longer needs sticky — nothing scrolls past it */
+  .rl-resume-page-nav {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Two-column wrapper fills remaining height without overflowing */
+  .rl-resume-layout {
+    flex: 1;
+    min-height: 0; /* crucial: prevents flex child from growing beyond parent */
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  /* Left: fixed panel — scrollable internally if resume is very tall */
+  .rl-resume-left {
+    width: 40%;
+    min-width: 260px;
+    max-width: 520px;
+    height: 100% !important;
+    overflow-y: auto !important;
+    position: static !important;
+    top: auto !important;
+    flex-shrink: 0;
+  }
+
+  /* Right: independently scrollable feedback panel */
+  .rl-resume-right {
+    flex: 1;
+    height: 100% !important;
+    overflow-y: auto !important;
+    min-width: 0;
+  }
+
+  .rl-resume-nav-actions .rl-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+/* ── Resume page: mobile (single column, natural scroll) ──────────── */
+@media (max-width: 767px) {
+  .rl-resume-main {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  .rl-resume-page-nav {
+    position: sticky !important;
+    top: 0 !important;
+    flex-shrink: 0;
+  }
+
+  /* Inline style has flexDirection:"row" and flex:1 — both need !important */
+  .rl-resume-layout {
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: unset !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .rl-resume-left {
+    width: 100% !important;
+    min-width: 0 !important; /* override inline minWidth:280 */
+    max-width: 100% !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    position: static !important;
+    top: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0 !important;
+  }
+
+  .rl-resume-right {
+    width: 100% !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 20px 16px !important;
+    flex: 1 1 auto !important;
+  }
+
+  .rl-resume-nav-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .rl-resume-nav-actions .rl-btn {
+    font-size: 11px !important;
+    padding: 5px 10px !important;
+  }
+}
+
 @media (max-width: 720px) {
   .rl-section {
     padding: 24px 16px 80px;
@@ -903,14 +1076,50 @@ label {
     display: inline !important;
   }
   .rl-compare-row {
-    grid-template-columns: 72px 1fr 1fr;
+    grid-template-columns: 60px 1fr 1fr;
   }
   .rl-run-score-bar {
     display: none !important;
   }
-  .rl-stats-strip .rl-stat-divider {
+
+  /* Stats grid: 2×2 on mobile */
+  .rl-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .rl-stat-item {
+    padding: 14px 16px !important;
     border-left: none !important;
+  }
+  .rl-stat-item:nth-child(even) {
+    border-left: 1px dashed var(--border) !important;
+  }
+  .rl-stat-item:nth-child(n + 3) {
     border-top: 1px dashed var(--border);
+  }
+
+  /* Toast: allow wrapping on narrow screens */
+  .rl-toast {
+    white-space: normal;
+    max-width: calc(100vw - 32px);
+    width: calc(100vw - 32px);
+    font-size: 12px;
+    bottom: 80px;
+  }
+
+  /* Settings density buttons */
+  .rl-density-btns {
+    flex-wrap: wrap;
+  }
+
+  /* History run log: tighter gap */
+  .rl-history-row {
+    gap: 10px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Resume right panel: tighter on small screens */
+  .rl-resume-right {
+    padding: 20px 16px !important;
   }
 
   /* Landing responsive overrides */
@@ -937,6 +1146,112 @@ label {
 
   .rl-hero-section {
     padding: 48px 16px 40px !important;
+  }
+
+  /* Footer bottom bar stack on mobile */
+  .rl-footer-bottom {
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    font-size: 10px;
+  }
+
+  /* Footer margin and inner padding */
+  .rl-footer {
+    margin-top: 40px !important;
+  }
+
+  /* Upload form full-width on mobile */
+  .rl-upload-form {
+    max-width: 100% !important;
+  }
+
+  /* Testimonials section reduced padding */
+  .rl-testimonials-section {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+  }
+
+  .rl-testimonials-header {
+    padding: 0 16px !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Dashboard hero card (empty state) */
+  .rl-hero-card {
+    padding: 32px 20px !important;
+  }
+
+  /* Rewrite suggestions: stack before/after vertically */
+  .rl-rewrite-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Score number: shrink on mobile */
+  .rl-score-big {
+    font-size: clamp(48px, 16vw, 88px) !important;
+  }
+
+  /* Stat values: slightly smaller on mobile */
+  .rl-stat-value {
+    font-size: 26px !important;
+  }
+}
+
+/* ── Very small screens (320px phones) ───────────────────────────── */
+@media (max-width: 480px) {
+  .rl-section {
+    padding: 16px 12px 80px;
+  }
+
+  .rl-card {
+    padding: var(--space-3);
+  }
+
+  /* Compare panel: tightest label column */
+  .rl-compare-row {
+    grid-template-columns: 48px 1fr 1fr;
+    font-size: 11px;
+  }
+
+  /* Chips: allow wrap and smaller text */
+  .rl-chip {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+
+  /* Pricing price: slightly smaller */
+  .rl-pricing-price {
+    font-size: clamp(32px, 10vw, 48px);
+    letter-spacing: -1px;
+  }
+
+  /* Nav: reduce button padding */
+  .rl-btn {
+    padding: 9px 12px;
+  }
+
+  .rl-btn-lg {
+    padding: 12px 18px;
+  }
+
+  /* Summary score + bars: stack vertically on tiny screens */
+  .rl-summary-grid {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+  }
+
+  /* Landing hero section: tighter on very small screens */
+  .rl-hero-section {
+    padding: 32px 12px 32px !important;
+  }
+
+  .rl-landing-section {
+    padding: 40px 12px;
+  }
+
+  .rl-landing-nav {
+    padding: 10px 12px;
   }
 }
 
@@ -1025,7 +1340,6 @@ label {
     break-inside: avoid;
   }
 }
-
 
 .skip-link {
   position: absolute;

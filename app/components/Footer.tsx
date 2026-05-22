@@ -12,6 +12,7 @@ const FEATURES = [
 const Footer = () => {
   return (
     <footer
+      className="rl-footer"
       style={{
         width: "100%",
         borderTop: "1px solid var(--border)",
@@ -166,20 +167,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom bar */}
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "20px 24px",
-          borderTop: "1px solid var(--border)",
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: 11,
-          color: "var(--fg-4)",
-          flexWrap: "wrap",
-          gap: 8,
-        }}
-      >
+      <div className="rl-footer-bottom">
         <span>
           // © {new Date().getFullYear()} resumelens — your data, your machine.
         </span>

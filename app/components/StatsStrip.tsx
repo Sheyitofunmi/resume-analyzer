@@ -51,6 +51,7 @@ function StatItem({
 
   return (
     <div
+      className="rl-stat-item"
       style={{
         padding: "20px 24px",
         borderLeft: divider ? "1px dashed var(--border)" : "none",
@@ -62,6 +63,7 @@ function StatItem({
       }}
     >
       <span
+        className="rl-stat-value"
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: 32,
@@ -113,14 +115,13 @@ const StatsStrip = () => {
   return (
     <div
       ref={ref}
+      className="rl-stats-grid"
       style={{
         width: "100%",
         background: "var(--surface)",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius-md)",
         position: "relative",
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
       }}
     >
       {/* Corner crosshairs */}

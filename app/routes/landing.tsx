@@ -783,8 +783,6 @@ export default function Landing() {
         </div>
       </section>
 
-     
-
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section
         id="how_it_works"
@@ -1120,6 +1118,7 @@ export default function Landing() {
       {/* ── TESTIMONIALS MARQUEE ─────────────────────────────────── */}
       <section
         id="signal_from_users"
+        className="rl-testimonials-section"
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
@@ -1130,6 +1129,7 @@ export default function Landing() {
       >
         {/* Header */}
         <div
+          className="rl-testimonials-header"
           style={{
             display: "flex",
             flexDirection: "column",

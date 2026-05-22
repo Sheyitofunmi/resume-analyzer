@@ -174,6 +174,7 @@ const Resume = () => {
 
   return (
     <main
+      className="rl-resume-main"
       style={{
         background: "var(--bg)",
         minHeight: "100vh",
@@ -205,19 +206,18 @@ const Resume = () => {
 
       {/* Top nav bar */}
       <nav
-        className="print:hidden"
+        className="rl-resume-page-nav print:hidden"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 24px",
+          padding: "10px 16px",
           borderBottom: "1px solid var(--border)",
           background: "rgba(11,11,10,0.88)",
           backdropFilter: "blur(8px)",
-          position: "sticky",
-          top: 0,
           zIndex: 50,
-          gap: 12,
+          gap: 10,
+          flexWrap: "wrap",
         }}
       >
         <Link
@@ -252,7 +252,7 @@ const Resume = () => {
           </span>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="rl-resume-nav-actions">
           {feedback && !isReanalyzing && (
             <button
               onClick={() => setShowReanalyze(true)}
@@ -274,7 +274,7 @@ const Resume = () => {
           {feedback && (
             <button
               onClick={() => window.print()}
-              className="rl-btn rl-btn-ghost"
+              className="rl-btn rl-btn-ghost rl-mobile-hide"
               style={{ fontSize: 11, padding: "6px 12px" }}
             >
               ↓ download
@@ -503,32 +503,24 @@ const Resume = () => {
 
       {/* Main two-column layout */}
       <div
+        className="rl-resume-layout"
         style={{
           display: "flex",
-          flexDirection: "row",
           width: "100%",
           flex: 1,
         }}
-        className="max-lg:flex-col-reverse"
       >
-        {/* Left: sticky resume preview */}
+        {/* Left: fixed resume preview (sticky via CSS on ≥768px) */}
         <section
           aria-label="Resume preview"
-          className="print:hidden"
+          className="rl-resume-left print:hidden"
           style={{
-            width: "40%",
-            minWidth: 280,
-            maxWidth: 520,
             padding: "24px 20px",
             background: "var(--bg-2)",
             borderRight: "1px solid var(--border)",
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "center",
-            position: "sticky",
-            top: 52,
-            height: "calc(100vh - 52px)",
-            overflowY: "auto",
           }}
         >
           {imageUrl && resumeUrl ? (
@@ -609,6 +601,7 @@ const Resume = () => {
         {/* Right: feedback panels */}
         <section
           id="resume-feedback"
+          className="rl-resume-right print:w-full print:px-0"
           style={{
             flex: 1,
             padding: "32px 28px",
@@ -617,7 +610,6 @@ const Resume = () => {
             gap: 24,
             minWidth: 0,
           }}
-          className="print:w-full print:px-0"
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <span className="rl-eyebrow-prompt">resume_report</span>

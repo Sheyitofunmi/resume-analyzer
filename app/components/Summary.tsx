@@ -72,6 +72,7 @@ const Summary = ({ feedback }: { feedback: Feedback }) => {
 
       {/* Score + bars grid */}
       <div
+        className="rl-summary-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "auto 1fr",
@@ -89,9 +90,10 @@ const Summary = ({ feedback }: { feedback: Feedback }) => {
           }}
         >
           <span
+            className="rl-score-big"
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: 88,
+              fontSize: "clamp(52px, 12vw, 88px)",
               fontWeight: 500,
               lineHeight: 0.9,
               letterSpacing: "-3px",

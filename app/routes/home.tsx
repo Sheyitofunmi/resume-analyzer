@@ -679,7 +679,7 @@ export default function Home() {
           >
             {/* Hero card */}
             <div
-              className="rl-card is-raised"
+              className="rl-card is-raised rl-hero-card"
               style={{
                 position: "relative",
                 width: "100%",

@@ -4,11 +4,38 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Full responsiveness pass complete
+- Responsiveness audit pass 2 complete (2026-05-22)
 
 ## Current Goal
 
 - Testing and iteration
+
+## Recent Changes
+
+### Resume page: viewport-locked split panel (2026-05-22)
+
+- **`routes/resume.tsx`:** Added `className="rl-resume-main"` to `<main>`. Nav gets `className="rl-resume-page-nav"` and loses `position: sticky; top: 0` from inline style (CSS re-adds sticky on mobile, removes it on desktop since nothing scrolls past it). Two-column div switches from `className="max-lg:flex-col-reverse"` to `className="rl-resume-layout"`. Left panel loses `position: sticky; top: 52; height: calc(100vh - 52px); overflowY: auto` from inline styles (all handled by CSS).
+- **`app/app.css`:** Replaced old `@media (max-width: 1024px)` resume block with two new blocks: `@media (min-width: 768px)` locks `.rl-resume-main` to `height: 100dvh; overflow: hidden`, sets `.rl-resume-layout` to `flex: 1; min-height: 0; overflow: hidden`, and gives `.rl-resume-left` / `.rl-resume-right` `height: 100%; overflow-y: auto` for independent panel scrolling. `@media (max-width: 767px)` restores natural flow, stacks panels as `column-reverse`, restores sticky nav.
+
+### Responsiveness audit pass 2 (2026-05-22)
+
+- **`app/app.css`:** Added `overflow-x: hidden` to `html, body` to prevent horizontal scroll on all screens. Made h2/h3 fluid with `clamp()` instead of fixed px. Added `.rl-rewrite-grid` CSS class (1fr 1fr desktop, 1fr on mobile). Added `@media (max-width: 768px)` tablet breakpoint — hero grid collapses, landing sections reduce padding, pricing grid goes single-column. Added `@media (max-width: 480px)` breakpoint for very small screens — tighter section padding, compare panel label column reduced to 48px, chip sizes reduced, pricing price clamped. In the 720px block: added `.rl-rewrite-grid` collapse, `.rl-score-big` class override, `.rl-stat-value` font reduction. Added `.rl-summary-grid` collapse rule in 480px block.
+- **`components/Summary.tsx`:** Score number changed from fixed `fontSize: 88` to `fontSize: "clamp(52px, 12vw, 88px)"` + `className="rl-score-big"` for CSS override. Added `className="rl-summary-grid"` on the score+bars grid so it stacks vertically on very small screens (480px).
+- **`components/RewriteSuggestions.tsx`:** Replaced inline `style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}` on the before/after grid with `className="rl-rewrite-grid"` — CSS now stacks columns vertically on ≤720px.
+- **`components/StatsStrip.tsx`:** Added `className="rl-stat-value"` on the count number span so the 720px CSS can reduce its `font-size` from 32px to 26px on mobile.
+
+### Full responsive pass (2026-05-22)
+
+- **`app/app.css`:** Added `.rl-stats-grid` (4→2col), `.rl-stat-item` nth-child borders, `.rl-resume-left/right` 1024px breakpoint (unstick panel), `.rl-resume-nav-actions` wrapping, `.rl-density-btns` wrapping, `.rl-footer-bottom` mobile stack, `.rl-toast` max-width + wrapping, `.rl-history-row` compact gap, testimonials section padding, dashboard hero card padding, upload form full-width.
+- **`components/StatsStrip.tsx`:** Added `rl-stats-grid` class on outer grid, `rl-stat-item` on each stat — enabling CSS 2×2 mobile layout.
+- **`routes/resume.tsx`:** Added `rl-resume-left`, `rl-resume-right`, `rl-resume-nav-actions` classes; download button hidden on mobile; nav wraps on mobile.
+- **`routes/settings.tsx`:** Density buttons use `rl-density-btns` (wraps on mobile); `SettingRow` uses `flexWrap: wrap`.
+- **`routes/history.tsx`:** Run log rows use `rl-history-row`; status pill hidden on mobile; only arrow shown.
+- **`routes/landing.tsx`:** Testimonials section gets `rl-testimonials-section` and `rl-testimonials-header` classes for mobile padding.
+- **`routes/home.tsx`:** Dashboard empty-state hero card gets `rl-hero-card` for reduced mobile padding.
+- **`components/Navbar.tsx`:** Tighter padding (`10px 16px`), `minWidth: 0` on container.
+- **`components/Footer.tsx`:** Bottom bar uses `.rl-footer-bottom` class (stacks on mobile).
+- **`routes/upload.tsx`:** Form uses `rl-upload-form` class (full-width on mobile).
 
 ## Completed
 
