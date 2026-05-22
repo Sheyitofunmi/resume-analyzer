@@ -1,4 +1,7 @@
-import { type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, type ReactNode, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useCountUp } from "~/hooks/useCountUp";
+import { springs } from "~/lib/motion";
 
 // ── Logo ─────────────────────────────────────────────────────────────
 export const Logo = ({ size = 16 }: { size?: number }) => (
@@ -79,6 +82,7 @@ export const Button = ({
   style?: CSSProperties;
   type?: "button" | "submit" | "reset";
 }) => {
+  const reduced = useReducedMotion();
   const cls = [
     "rl-btn",
     `rl-btn-${variant}`,
@@ -89,11 +93,14 @@ export const Button = ({
     .join(" ");
 
   return (
-    <button
+    <motion.button
       type={type}
       className={cls}
       disabled={disabled}
       onClick={onClick}
+      whileHover={disabled || reduced ? {} : { y: -2, scale: 1.02 }}
+      whileTap={disabled || reduced ? {} : { y: 0, scale: 0.96 }}
+      transition={springs.snappy}
       style={{
         opacity: disabled ? 0.5 : 1,
         cursor: disabled ? "not-allowed" : "pointer",
@@ -101,7 +108,7 @@ export const Button = ({
       }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 };
 
@@ -289,7 +296,7 @@ export const ScoreCircle = ({
         fontFamily="var(--font-mono)"
         fontWeight={700}
         fontSize={size * 0.22}
-        fontVariantNumeric="tabular-nums"
+        style={{ fontVariantNumeric: "tabular-nums" }}
       >
         {score}
       </text>
@@ -425,3 +432,206 @@ export const FeatureChip = ({ tag, label }: { tag: string; label: string }) => (
     <span>{label}</span>
   </span>
 );
+
+// ── AnimatedScoreNumber — counts up from 0 on mount ───────────────────
+export const AnimatedScoreNumber = ({
+  score,
+  enabled = true,
+}: {
+  score: number;
+  enabled?: boolean;
+}) => {
+  const reduced = useReducedMotion();
+  const display = useCountUp(score, 1200, enabled && !reduced);
+  const color =
+    score > 69
+      ? "var(--phos)"
+      : score > 49
+        ? "var(--copper-hi)"
+        : "var(--ember)";
+
+  return (
+    <span
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: 88,
+        fontWeight: 700,
+        lineHeight: 1,
+        letterSpacing: "-4px",
+        color,
+        fontVariantNumeric: "tabular-nums",
+        textShadow: `0 0 32px ${color}44`,
+      }}
+    >
+      {reduced ? score : display}
+      <span style={{ fontSize: 22, color: "var(--fg-3)", letterSpacing: 0 }}>
+        /100
+      </span>
+    </span>
+  );
+};
+
+// ── AnimatedScoreCircle — SVG ring draws in on mount ─────────────────
+export const AnimatedScoreCircle = ({
+  score,
+  size = 80,
+  animate = true,
+}: {
+  score: number;
+  size?: number;
+  animate?: boolean;
+}) => {
+  const reduced = useReducedMotion();
+  const r = (size - 8) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
+  const color =
+    score > 69
+      ? "var(--phos)"
+      : score > 49
+        ? "var(--copper-hi)"
+        : "var(--ember)";
+  const display = useCountUp(score, 1100, animate && !reduced);
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="var(--border)"
+        strokeWidth={4}
+      />
+      <motion.circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        initial={{ strokeDashoffset: circ }}
+        animate={{ strokeDashoffset: animate && !reduced ? offset : offset }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        style={{ filter: `drop-shadow(0 0 6px ${color}88)` }}
+      />
+      <text
+        x={size / 2}
+        y={size / 2 - 4}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill={color}
+        fontFamily="var(--font-mono)"
+        fontWeight={700}
+        fontSize={size * 0.22}
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
+        {reduced ? score : display}
+      </text>
+      <text
+        x={size / 2}
+        y={size / 2 + size * 0.18}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="var(--fg-3)"
+        fontFamily="var(--font-mono)"
+        fontSize={size * 0.11}
+        letterSpacing="0.1em"
+      >
+        OF 100
+      </text>
+    </svg>
+  );
+};
+
+// ── FadeInView — scroll-triggered reveal wrapper ──────────────────────
+export const FadeInView = ({
+  children,
+  delay = 0,
+  className,
+  style,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+  style?: CSSProperties;
+}) => {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      style={style}
+      initial={reduced ? {} : { opacity: 0, y: 24, filter: "blur(4px)" }}
+      whileInView={reduced ? {} : { opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.65, ease: [0.19, 1, 0.22, 1], delay }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// ── MagneticButton — primary CTA with magnetic hover pull ────────────
+export const MagneticButton = ({
+  children,
+  className,
+  style,
+  onClick,
+  href,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  onClick?: () => void;
+  href?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (reduced || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) * 0.25;
+    const dy = (e.clientY - cy) * 0.25;
+    ref.current.style.transform = `translate(${dx}px, ${dy}px)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!ref.current) return;
+    ref.current.style.transform = "translate(0px, 0px)";
+  };
+
+  const Tag = href ? "a" : "div";
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        display: "inline-block",
+        transition: "transform 0.3s cubic-bezier(0.16,1,0.3,1)",
+      }}
+    >
+      <motion.div
+        whileHover={reduced ? {} : { scale: 1.04 }}
+        whileTap={reduced ? {} : { scale: 0.96 }}
+        transition={springs.snappy}
+      >
+        <Tag className={className} style={style} onClick={onClick} href={href}>
+          {children}
+        </Tag>
+      </motion.div>
+    </div>
+  );
+};

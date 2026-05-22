@@ -1,4 +1,5 @@
 import type { Route } from "./+types/home";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import ResumeCard from "~/components/ResumeCard";
@@ -9,6 +10,7 @@ import Landing from "~/routes/landing";
 import { usePuterStore } from "~/lib/puter";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router";
 import { useEffect, useRef, useState } from "react";
+import { springs, staggerContainer, fadeUp } from "~/lib/motion";
 
 const SECTIONS: { key: keyof Feedback; label: string }[] = [
   { key: "ATS", label: "ATS" },
@@ -425,6 +427,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const reduced = useReducedMotion();
 
   const toggleCompareMode = () => {
     setCompareMode((v) => !v);
@@ -493,7 +496,10 @@ export default function Home() {
         style={{ flex: 1, display: "flex", flexDirection: "column", gap: 32 }}
       >
         {/* Heading */}
-        <div
+        <motion.div
+          variants={staggerContainer(0.1, 0)}
+          initial={reduced ? false : "hidden"}
+          animate="visible"
           style={{
             display: "flex",
             flexDirection: "column",
@@ -501,52 +507,85 @@ export default function Home() {
             paddingTop: 16,
           }}
         >
-          <span className="rl-eyebrow-prompt">resumelens dashboard</span>
-          <h1 className="rl-h1">
+          <motion.span variants={fadeUp} className="rl-eyebrow-prompt">
+            resumelens dashboard
+          </motion.span>
+          <motion.h1 variants={fadeUp} className="rl-h1">
             track_your_
             <span style={{ color: "var(--phos)" }}>applications</span>
             <span className="rl-cursor" />
-          </h1>
-          {!loadingResumes && (
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--fg-2)",
-                lineHeight: 1.7,
-              }}
-            >
-              {resumes.length === 0
-                ? "No resumes yet — upload your first to get AI feedback."
-                : "Review your submissions, drill into AI feedback, compare versions side-by-side."}
-            </p>
-          )}
-        </div>
+          </motion.h1>
+          <AnimatePresence>
+            {!loadingResumes && (
+              <motion.p
+                key="subtitle"
+                variants={fadeUp}
+                initial={reduced ? false : "hidden"}
+                animate="visible"
+                exit={{ opacity: 0, y: -4 }}
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  color: "var(--fg-2)",
+                  lineHeight: 1.7,
+                }}
+              >
+                {resumes.length === 0
+                  ? "No resumes yet — upload your first to get AI feedback."
+                  : "Review your submissions, drill into AI feedback, compare versions side-by-side."}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Loading */}
-        {loadingResumes && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              padding: "48px 0",
-            }}
-          >
-            <span className="rl-dot" style={{ width: 12, height: 12 }} />
-            <p
+        <AnimatePresence>
+          {loadingResumes && (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                color: "var(--fg-3)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                padding: "48px 0",
               }}
             >
-              loading resumes…
-            </p>
-          </div>
-        )}
+              <motion.span
+                className="rl-dot"
+                animate={
+                  reduced ? {} : { scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }
+                }
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{ width: 12, height: 12, display: "block" }}
+              />
+              <motion.p
+                animate={reduced ? {} : { opacity: [0.5, 1, 0.5] }}
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-3)",
+                }}
+              >
+                loading resumes…
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Populated state */}
         {!loadingResumes && resumes.length > 0 && (
@@ -580,18 +619,24 @@ export default function Home() {
                 )}
               </div>
               {resumes.length >= 2 && (
-                <button
+                <motion.button
                   onClick={toggleCompareMode}
+                  whileHover={reduced ? {} : { scale: 1.03 }}
+                  whileTap={reduced ? {} : { scale: 0.97 }}
+                  transition={springs.snappy}
                   className={`rl-btn ${compareMode ? "rl-btn-copper" : "rl-btn-secondary"}`}
                   style={{ fontSize: 12 }}
                 >
                   {compareMode ? "✕ cancel_compare" : "⇄ compare_resumes"}
-                </button>
+                </motion.button>
               )}
             </div>
 
             {/* Resume grid */}
-            <div
+            <motion.div
+              variants={staggerContainer(0.07, 0)}
+              initial={reduced ? false : "hidden"}
+              animate="visible"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -599,43 +644,59 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              {paginatedResumes.map((resume) => (
-                <ResumeCard
-                  key={resume.id}
-                  resume={resume}
-                  onDelete={
-                    compareMode ? undefined : () => handleDelete(resume)
-                  }
-                  compareMode={compareMode}
-                  isSelected={compareIds.includes(resume.id)}
-                  onSelect={() => toggleSelect(resume.id)}
-                />
-              ))}
-            </div>
+              <AnimatePresence mode="popLayout">
+                {paginatedResumes.map((resume) => (
+                  <motion.div key={resume.id} variants={fadeUp} layout>
+                    <ResumeCard
+                      resume={resume}
+                      onDelete={
+                        compareMode ? undefined : () => handleDelete(resume)
+                      }
+                      compareMode={compareMode}
+                      isSelected={compareIds.includes(resume.id)}
+                      onSelect={() => toggleSelect(resume.id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
             {/* Compare panel */}
-            {compareResumes && (
-              <ComparePanel
-                a={compareResumes[0]}
-                b={compareResumes[1]}
-                onClose={() => {
-                  setCompareIds([]);
-                  setCompareMode(false);
-                }}
-              />
-            )}
+            <AnimatePresence>
+              {compareResumes && (
+                <motion.div
+                  key="compare-panel"
+                  initial={reduced ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={springs.smooth}
+                >
+                  <ComparePanel
+                    a={compareResumes[0]}
+                    b={compareResumes[1]}
+                    onClose={() => {
+                      setCompareIds([]);
+                      setCompareMode(false);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Pagination */}
             {totalPages > 1 && (
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <button
+                <motion.button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
+                  whileHover={reduced ? {} : { scale: 1.04 }}
+                  whileTap={reduced ? {} : { scale: 0.96 }}
+                  transition={springs.snappy}
                   className="rl-btn rl-btn-secondary"
                   style={{ fontSize: 12, opacity: currentPage === 1 ? 0.4 : 1 }}
                 >
                   ← prev
-                </button>
+                </motion.button>
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
@@ -645,11 +706,14 @@ export default function Home() {
                 >
                   {currentPage} / {totalPages}
                 </span>
-                <button
+                <motion.button
                   onClick={() =>
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
+                  whileHover={reduced ? {} : { scale: 1.04 }}
+                  whileTap={reduced ? {} : { scale: 0.96 }}
+                  transition={springs.snappy}
                   className="rl-btn rl-btn-secondary"
                   style={{
                     fontSize: 12,
@@ -657,7 +721,7 @@ export default function Home() {
                   }}
                 >
                   next →
-                </button>
+                </motion.button>
               </div>
             )}
           </>
@@ -665,8 +729,10 @@ export default function Home() {
 
         {/* Empty state */}
         {!loadingResumes && resumes.length === 0 && (
-          <div
-            className="rl-fade-in"
+          <motion.div
+            variants={staggerContainer(0.12, 0.1)}
+            initial={reduced ? false : "hidden"}
+            animate="visible"
             style={{
               display: "flex",
               flexDirection: "column",
@@ -749,7 +815,7 @@ export default function Home() {
 
             <HowItWorks />
             <StatsStrip />
-          </div>
+          </motion.div>
         )}
       </div>
 

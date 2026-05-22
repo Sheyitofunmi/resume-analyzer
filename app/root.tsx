@@ -13,14 +13,95 @@ import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
 import { ToastProvider } from "~/components/Toast";
 import CommandPalette from "~/components/CommandPalette";
+import { useLenis } from "~/hooks/useLenis";
 
 function PuterLoadingScreen() {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white">
-      <div className="w-10 h-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
-      <p className="text-sm text-gray-500 font-medium">Connecting to Puter…</p>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 20,
+        background: "var(--bg)",
+        fontFamily: "var(--font-mono)",
+      }}
+    >
+      {/* Animated scan line */}
+      <div
+        style={{
+          position: "relative",
+          width: 48,
+          height: 48,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 48 48"
+          style={{ transform: "rotate(-90deg)" }}
+        >
+          <circle
+            cx="24"
+            cy="24"
+            r="20"
+            fill="none"
+            stroke="var(--border-hi)"
+            strokeWidth="2"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r="20"
+            fill="none"
+            stroke="var(--phos)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="125.6"
+            strokeDashoffset="94"
+            style={{
+              filter: "drop-shadow(0 0 6px var(--phos-glow))",
+              animation: "rl-spin 1.2s linear infinite",
+            }}
+          />
+        </svg>
+        <span
+          style={{
+            position: "absolute",
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            fontWeight: 700,
+            color: "var(--phos)",
+          }}
+        >
+          R
+        </span>
+      </div>
+      <p
+        style={{
+          fontSize: "var(--text-xs)",
+          color: "var(--fg-3)",
+          letterSpacing: "0.2em",
+          margin: 0,
+        }}
+      >
+        connecting…
+      </p>
+      <style>{`@keyframes rl-spin { to { stroke-dashoffset: 0; } }`}</style>
     </div>
   );
+}
+
+function LenisProvider({ children }: { children: React.ReactNode }) {
+  useLenis();
+  return <>{children}</>;
 }
 
 export const links: Route.LinksFunction = () => [
@@ -58,7 +139,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           Skip to main content
         </a>
         <script src="https://js.puter.com/v2/"></script>
-        {showLoader ? <PuterLoadingScreen /> : children}
+        {showLoader ? (
+          <PuterLoadingScreen />
+        ) : (
+          <LenisProvider>{children}</LenisProvider>
+        )}
         <ScrollRestoration />
         <Scripts />
       </body>

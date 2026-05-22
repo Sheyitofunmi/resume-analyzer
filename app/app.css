@@ -93,10 +93,25 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-slow: 320ms;
+  --dur-reveal: 600ms;
+
+  /* Depth layers */
+  --depth-surface: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --depth-card: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.3);
+  --depth-card-hover:
+    0 8px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --depth-float: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  /* Animated gradient border colors */
+  --glow-border-phos:
+    0 0 0 1px rgba(168, 230, 163, 0.35), 0 0 20px rgba(168, 230, 163, 0.12);
+  --glow-border-copper:
+    0 0 0 1px rgba(196, 123, 74, 0.35), 0 0 20px rgba(196, 123, 74, 0.12);
 
   /* Grid */
   --grid-size: 40px;
@@ -661,7 +676,208 @@ label {
   letter-spacing: 0.05em;
 }
 
-/* ── Animations ───────────────────────────────────────────────────── */
+/* ── Noise texture overlay ────────────────────────────────────────── */
+.rl-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* ── Animated gradient border ─────────────────────────────────────── */
+@keyframes rl-border-spin {
+  from {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0% 50%;
+  }
+}
+
+.rl-animated-border {
+  position: relative;
+}
+.rl-animated-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    120deg,
+    var(--phos-dim) 0%,
+    var(--border-acc) 40%,
+    var(--copper-deep) 70%,
+    var(--phos-dim) 100%
+  );
+  background-size: 300% 300%;
+  animation: rl-border-spin 4s ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Shimmer effect ───────────────────────────────────────────────── */
+@keyframes rl-shimmer {
+  from {
+    background-position: -200% center;
+  }
+  to {
+    background-position: 200% center;
+  }
+}
+
+.rl-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-2) 40%,
+    var(--border-hi) 50%,
+    var(--surface-2) 60%,
+    var(--surface) 100%
+  );
+  background-size: 200% auto;
+  animation: rl-shimmer 1.8s linear infinite;
+}
+
+/* ── Ambient glow pulse ───────────────────────────────────────────── */
+@keyframes rl-ambient {
+  0%,
+  100% {
+    opacity: 0.04;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.07;
+    transform: scale(1.05);
+  }
+}
+
+/* ── Score fill animation ─────────────────────────────────────────── */
+@keyframes rl-draw {
+  from {
+    stroke-dashoffset: var(--dash-total, 314);
+  }
+}
+
+/* ── Gradient text ────────────────────────────────────────────────── */
+.rl-gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--phos) 0%,
+    var(--copper-hi) 60%,
+    var(--phos) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rl-border-spin 4s ease infinite;
+}
+
+/* ── Card depth hover ─────────────────────────────────────────────── */
+.rl-card-interactive {
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    box-shadow var(--dur-slow) var(--ease-out),
+    border-color var(--dur-base);
+  will-change: transform;
+}
+.rl-card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--depth-card-hover);
+  border-color: var(--border-hi);
+}
+
+/* ── Scan line effect ─────────────────────────────────────────────── */
+@keyframes rl-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.rl-scan-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.rl-scan-overlay::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--phos-dim) 30%,
+    var(--phos) 50%,
+    var(--phos-dim) 70%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px var(--phos-glow);
+  animation: rl-scan 2.4s ease-in-out infinite;
+}
+
+/* ── AI thinking pulse ────────────────────────────────────────────── */
+@keyframes rl-think {
+  0% {
+    opacity: 0.3;
+    transform: scaleX(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scaleX(0.3);
+  }
+}
+
+.rl-thinking-bar {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--phos),
+    var(--copper-hi),
+    var(--phos),
+    transparent
+  );
+  animation: rl-think 1.6s ease-in-out infinite;
+  transform-origin: center;
+  border-radius: 1px;
+}
+
+/* ── Entrance animations ──────────────────────────────────────────── */
+/* Animations ───────────────────────────────────────────────────── */
 .rl-fade-in {
   animation: rl-fade-in 400ms var(--ease-out) both;
 }
@@ -952,47 +1168,50 @@ label {
 
 /* ── Resume page: viewport-locked split panel (≥768px) ────────────── */
 @media (min-width: 768px) {
-  /* Lock the page to viewport height — panels scroll independently */
+  /* Lock page to viewport — each panel scrolls independently */
   .rl-resume-main {
     height: 100vh;
-    height: 100dvh; /* dynamic viewport height: handles mobile browser chrome */
+    height: 100dvh;
     min-height: unset;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Nav no longer needs sticky — nothing scrolls past it */
   .rl-resume-page-nav {
     position: relative;
     flex-shrink: 0;
+    z-index: 50;
   }
 
-  /* Two-column wrapper fills remaining height without overflowing */
+  /* Fill remaining height; children scroll within their column */
   .rl-resume-layout {
     flex: 1;
-    min-height: 0; /* crucial: prevents flex child from growing beyond parent */
+    min-height: 0;
     display: flex;
     flex-direction: row;
     overflow: hidden;
   }
 
-  /* Left: fixed panel — scrollable internally if resume is very tall */
+  /* Left: never scrolls the page — stays put always */
   .rl-resume-left {
     width: 40%;
     min-width: 260px;
     max-width: 520px;
-    height: 100% !important;
-    overflow-y: auto !important;
-    position: static !important;
-    top: auto !important;
     flex-shrink: 0;
+    min-height: 0;
+    overflow-y: auto;
+    position: static !important;
   }
 
-  /* Right: independently scrollable feedback panel */
+  /* Right: scroll within this column, not the page.
+     min-height: 0 is required — flex children default to min-height: auto
+     which lets them grow past the parent, preventing overflow-y from activating. */
   .rl-resume-right {
     flex: 1;
-    height: 100% !important;
-    overflow-y: auto !important;
     min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .rl-resume-nav-actions .rl-btn {
@@ -1255,26 +1474,37 @@ label {
   }
 }
 
-/* ── Resume editor paper (preserved from original) ────────────────── */
-.resume-doc {
-  font-family: "Georgia", "Times New Roman", serif;
-  font-size: 10.5pt;
-  line-height: 1.55;
-  color: #111;
-  outline: none;
+/* ── MDXEditor resume styling ──────────────────────────────────────── */
+.resume-mdx-editor {
+  width: 100%;
+  background: white;
+  border-radius: 2px;
 }
-.resume-doc h1 {
+
+/* Editor content area: resume typography */
+.resume-mdx-editor [contenteditable] {
+  font-family: "Georgia", "Times New Roman", serif !important;
+  font-size: 10.5pt !important;
+  line-height: 1.55 !important;
+  color: #111 !important;
+  padding: 0.85in 0.9in !important;
+  outline: none !important;
+  background: white !important;
+  caret-color: #111 !important;
+}
+
+/* Resume headings inside MDXEditor */
+.resume-mdx-editor h1 {
   font-family: "Georgia", serif !important;
   font-size: 20pt !important;
   font-weight: 700 !important;
   color: #111 !important;
-  background: none !important;
-  -webkit-text-fill-color: #111 !important;
   letter-spacing: 0.3px;
   line-height: 1.2;
   margin-bottom: 2px;
 }
-.resume-doc h2 {
+
+.resume-mdx-editor h2 {
   font-family: "Georgia", serif !important;
   font-size: 9.5pt !important;
   font-weight: 700 !important;
@@ -1284,25 +1514,21 @@ label {
   color: #111 !important;
   margin: 14px 0 5px !important;
   padding-bottom: 3px !important;
-  background: none !important;
-  -webkit-text-fill-color: #111 !important;
 }
-.resume-doc p {
+
+.resume-mdx-editor p {
   margin-bottom: 3px;
   font-size: 10pt;
 }
-.resume-doc ul {
+
+.resume-mdx-editor ul {
   margin: 0 0 6px 18px;
   list-style: disc;
 }
-.resume-doc li {
+
+.resume-mdx-editor li {
   margin-bottom: 2px;
   font-size: 10pt;
-}
-.resume-doc .contact-line {
-  font-size: 9.5pt;
-  color: #444;
-  margin-bottom: 8px;
 }
 
 @media print {
@@ -1322,6 +1548,11 @@ label {
     padding: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
+    min-height: 1123px !important;
+  }
+  .resume-mdx-editor,
+  .resume-mdx-editor [contenteditable] {
+    min-height: 1050px !important;
   }
   body {
     background: white !important;

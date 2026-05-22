@@ -1,6 +1,8 @@
 import { Link, useLocation } from "react-router";
+import { motion, useReducedMotion } from "framer-motion";
 import { usePuterStore } from "~/lib/puter";
 import { Logo } from "~/components/atoms";
+import { springs } from "~/lib/motion";
 
 const NAV_LINKS = [
   { to: "/", label: "dashboard", exact: true },
@@ -8,12 +10,12 @@ const NAV_LINKS = [
   { to: "/history", label: "history", exact: false },
   { to: "/pricing", label: "pricing", exact: false },
   { to: "/settings", label: "settings", exact: false },
-  { to: "/landing", label: "home", exact: false },
 ];
 
 const Navbar = () => {
   const { auth } = usePuterStore();
   const location = useLocation();
+  const reduced = useReducedMotion();
   const user = auth.user;
   const initials = user?.username
     ? user.username.slice(0, 2).toUpperCase()
@@ -30,8 +32,9 @@ const Navbar = () => {
         justifyContent: "space-between",
         padding: "10px 16px",
         borderBottom: "1px solid var(--border)",
-        background: "rgba(11,11,10,0.88)",
-        backdropFilter: "blur(8px)",
+        background: "rgba(11,11,10,0.9)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         position: "sticky",
         top: 0,
         zIndex: 50,
@@ -41,7 +44,14 @@ const Navbar = () => {
     >
       {/* Logo */}
       <Link to="/landing" style={{ textDecoration: "none", flexShrink: 0 }}>
-        <Logo size={15} />
+        <motion.div
+          whileHover={reduced ? {} : { scale: 1.04 }}
+          whileTap={reduced ? {} : { scale: 0.97 }}
+          transition={springs.snappy}
+          style={{ display: "inline-flex" }}
+        >
+          <Logo size={15} />
+        </motion.div>
       </Link>
 
       {/* Nav links — desktop */}
@@ -50,7 +60,7 @@ const Navbar = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 4,
+          gap: 2,
           flex: 1,
           justifyContent: "center",
         }}
@@ -62,28 +72,51 @@ const Navbar = () => {
               key={to}
               to={to}
               style={{
+                position: "relative",
                 fontFamily: "var(--font-mono)",
                 fontSize: 12,
                 color: active ? "var(--fg-1)" : "var(--fg-3)",
                 textDecoration: "none",
-                padding: "5px 10px",
+                padding: "5px 12px",
                 borderRadius: "var(--radius-sm)",
-                background: active ? "var(--surface)" : "transparent",
-                border: active
-                  ? "1px solid var(--border-hi)"
-                  : "1px solid transparent",
                 letterSpacing: "0.04em",
-                transition: "all var(--dur-fast)",
+                transition: "color var(--dur-fast)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
               }}
               onMouseEnter={(e) => {
-                if (!active) e.currentTarget.style.color = "var(--fg-1)";
+                if (!active)
+                  (e.currentTarget as HTMLElement).style.color = "var(--fg-1)";
               }}
               onMouseLeave={(e) => {
-                if (!active) e.currentTarget.style.color = "var(--fg-3)";
+                if (!active)
+                  (e.currentTarget as HTMLElement).style.color = "var(--fg-3)";
               }}
             >
+              {/* Sliding active background */}
               {active && (
-                <span style={{ color: "var(--phos)", marginRight: 4 }}>▶</span>
+                <motion.span
+                  layoutId="nav-active-bg"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-hi)",
+                    borderRadius: "var(--radius-sm)",
+                    zIndex: -1,
+                  }}
+                  transition={reduced ? { duration: 0 } : springs.smooth}
+                />
+              )}
+              {active && (
+                <motion.span
+                  layoutId="nav-active-dot"
+                  style={{ color: "var(--phos)", fontSize: 8, lineHeight: 1 }}
+                  transition={reduced ? { duration: 0 } : springs.smooth}
+                >
+                  ◆
+                </motion.span>
               )}
               {label}
             </Link>
@@ -91,7 +124,7 @@ const Navbar = () => {
         })}
       </div>
 
-      {/* Right: user + sign out */}
+      {/* Right: user + actions */}
       <div
         style={{
           display: "flex",
@@ -115,10 +148,12 @@ const Navbar = () => {
               fontSize: 12,
             }}
           >
-            <span
+            <motion.span
+              whileHover={reduced ? {} : { scale: 1.1 }}
+              transition={springs.snappy}
               style={{
-                width: 18,
-                height: 18,
+                width: 20,
+                height: 20,
                 background: "var(--copper)",
                 color: "var(--bg)",
                 display: "inline-flex",
@@ -126,11 +161,13 @@ const Navbar = () => {
                 justifyContent: "center",
                 fontSize: 10,
                 fontWeight: 700,
+                borderRadius: "50%",
                 flexShrink: 0,
+                boxShadow: "0 0 8px var(--copper-glow)",
               }}
             >
               {initials}
-            </span>
+            </motion.span>
             <span
               style={{
                 fontFamily: "var(--font-mono)",
@@ -147,32 +184,46 @@ const Navbar = () => {
         )}
 
         {auth.isAuthenticated && (
-          <Link
-            to="/upload"
-            className="rl-btn rl-btn-primary"
-            style={{ fontSize: 12 }}
-          >
-            $ upload<span className="rl-mobile-hide">_resume</span> →
+          <Link to="/upload" style={{ textDecoration: "none" }}>
+            <motion.span
+              className="rl-btn rl-btn-primary"
+              style={{
+                fontSize: 12,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              whileHover={reduced ? {} : { y: -2, scale: 1.02 }}
+              whileTap={reduced ? {} : { y: 0, scale: 0.97 }}
+              transition={springs.snappy}
+            >
+              $ upload<span className="rl-mobile-hide">_resume</span> →
+            </motion.span>
           </Link>
         )}
 
         {auth.isAuthenticated ? (
-          <button
+          <motion.button
             onClick={auth.signOut}
             className="rl-btn rl-btn-ghost rl-mobile-hide"
             style={{ fontSize: 12 }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ember)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "")}
+            whileHover={reduced ? {} : { color: "var(--ember)" }}
+            whileTap={reduced ? {} : { scale: 0.97 }}
+            transition={springs.snappy}
           >
             sign_out
-          </button>
+          </motion.button>
         ) : (
-          <Link
-            to="/auth"
-            className="rl-btn rl-btn-primary"
-            style={{ fontSize: 12 }}
-          >
-            $ sign_in →
+          <Link to="/auth" style={{ textDecoration: "none" }}>
+            <motion.span
+              className="rl-btn rl-btn-primary"
+              style={{ fontSize: 12, display: "inline-flex" }}
+              whileHover={reduced ? {} : { y: -2, scale: 1.02 }}
+              whileTap={reduced ? {} : { scale: 0.97 }}
+              transition={springs.snappy}
+            >
+              $ sign_in →
+            </motion.span>
           </Link>
         )}
       </div>

@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import PricingTiers from "~/components/PricingTiers";
-import { Corners, Cursor, FeatureChip, ScoreBar } from "~/components/atoms";
+import {
+  Corners,
+  Cursor,
+  FadeInView,
+  FeatureChip,
+  ScoreBar,
+} from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
+import { springs, staggerContainer, fadeUp } from "~/lib/motion";
 
 // ── Animated terminal demo ─────────────────────────────────────────────
 const TERMINAL_LINES = [
@@ -475,16 +483,15 @@ function FAQItem({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const reduced = useReducedMotion();
+
   return (
-    <div
-      style={{
-        borderBottom: "1px dashed var(--border)",
-        padding: "0",
-      }}
-    >
-      <button
+    <div style={{ borderBottom: "1px dashed var(--border)" }}>
+      <motion.button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        whileHover={reduced ? {} : { x: 2 }}
+        transition={springs.snappy}
         style={{
           width: "100%",
           background: "none",
@@ -497,19 +504,24 @@ function FAQItem({
           textAlign: "left",
         }}
       >
-        <span
+        <motion.span
+          animate={{
+            rotate: open ? 45 : 0,
+            color: open ? "var(--phos)" : "var(--fg-3)",
+          }}
+          transition={reduced ? { duration: 0 } : springs.snappy}
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 16,
-            color: open ? "var(--phos)" : "var(--fg-3)",
+            fontSize: 18,
             flexShrink: 0,
             width: 16,
             lineHeight: 1,
-            transition: "color 150ms",
+            display: "inline-block",
+            transformOrigin: "center",
           }}
         >
-          {open ? "−" : "+"}
-        </span>
+          +
+        </motion.span>
         <span
           style={{
             fontFamily: "var(--font-mono)",
@@ -520,21 +532,33 @@ function FAQItem({
         >
           {q}
         </span>
-      </button>
-      {open && (
-        <div
-          style={{
-            paddingBottom: 16,
-            paddingLeft: 28,
-            fontFamily: "var(--font-body)",
-            fontSize: 14,
-            color: "var(--fg-2)",
-            lineHeight: 1.75,
-          }}
-        >
-          {a}
-        </div>
-      )}
+      </motion.button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="answer"
+            initial={reduced ? {} : { height: 0, opacity: 0 }}
+            animate={reduced ? {} : { height: "auto", opacity: 1 }}
+            exit={reduced ? {} : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <div
+              style={{
+                paddingBottom: 16,
+                paddingLeft: 28,
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                color: "var(--fg-2)",
+                lineHeight: 1.75,
+              }}
+            >
+              {a}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -689,9 +713,15 @@ export default function Landing() {
           boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        {/* Left column — staggered entrance */}
+        <motion.div
+          variants={staggerContainer(0.09, 0.1)}
+          initial="hidden"
+          animate="visible"
+          style={{ display: "flex", flexDirection: "column", gap: 24 }}
+        >
           {/* Badge */}
-          <div style={{ display: "inline-flex" }}>
+          <motion.div variants={fadeUp} style={{ display: "inline-flex" }}>
             <span
               className="rl-pill rl-pill-good"
               style={{ display: "inline-flex", gap: 8 }}
@@ -699,10 +729,11 @@ export default function Landing() {
               <span className="rl-dot" style={{ width: 7, height: 7 }} />
               v1.0 · now in public beta
             </span>
-          </div>
+          </motion.div>
 
           {/* Headline */}
-          <h1
+          <motion.h1
+            variants={fadeUp}
             style={{
               fontSize: "clamp(40px, 6vw, 72px)",
               fontWeight: 500,
@@ -716,10 +747,11 @@ export default function Landing() {
             <br />
             you wish you knew
             <Cursor />
-          </h1>
+          </motion.h1>
 
           {/* Body */}
-          <p
+          <motion.p
+            variants={fadeUp}
             style={{
               fontFamily: "var(--font-body)",
               fontSize: 16,
@@ -733,23 +765,58 @@ export default function Landing() {
             five dimensions, and tells you exactly what to rewrite. Three
             seconds. No fluff. Built for engineers who'd rather read a
             structured report than a vibe check.
-          </p>
+          </motion.p>
 
           {/* CTAs */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link to="/auth" className="rl-btn rl-btn-primary rl-btn-lg">
-              $ analyze_my_resume →
+          <motion.div
+            variants={fadeUp}
+            style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+          >
+            <Link to="/auth">
+              <motion.span
+                className="rl-btn rl-btn-primary rl-btn-lg"
+                style={{
+                  display: "inline-flex",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                whileHover={{ y: -3, scale: 1.03 }}
+                whileTap={{ y: 0, scale: 0.97 }}
+                transition={springs.snappy}
+              >
+                $ analyze_my_resume →{/* Shimmer on hover */}
+                <motion.span
+                  initial={{ x: "-100%", opacity: 0 }}
+                  whileHover={{ x: "100%", opacity: 0.15 }}
+                  transition={{ duration: 0.5 }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(90deg, transparent, white, transparent)",
+                    pointerEvents: "none",
+                  }}
+                />
+              </motion.span>
             </Link>
-            <a
+            <motion.a
               href="#before_after"
               className="rl-btn rl-btn-secondary rl-btn-lg"
+              whileHover={{
+                y: -2,
+                borderColor: "var(--copper)",
+                color: "var(--copper-hi)",
+              }}
+              whileTap={{ y: 0, scale: 0.97 }}
+              transition={springs.snappy}
             >
               see_sample_report
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
 
           {/* Trust indicators */}
-          <div
+          <motion.div
+            variants={fadeUp}
             style={{
               display: "flex",
               gap: 20,
@@ -761,9 +828,12 @@ export default function Landing() {
               "✓ no signup to try",
               "✓ pdf never leaves your puter cloud",
               "✓ 3 sec avg",
-            ].map((t) => (
-              <span
+            ].map((t, i) => (
+              <motion.span
                 key={t}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 + i * 0.08, duration: 0.5 }}
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: 11,
@@ -772,25 +842,26 @@ export default function Landing() {
                 }}
               >
                 {t}
-              </span>
+              </motion.span>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Terminal demo */}
-        <div>
+        {/* Terminal demo — slides in from right */}
+        <motion.div
+          initial={{ opacity: 0, x: 40, filter: "blur(8px)" }}
+          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1], delay: 0.25 }}
+        >
           <TerminalDemo />
-        </div>
+        </motion.div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section
         id="how_it_works"
         className="rl-landing-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-        }}
+        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
       >
         <div
           style={{
@@ -801,7 +872,7 @@ export default function Landing() {
             gap: 48,
           }}
         >
-          <div
+          <FadeInView
             style={{
               display: "flex",
               flexDirection: "column",
@@ -821,9 +892,13 @@ export default function Landing() {
             >
               three commands. three seconds.
             </h2>
-          </div>
+          </FadeInView>
 
-          <div
+          <motion.div
+            variants={staggerContainer(0.1)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -850,10 +925,17 @@ export default function Landing() {
                 desc: "Get specific bullet rewrites, a keyword diff you can copy-paste, and tailored interview questions. Approve or skip each suggestion individually.",
               },
             ].map((s) => (
-              <div
+              <motion.div
                 key={s.step}
+                variants={fadeUp}
+                whileHover={{
+                  y: -4,
+                  boxShadow: "var(--depth-card-hover)",
+                  borderColor: "var(--border-hi)",
+                }}
+                transition={springs.smooth}
                 className="rl-card"
-                style={{ position: "relative" }}
+                style={{ position: "relative", willChange: "transform" }}
               >
                 <Corners />
                 <div
@@ -909,9 +991,9 @@ export default function Landing() {
                     {s.desc}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -933,7 +1015,7 @@ export default function Landing() {
             gap: 48,
           }}
         >
-          <div
+          <FadeInView
             style={{
               display: "flex",
               flexDirection: "column",
@@ -956,72 +1038,75 @@ export default function Landing() {
               get an unfair edge
               <Cursor />
             </h2>
-          </div>
+          </FadeInView>
 
           <div className="rl-ba-grid">
             {/* Before */}
-            <div className="rl-card" style={{ position: "relative" }}>
-              <Corners />
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
-              >
+            <FadeInView delay={0.05}>
+              <div className="rl-card" style={{ position: "relative" }}>
+                <Corners />
                 <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--fg-3)",
-                      letterSpacing: "0.15em",
-                    }}
-                  >
-                    BEFORE
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 28,
-                      fontWeight: 700,
-                      color: "var(--ember)",
-                      letterSpacing: "-1px",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    48
-                    <span style={{ fontSize: 14, color: "var(--fg-4)" }}>
-                      /100
-                    </span>
-                  </span>
-                </div>
-                {[
-                  "Helped improve the website.",
-                  "Worked with the team on new features.",
-                  "Used React.",
-                  "Was responsible for code reviews.",
-                ].map((b) => (
                   <div
-                    key={b}
                     style={{
                       display: "flex",
-                      gap: 8,
-                      fontFamily: "var(--font-body)",
-                      fontSize: 13,
-                      color: "var(--fg-3)",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    <span style={{ color: "var(--fg-4)" }}>-</span> {b}
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 11,
+                        color: "var(--fg-3)",
+                        letterSpacing: "0.15em",
+                      }}
+                    >
+                      BEFORE
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 28,
+                        fontWeight: 700,
+                        color: "var(--ember)",
+                        letterSpacing: "-1px",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      48
+                      <span style={{ fontSize: 14, color: "var(--fg-4)" }}>
+                        /100
+                      </span>
+                    </span>
                   </div>
-                ))}
+                  {[
+                    "Helped improve the website.",
+                    "Worked with the team on new features.",
+                    "Used React.",
+                    "Was responsible for code reviews.",
+                  ].map((b) => (
+                    <div
+                      key={b}
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 13,
+                        color: "var(--fg-3)",
+                      }}
+                    >
+                      <span style={{ color: "var(--fg-4)" }}>-</span> {b}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </FadeInView>
 
             {/* Rewrite button */}
-            <div
+            <FadeInView
+              delay={0.15}
               className="rl-ba-mid"
               style={{
                 display: "flex",
@@ -1030,7 +1115,19 @@ export default function Landing() {
                 paddingTop: 48,
               }}
             >
-              <div
+              <motion.div
+                animate={{
+                  boxShadow: [
+                    "var(--glow-copper)",
+                    "0 0 28px rgba(196,123,74,0.5)",
+                    "var(--glow-copper)",
+                  ],
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 style={{
                   background: "var(--copper)",
                   color: "var(--bg)",
@@ -1039,78 +1136,87 @@ export default function Landing() {
                   fontWeight: 700,
                   padding: "10px 18px",
                   borderRadius: "var(--radius-md)",
-                  boxShadow: "var(--glow-copper)",
                   whiteSpace: "nowrap",
                 }}
               >
                 $ rewrite
-              </div>
-            </div>
+              </motion.div>
+            </FadeInView>
 
             {/* After */}
-            <div className="rl-card is-phos" style={{ position: "relative" }}>
-              <Corners />
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
-              >
+            <FadeInView delay={0.25}>
+              <div className="rl-card is-phos" style={{ position: "relative" }}>
+                <Corners />
                 <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--fg-3)",
-                      letterSpacing: "0.15em",
-                    }}
-                  >
-                    AFTER
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 28,
-                      fontWeight: 700,
-                      color: "var(--phos)",
-                      letterSpacing: "-1px",
-                      fontVariantNumeric: "tabular-nums",
-                      textShadow: "0 0 14px var(--phos-glow)",
-                    }}
-                  >
-                    89
-                    <span style={{ fontSize: 14, color: "var(--fg-3)" }}>
-                      /100
-                    </span>
-                  </span>
-                </div>
-                {[
-                  "Cut page-load p95 by 200 ms, lifting conversion 8%.",
-                  "Shipped 4 major features end-to-end with 3 engineers; 0 rollbacks.",
-                  "Migrated app to React + TypeScript; reduced bundle 38%.",
-                  "Reviewed 200+ PRs; mentored 3 juniors, 2 promoted in a year.",
-                ].map((b) => (
                   <div
-                    key={b}
                     style={{
                       display: "flex",
-                      gap: 8,
-                      fontFamily: "var(--font-body)",
-                      fontSize: 13,
-                      color: "var(--fg-1)",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    <span style={{ color: "var(--phos)", flexShrink: 0 }}>
-                      +
-                    </span>{" "}
-                    {b}
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 11,
+                        color: "var(--fg-3)",
+                        letterSpacing: "0.15em",
+                      }}
+                    >
+                      AFTER
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 28,
+                        fontWeight: 700,
+                        color: "var(--phos)",
+                        letterSpacing: "-1px",
+                        fontVariantNumeric: "tabular-nums",
+                        textShadow: "0 0 14px var(--phos-glow)",
+                      }}
+                    >
+                      89
+                      <span style={{ fontSize: 14, color: "var(--fg-3)" }}>
+                        /100
+                      </span>
+                    </span>
                   </div>
-                ))}
+                  {[
+                    "Cut page-load p95 by 200 ms, lifting conversion 8%.",
+                    "Shipped 4 major features end-to-end with 3 engineers; 0 rollbacks.",
+                    "Migrated app to React + TypeScript; reduced bundle 38%.",
+                    "Reviewed 200+ PRs; mentored 3 juniors, 2 promoted in a year.",
+                  ].map((b, i) => (
+                    <motion.div
+                      key={b}
+                      initial={{ opacity: 0, x: 8 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{
+                        delay: 0.4 + i * 0.07,
+                        duration: 0.45,
+                        ease: [0.19, 1, 0.22, 1],
+                      }}
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 13,
+                        color: "var(--fg-1)",
+                      }}
+                    >
+                      <span style={{ color: "var(--phos)", flexShrink: 0 }}>
+                        +
+                      </span>{" "}
+                      {b}
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </FadeInView>
           </div>
         </div>
       </section>
@@ -1128,7 +1234,7 @@ export default function Landing() {
         }}
       >
         {/* Header */}
-        <div
+        <FadeInView
           className="rl-testimonials-header"
           style={{
             display: "flex",
@@ -1152,16 +1258,22 @@ export default function Landing() {
             from job-seeker to job-shipper
             <Cursor />
           </h2>
-        </div>
+        </FadeInView>
 
         {/* Marquee track — duplicated for seamless loop */}
         <div className="rl-marquee-wrap">
           <div className="rl-marquee-track">
             {[...TESTIMONIALS, ...TESTIMONIALS].map((t, idx) => (
-              <div
+              <motion.div
                 key={`${t.name}-${idx}`}
                 className="rl-card rl-marquee-card"
                 style={{ position: "relative", flexShrink: 0 }}
+                whileHover={{
+                  y: -4,
+                  scale: 1.02,
+                  boxShadow: "var(--depth-card-hover)",
+                }}
+                transition={springs.smooth}
               >
                 <Corners />
                 <div
@@ -1261,7 +1373,7 @@ export default function Landing() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -1271,10 +1383,7 @@ export default function Landing() {
       <section
         id="pricing"
         className="rl-landing-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-        }}
+        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
       >
         <div
           style={{
@@ -1286,7 +1395,7 @@ export default function Landing() {
             alignItems: "center",
           }}
         >
-          <div
+          <FadeInView
             style={{
               display: "flex",
               flexDirection: "column",
@@ -1306,8 +1415,10 @@ export default function Landing() {
             >
               one tier away from your offer
             </h2>
-          </div>
-          <PricingTiers />
+          </FadeInView>
+          <FadeInView delay={0.1} style={{ width: "100%" }}>
+            <PricingTiers />
+          </FadeInView>
         </div>
       </section>
 
@@ -1315,10 +1426,7 @@ export default function Landing() {
       <section
         id="faq"
         className="rl-landing-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-        }}
+        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
       >
         <div
           style={{
@@ -1329,7 +1437,7 @@ export default function Landing() {
             gap: 48,
           }}
         >
-          <div
+          <FadeInView
             style={{
               display: "flex",
               flexDirection: "column",
@@ -1349,17 +1457,24 @@ export default function Landing() {
             >
               answers, before you ask
             </h2>
-          </div>
+          </FadeInView>
 
-          <div
-            className="rl-card"
-            style={{ position: "relative", padding: "0 24px" }}
-          >
-            <Corners />
-            {FAQS.map((f) => (
-              <FAQItem key={f.q} q={f.q} a={f.a} defaultOpen={f === FAQS[0]} />
-            ))}
-          </div>
+          <FadeInView delay={0.1}>
+            <div
+              className="rl-card"
+              style={{ position: "relative", padding: "0 24px" }}
+            >
+              <Corners />
+              {FAQS.map((f) => (
+                <FAQItem
+                  key={f.q}
+                  q={f.q}
+                  a={f.a}
+                  defaultOpen={f === FAQS[0]}
+                />
+              ))}
+            </div>
+          </FadeInView>
         </div>
       </section>
 
@@ -1370,11 +1485,24 @@ export default function Landing() {
         style={{
           width: "100%",
           borderTop: "1px dashed var(--border)",
-          background:
-            "radial-gradient(800px 400px at 50% 100%, rgba(168,230,163,0.05), transparent 70%)",
+          position: "relative",
           textAlign: "center",
+          overflow: "hidden",
         }}
       >
+        {/* Ambient pulsing glow */}
+        <motion.div
+          animate={{ opacity: [0.04, 0.1, 0.04], scale: [1, 1.08, 1] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(800px 500px at 50% 100%, rgba(168,230,163,0.18), transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
         <div
           style={{
             maxWidth: 720,
@@ -1383,10 +1511,11 @@ export default function Landing() {
             flexDirection: "column",
             alignItems: "center",
             gap: 32,
+            position: "relative",
           }}
         >
-          {/* Big stat */}
-          <div
+          {/* Animated big stat */}
+          <FadeInView
             style={{
               display: "flex",
               flexDirection: "column",
@@ -1394,7 +1523,18 @@ export default function Landing() {
               gap: 4,
             }}
           >
-            <span
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
+              whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
+              animate={{
+                textShadow: [
+                  "0 0 24px rgba(168,230,163,0.3)",
+                  "0 0 56px rgba(168,230,163,0.6)",
+                  "0 0 24px rgba(168,230,163,0.3)",
+                ],
+              }}
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "clamp(64px, 10vw, 96px)",
@@ -1402,12 +1542,12 @@ export default function Landing() {
                 color: "var(--phos)",
                 letterSpacing: "-4px",
                 lineHeight: 1,
-                textShadow: "0 0 40px var(--phos-glow)",
                 fontVariantNumeric: "tabular-nums",
+                display: "inline-block",
               }}
             >
               87
-            </span>
+            </motion.span>
             <span
               style={{
                 fontFamily: "var(--font-mono)",
@@ -1418,43 +1558,66 @@ export default function Landing() {
             >
               avg score after first revision
             </span>
-          </div>
+          </FadeInView>
 
-          <h2
-            style={{
-              fontSize: "clamp(28px, 4vw, 48px)",
-              color: "var(--fg-1)",
-              fontWeight: 500,
-              letterSpacing: "-1.5px",
-              lineHeight: 1.1,
-              margin: 0,
-            }}
-          >
-            your next offer is one
-            <br />
-            analysis away
-            <Cursor />
-          </h2>
+          <FadeInView delay={0.1}>
+            <h2
+              style={{
+                fontSize: "clamp(28px, 4vw, 48px)",
+                color: "var(--fg-1)",
+                fontWeight: 500,
+                letterSpacing: "-1.5px",
+                lineHeight: 1.1,
+                margin: 0,
+              }}
+            >
+              your next offer is one
+              <br />
+              analysis away
+              <Cursor />
+            </h2>
+          </FadeInView>
 
-          <Link
-            to="/auth"
-            className="rl-btn rl-btn-primary rl-btn-lg"
-            style={{ fontSize: 16, padding: "16px 32px" }}
-          >
-            $ analyze_my_resume →
-          </Link>
+          <FadeInView delay={0.2}>
+            <Link to="/auth">
+              <motion.span
+                className="rl-btn rl-btn-primary rl-btn-lg"
+                style={{
+                  fontSize: 16,
+                  padding: "16px 32px",
+                  display: "inline-flex",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                whileHover={{ y: -3, scale: 1.04 }}
+                whileTap={{ y: 0, scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                animate={{
+                  boxShadow: [
+                    "0 0 18px rgba(168,230,163,0.25), inset 0 -3px 0 rgba(95,165,92,1)",
+                    "0 0 36px rgba(168,230,163,0.5), inset 0 -3px 0 rgba(95,165,92,1)",
+                    "0 0 18px rgba(168,230,163,0.25), inset 0 -3px 0 rgba(95,165,92,1)",
+                  ],
+                }}
+              >
+                $ analyze_my_resume →
+              </motion.span>
+            </Link>
+          </FadeInView>
 
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--fg-4)",
-              margin: 0,
-              letterSpacing: "0.08em",
-            }}
-          >
-            no signup · no credit card · pdf stays private
-          </p>
+          <FadeInView delay={0.3}>
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--fg-4)",
+                margin: 0,
+                letterSpacing: "0.08em",
+              }}
+            >
+              no signup · no credit card · pdf stays private
+            </p>
+          </FadeInView>
         </div>
       </section>
 

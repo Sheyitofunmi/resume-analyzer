@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { isRouteErrorResponse, useRouteError } from "react-router";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import FileUploader from "~/components/FileUploader";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router";
 import { convertPdfToImage } from "~/lib/pdf2img";
 import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
+import { springs } from "~/lib/motion";
 
 const STEPS = [
   { label: "convert PDF to image", cmd: "pdf2img" },
@@ -15,6 +17,298 @@ const STEPS = [
   { label: "analyze against job description", cmd: "ai.feedback" },
   { label: "save analysis", cmd: "kv.set" },
 ];
+
+// ── Cinematic AI processing panel ──────────────────────────────────────
+function ProcessingPanel({
+  currentStep,
+  statusText,
+}: {
+  currentStep: number;
+  statusText: string;
+}) {
+  const reduced = useReducedMotion();
+  const totalDone = Math.max(0, currentStep);
+  const progressPct = (totalDone / STEPS.length) * 100;
+
+  return (
+    <motion.div
+      initial={reduced ? {} : { opacity: 0, y: 20, filter: "blur(8px)" }}
+      animate={reduced ? {} : { opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
+      style={{
+        width: "100%",
+        maxWidth: 560,
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+      }}
+    >
+      {/* Main card */}
+      <div
+        className="rl-card is-phos"
+        style={{ position: "relative", padding: 0, overflow: "hidden" }}
+      >
+        {/* Ambient scan line */}
+        {!reduced && (
+          <motion.div
+            animate={{ y: ["-100%", "400%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              height: 1,
+              background:
+                "linear-gradient(90deg, transparent 0%, var(--phos-dim) 30%, var(--phos) 50%, var(--phos-dim) 70%, transparent 100%)",
+              opacity: 0.5,
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+        )}
+
+        <span className="rl-corner tl" />
+        <span className="rl-corner tr" />
+        <span className="rl-corner bl" />
+        <span className="rl-corner br" />
+
+        {/* Progress bar at top */}
+        <div
+          style={{
+            height: 2,
+            background: "var(--border)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <motion.div
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              background:
+                "linear-gradient(90deg, var(--phos-dim), var(--phos))",
+              boxShadow: "0 0 12px var(--phos-glow)",
+            }}
+          />
+        </div>
+
+        {/* Steps */}
+        <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
+          {STEPS.map(({ label, cmd }, i) => {
+            const done = i < currentStep;
+            const active = i === currentStep;
+
+            return (
+              <motion.li
+                key={label}
+                animate={{
+                  background: active ? "rgba(168,230,163,0.05)" : "transparent",
+                }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: "14px 20px",
+                  borderBottom:
+                    i < STEPS.length - 1 ? "1px dashed var(--border)" : "none",
+                  position: "relative",
+                }}
+              >
+                {/* Step indicator */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: 20,
+                    height: 20,
+                    position: "relative",
+                  }}
+                >
+                  <AnimatePresence mode="wait">
+                    {done ? (
+                      <motion.span
+                        key="done"
+                        initial={reduced ? {} : { scale: 0, rotate: -90 }}
+                        animate={reduced ? {} : { scale: 1, rotate: 0 }}
+                        transition={springs.elastic}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 13,
+                          color: "var(--phos)",
+                        }}
+                      >
+                        ✓
+                      </motion.span>
+                    ) : active ? (
+                      <motion.span
+                        key="active"
+                        animate={reduced ? {} : { rotate: [0, 360] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 14,
+                          color: "var(--copper)",
+                        }}
+                      >
+                        ◈
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="waiting"
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          color: "var(--fg-4)",
+                        }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Label */}
+                <motion.span
+                  animate={{
+                    color: done
+                      ? "var(--phos)"
+                      : active
+                        ? "var(--fg-1)"
+                        : "var(--fg-4)",
+                  }}
+                  transition={{ duration: 0.25 }}
+                  style={{
+                    flex: 1,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 13,
+                  }}
+                >
+                  {label}
+                </motion.span>
+
+                {/* Status tag */}
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={done ? "done" : active ? "running" : "pending"}
+                    initial={reduced ? {} : { opacity: 0, x: 6 }}
+                    animate={reduced ? {} : { opacity: 1, x: 0 }}
+                    exit={reduced ? {} : { opacity: 0, x: -6 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: done
+                        ? "var(--phos-dim)"
+                        : active
+                          ? "var(--copper)"
+                          : "var(--fg-4)",
+                    }}
+                  >
+                    {done ? "done" : active ? "running…" : cmd}
+                  </motion.span>
+                </AnimatePresence>
+
+                {/* Active row: AI thinking bar */}
+                {active && !reduced && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 20,
+                      right: 20,
+                      height: 1,
+                    }}
+                  >
+                    <div className="rl-thinking-bar" />
+                  </motion.div>
+                )}
+              </motion.li>
+            );
+          })}
+        </ol>
+      </div>
+
+      {/* Status text */}
+      <motion.div
+        layout
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "12px 16px",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-md)",
+        }}
+      >
+        <motion.span
+          animate={
+            reduced
+              ? {}
+              : {
+                  boxShadow: [
+                    "0 0 6px var(--phos), 0 0 12px var(--phos-glow)",
+                    "0 0 14px var(--phos), 0 0 24px var(--phos-glow)",
+                    "0 0 6px var(--phos), 0 0 12px var(--phos-glow)",
+                  ],
+                  scale: [1, 1.3, 1],
+                }
+          }
+          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "var(--phos)",
+            flexShrink: 0,
+            display: "inline-block",
+          }}
+        />
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={statusText}
+            initial={reduced ? {} : { opacity: 0, y: 4 }}
+            animate={reduced ? {} : { opacity: 1, y: 0 }}
+            exit={reduced ? {} : { opacity: 0, y: -4 }}
+            transition={{ duration: 0.22 }}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-2)",
+            }}
+            aria-live="polite"
+          >
+            {statusText}
+          </motion.span>
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 const Upload = () => {
   const { fs, ai, kv } = usePuterStore();
@@ -164,7 +458,10 @@ const Upload = () => {
 
       <div className="rl-section" style={{ flex: 1 }}>
         {/* Heading */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.65, ease: [0.19, 1, 0.22, 1] }}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -180,138 +477,33 @@ const Upload = () => {
             <span style={{ color: "var(--phos)" }}>dream_job</span>
             <span className="rl-cursor" />
           </h1>
-          {!isProcessing && (
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--fg-2)",
-                lineHeight: 1.7,
-                maxWidth: 560,
-              }}
-            >
-              Drop your PDF. Paste the JD. We score five dimensions and surface
-              every missing keyword in three seconds.
-            </p>
-          )}
-        </div>
+          <AnimatePresence>
+            {!isProcessing && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  color: "var(--fg-2)",
+                  lineHeight: 1.7,
+                  maxWidth: 560,
+                  overflow: "hidden",
+                }}
+              >
+                Drop your PDF. Paste the JD. We score five dimensions and
+                surface every missing keyword in three seconds.
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {isProcessing ? (
-          /* Progress pipeline */
-          <div
-            className="rl-fade-in"
-            style={{
-              width: "100%",
-              maxWidth: 560,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            <div
-              className="rl-card is-phos"
-              style={{ position: "relative", padding: 0 }}
-            >
-              <span className="rl-corner tl" />
-              <span className="rl-corner tr" />
-              <span className="rl-corner bl" />
-              <span className="rl-corner br" />
-              <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                {STEPS.map(({ label, cmd }, i) => {
-                  const done = i < currentStep;
-                  const active = i === currentStep;
-                  return (
-                    <li
-                      key={label}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 14,
-                        padding: "13px 20px",
-                        borderBottom:
-                          i < STEPS.length - 1
-                            ? "1px dashed var(--border)"
-                            : "none",
-                        background: active
-                          ? "rgba(168,230,163,0.04)"
-                          : "transparent",
-                        transition: "background var(--dur-base)",
-                      }}
-                    >
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 13,
-                          color: done
-                            ? "var(--phos)"
-                            : active
-                              ? "var(--copper)"
-                              : "var(--fg-4)",
-                          width: 16,
-                          textAlign: "center",
-                        }}
-                      >
-                        {done ? "✓" : active ? "▶" : String(i + 1)}
-                      </span>
-                      <span
-                        style={{
-                          flex: 1,
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 13,
-                          color: done
-                            ? "var(--phos)"
-                            : active
-                              ? "var(--fg-1)"
-                              : "var(--fg-4)",
-                        }}
-                      >
-                        {label}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          color: done
-                            ? "var(--phos-dim)"
-                            : active
-                              ? "var(--copper)"
-                              : "var(--fg-4)",
-                        }}
-                      >
-                        {done ? "done" : active ? "running…" : cmd}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "12px 16px",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-md)",
-              }}
-            >
-              <span className="rl-dot" />
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  color: "var(--fg-2)",
-                }}
-                aria-live="polite"
-              >
-                {statusText}
-              </span>
-            </div>
-          </div>
+          /* ── Cinematic AI analysis pipeline ── */
+          <ProcessingPanel currentStep={currentStep} statusText={statusText} />
         ) : (
           /* Upload form */
           <form
@@ -452,13 +644,21 @@ const Upload = () => {
               ))}
             </div>
 
-            <button
+            <motion.button
               type="submit"
               className="rl-btn rl-btn-primary"
-              style={{ alignSelf: "flex-start", fontSize: 14 }}
+              style={{
+                alignSelf: "flex-start",
+                fontSize: 14,
+                position: "relative",
+                overflow: "hidden",
+              }}
+              whileHover={{ y: -2, scale: 1.03 }}
+              whileTap={{ y: 0, scale: 0.97 }}
+              transition={springs.snappy}
             >
               $ run analyze →
-            </button>
+            </motion.button>
           </form>
         )}
       </div>

@@ -1,4 +1,8 @@
+import { motion, useReducedMotion } from "framer-motion";
+import { useCountUp } from "~/hooks/useCountUp";
+
 const ScoreCircle = ({ score = 75 }: { score: number }) => {
+  const reduced = useReducedMotion();
   const stroke = 4;
   const r = 50 - stroke / 2;
   const circumference = 2 * Math.PI * r;
@@ -18,6 +22,9 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
         ? "rgba(230,153,104,0.5)"
         : "rgba(227,83,74,0.5)";
 
+  // Count up from 0 to score
+  const display = useCountUp(score, 1100, !reduced);
+
   return (
     <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0 }}>
       <svg
@@ -26,6 +33,7 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
         viewBox="0 0 100 100"
         style={{ transform: "rotate(-90deg)" }}
       >
+        {/* Track */}
         <circle
           cx="50"
           cy="50"
@@ -34,20 +42,24 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
           strokeWidth={stroke}
           fill="transparent"
         />
-        <circle
+        {/* Animated fill ring */}
+        <motion.circle
           cx="50"
           cy="50"
           r={r}
           stroke={color}
           strokeWidth={stroke}
           fill="transparent"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{
-            transition: "stroke-dashoffset 1200ms cubic-bezier(0.16,1,0.3,1)",
-            filter: `drop-shadow(0 0 6px ${glow})`,
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{
+            duration: reduced ? 0 : 1.2,
+            ease: [0.16, 1, 0.3, 1],
+            delay: reduced ? 0 : 0.1,
           }}
+          style={{ filter: `drop-shadow(0 0 6px ${glow})` }}
         />
       </svg>
       <div
@@ -61,7 +73,10 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
           fontFamily: "var(--font-mono)",
         }}
       >
-        <span
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: reduced ? 0 : 0.2 }}
           style={{
             fontSize: 22,
             fontWeight: 500,
@@ -71,8 +86,8 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
             lineHeight: 1,
           }}
         >
-          {score}
-        </span>
+          {reduced ? score : display}
+        </motion.span>
         <span
           style={{
             fontSize: 9,

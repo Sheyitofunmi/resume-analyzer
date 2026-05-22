@@ -12,6 +12,24 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Resume view page: fix scroll — viewport-locked split panel (2026-05-22)
+
+- **`app/app.css`:** Viewport-locked split-panel layout (≥768px). `rl-resume-main` has `height: 100vh; overflow: hidden; display: flex; flex-direction: column`. Layout has `flex: 1; min-height: 0; overflow: hidden`. Both panels have `min-height: 0; overflow-y: auto` — `min-height: 0` is critical because flex children default to `min-height: auto`, which lets them grow past the parent height and prevents `overflow-y` from ever activating.
+
+### Edit resume page: remove A4 min-height on screen (2026-05-22)
+
+- **`app/app.css`:** Removed `min-height: 1123px` from `.resume-mdx-editor` and `min-height: 1050px` from `.resume-mdx-editor [contenteditable]` — these forced the editor to full A4 height on screen, creating a large blank space when resume content was shorter than a page. Moved both min-heights into `@media print` only so PDF/print exports still fill a full A4 page.
+- **`routes/resume-edit.tsx`:** Removed `minHeight: 1123` from the paper div — same reason.
+
+### Edit resume page: layout fix — overflow + sticky sidebar (2026-05-22)
+
+- **`routes/resume-edit.tsx`:** Removed `overflow: "hidden"` from the body flex container (was cutting off MDXEditor toolbar and content). Added `minHeight: 0` instead. AI tips sidebar made `position: sticky; top: 44px; height: calc(100vh - 44px)` so it stays in view while the page scrolls naturally, with its own internal scroll for long tip lists.
+
+### Edit resume page: MDXEditor integration (2026-05-22)
+
+- **`routes/resume-edit.tsx`:** Full rewrite — replaced `contentEditable` div + manual `document.execCommand` toolbar with `@mdxeditor/editor`. Removed all custom `ToolBtn`/`Sep`/icon components. Uses `toolbarPlugin` with `UndoRedo`, `BoldItalicUnderlineToggles`, `BlockTypeSelect`, `CreateLink`, `ListsToggle`. Saves markdown to `resume-edit-md:<id>` KV key (new). `handleChange` wires `onChange` prop; `handleSave` uses `mdxRef.current?.getMarkdown()`. `textToMarkdown` replaces `textToResumeHtml` for PDF text → markdown conversion. `markdownToHtml` added for `.doc` download. All page chrome (nav, AI sidebar, footer) restyled to CIPHER dark theme.
+- **`app/app.css`:** Removed old `.resume-doc` block. Added `.resume-mdx-editor` block — overrides MDXEditor's own CSS variables (`--baseBg`, `--baseBase`, `--baseBgActive`, `--baseBorder`, `--baseText`, `--baseTextContrast`) to map to CIPHER tokens, giving the toolbar a dark CIPHER look. Resume typography (Georgia serif, pt sizes, h1/h2 styles) applied to `[contenteditable]` and heading elements inside the wrapper.
+
 ### Resume page: viewport-locked split panel (2026-05-22)
 
 - **`routes/resume.tsx`:** Added `className="rl-resume-main"` to `<main>`. Nav gets `className="rl-resume-page-nav"` and loses `position: sticky; top: 0` from inline style (CSS re-adds sticky on mobile, removes it on desktop since nothing scrolls past it). Two-column div switches from `className="max-lg:flex-col-reverse"` to `className="rl-resume-layout"`. Left panel loses `position: sticky; top: 52; height: calc(100vh - 52px); overflowY: auto` from inline styles (all handled by CSS).

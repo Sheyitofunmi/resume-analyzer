@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { formatSize } from "../lib/utils";
+import { springs } from "~/lib/motion";
 
 interface FileUploaderProps {
   onFileSelect?: (file: File | null) => void;
@@ -8,6 +10,7 @@ interface FileUploaderProps {
 
 const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const reduced = useReducedMotion();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -30,149 +33,241 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
     });
 
   const file = acceptedFiles[0] || null;
+  const active = isDragActive || isDragOver;
 
   return (
-    <div
-      {...getRootProps()}
+    <motion.div
+      {...(getRootProps() as object)}
+      animate={
+        reduced
+          ? {}
+          : {
+              borderColor: active ? "var(--phos)" : "var(--border-hi)",
+              background: active ? "rgba(168,230,163,0.06)" : "var(--surface)",
+              scale: active ? 1.015 : 1,
+              boxShadow: active
+                ? "0 0 0 1px var(--phos-dim), 0 0 32px rgba(168,230,163,0.15)"
+                : "none",
+            }
+      }
+      whileHover={
+        reduced || file
+          ? {}
+          : { borderColor: "var(--border-acc)", scale: 1.005 }
+      }
+      transition={springs.smooth}
       style={{
         position: "relative",
         padding: "var(--space-8)",
         textAlign: "center",
         cursor: "pointer",
-        background: isDragActive ? "rgba(168,230,163,0.05)" : "var(--surface)",
-        border: `1px dashed ${isDragActive ? "var(--phos)" : "var(--border-hi)"}`,
+        border: "1px dashed var(--border-hi)",
         borderRadius: "var(--radius-md)",
         minHeight: 200,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "all var(--dur-base)",
-        boxShadow: isDragActive ? "0 0 24px rgba(168,230,163,0.15)" : "none",
+        overflow: "hidden",
       }}
     >
       <input {...getInputProps()} />
 
-      {file ? (
-        <div
+      {/* Animated corner crosshairs that glow when active */}
+      {(["tl", "tr", "bl", "br"] as const).map((pos) => (
+        <motion.span
+          key={pos}
+          className={`rl-corner ${pos}`}
+          animate={
+            reduced
+              ? {}
+              : { borderColor: active ? "var(--phos)" : "var(--copper)" }
+          }
+          transition={{ duration: 0.2 }}
+        />
+      ))}
+
+      {/* Scanning line on drag-over */}
+      {active && !reduced && (
+        <motion.div
+          initial={{ y: "-100%", opacity: 0 }}
+          animate={{ y: "150%", opacity: [0, 0.7, 0.7, 0] }}
+          transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity }}
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "var(--bg-3)",
-            border: "1px solid var(--phos-dim)",
-            borderRadius: "var(--radius-md)",
-            padding: "12px 16px",
-            width: "100%",
-            gap: 12,
+            position: "absolute",
+            left: 0,
+            right: 0,
+            height: 2,
+            background:
+              "linear-gradient(90deg, transparent 0%, var(--phos-dim) 20%, var(--phos) 50%, var(--phos-dim) 80%, transparent 100%)",
+            boxShadow: "0 0 12px var(--phos-glow)",
+            pointerEvents: "none",
           }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span style={{ color: "var(--phos)", fontSize: 20, flexShrink: 0 }}>
-            ✓
-          </span>
-          <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                color: "var(--fg-1)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {file.name}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--fg-3)",
-              }}
-            >
-              {formatSize(file.size)} · pdf
-            </p>
-          </div>
-          <button
-            style={{
-              background: "none",
-              border: "1px solid var(--border)",
-              color: "var(--fg-3)",
-              cursor: "pointer",
-              padding: "4px 8px",
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              borderRadius: "var(--radius-sm)",
-              transition: "all var(--dur-fast)",
-              flexShrink: 0,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--ember)";
-              e.currentTarget.style.borderColor = "var(--ember-dim)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--fg-3)";
-              e.currentTarget.style.borderColor = "var(--border)";
-            }}
-            onClick={() => onFileSelect?.(null)}
-          >
-            ✕ remove
-          </button>
-        </div>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 32,
-              color: isDragActive ? "var(--phos)" : "var(--fg-4)",
-              lineHeight: 1,
-              transition: "color var(--dur-base)",
-            }}
-          >
-            ↓
-          </span>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                color: "var(--fg-2)",
-              }}
-            >
-              {isDragActive ? (
-                <span style={{ color: "var(--phos)" }}>drop_resume_here</span>
-              ) : (
-                <>
-                  <span style={{ color: "var(--fg-1)" }}>click_to_upload</span>{" "}
-                  or drag and drop
-                </>
-              )}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--fg-3)",
-              }}
-            >
-              // pdf · max {formatSize(maxFileSize)}
-            </p>
-          </div>
-        </div>
+        />
       )}
-    </div>
+
+      <AnimatePresence mode="wait">
+        {file ? (
+          <motion.div
+            key="file"
+            initial={reduced ? {} : { opacity: 0, scale: 0.95, y: 8 }}
+            animate={reduced ? {} : { opacity: 1, scale: 1, y: 0 }}
+            exit={reduced ? {} : { opacity: 0, scale: 0.95, y: -8 }}
+            transition={springs.smooth}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "var(--bg-3)",
+              border: "1px solid var(--phos-dim)",
+              borderRadius: "var(--radius-md)",
+              padding: "12px 16px",
+              width: "100%",
+              gap: 12,
+              boxShadow: "0 0 16px rgba(168,230,163,0.1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <motion.span
+              initial={reduced ? {} : { scale: 0, rotate: -90 }}
+              animate={reduced ? {} : { scale: 1, rotate: 0 }}
+              transition={{ ...springs.elastic, delay: 0.1 }}
+              style={{
+                color: "var(--phos)",
+                fontSize: 20,
+                flexShrink: 0,
+                display: "inline-block",
+              }}
+            >
+              ✓
+            </motion.span>
+            <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-1)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {file.name}
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  color: "var(--fg-3)",
+                  marginTop: 2,
+                }}
+              >
+                {formatSize(file.size)} · pdf
+              </p>
+            </div>
+            <motion.button
+              whileHover={
+                reduced
+                  ? {}
+                  : { color: "var(--ember)", borderColor: "var(--ember-dim)" }
+              }
+              whileTap={reduced ? {} : { scale: 0.95 }}
+              transition={springs.snappy}
+              style={{
+                background: "none",
+                border: "1px solid var(--border)",
+                color: "var(--fg-3)",
+                cursor: "pointer",
+                padding: "4px 8px",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                borderRadius: "var(--radius-sm)",
+                flexShrink: 0,
+              }}
+              onClick={() => onFileSelect?.(null)}
+            >
+              ✕ remove
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="empty"
+            initial={reduced ? {} : { opacity: 0 }}
+            animate={reduced ? {} : { opacity: 1 }}
+            exit={reduced ? {} : { opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <motion.span
+              animate={
+                reduced
+                  ? {}
+                  : {
+                      color: active ? "var(--phos)" : "var(--fg-4)",
+                      y: active ? [0, -6, 0] : 0,
+                    }
+              }
+              transition={
+                active
+                  ? { duration: 0.6, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 0.2 }
+              }
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 32,
+                lineHeight: 1,
+                display: "inline-block",
+              }}
+            >
+              ↓
+            </motion.span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--fg-2)",
+                }}
+              >
+                {active ? (
+                  <motion.span
+                    initial={reduced ? {} : { opacity: 0, scale: 0.9 }}
+                    animate={reduced ? {} : { opacity: 1, scale: 1 }}
+                    style={{ color: "var(--phos)" }}
+                  >
+                    drop_resume_here
+                  </motion.span>
+                ) : (
+                  <>
+                    <span style={{ color: "var(--fg-1)" }}>
+                      click_to_upload
+                    </span>{" "}
+                    or drag and drop
+                  </>
+                )}
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  color: "var(--fg-3)",
+                }}
+              >
+                // pdf · max {formatSize(maxFileSize)}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
