@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSpring, animated } from "@react-spring/web";
 
 const STATS = [
   { value: 5, suffix: "", label: "ai_metrics" },
@@ -6,24 +7,6 @@ const STATS = [
   { value: 3, suffix: "s", label: "avg_analysis" },
   { value: 98, suffix: "%", label: "ats_coverage" },
 ];
-
-function useCountUp(target: number, duration: number, active: boolean) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!active) return;
-    let raf: number;
-    const startTime = performance.now();
-    const tick = (now: number) => {
-      const progress = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration, active]);
-  return count;
-}
 
 function StatItem({
   value,
@@ -41,13 +24,19 @@ function StatItem({
   divider: boolean;
 }) {
   const [show, setShow] = useState(false);
+  const [{ num }, api] = useSpring(() => ({ num: 0 }));
+
   useEffect(() => {
     if (!animate) return;
-    const t = setTimeout(() => setShow(true), delay);
+    const t = setTimeout(() => {
+      setShow(true);
+      api.start({
+        num: value,
+        config: { mass: 1, tension: 52, friction: 16 },
+      });
+    }, delay);
     return () => clearTimeout(t);
-  }, [animate, delay]);
-
-  const count = useCountUp(value, 1200, show);
+  }, [animate, delay, value, api]);
 
   return (
     <div
@@ -62,7 +51,7 @@ function StatItem({
         transition: "opacity 400ms",
       }}
     >
-      <span
+      <animated.span
         className="rl-stat-value"
         style={{
           fontFamily: "var(--font-mono)",
@@ -75,9 +64,8 @@ function StatItem({
           textShadow: "0 0 14px var(--phos-glow)",
         }}
       >
-        {count}
-        {suffix}
-      </span>
+        {num.to((n) => `${Math.round(n)}${suffix}`)}
+      </animated.span>
       <span
         style={{
           fontFamily: "var(--font-mono)",
@@ -124,7 +112,6 @@ const StatsStrip = () => {
         position: "relative",
       }}
     >
-      {/* Corner crosshairs */}
       <span className="rl-corner tl" />
       <span className="rl-corner tr" />
       <span className="rl-corner bl" />

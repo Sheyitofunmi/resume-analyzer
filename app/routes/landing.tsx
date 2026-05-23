@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSpring, animated } from "@react-spring/web";
+import { useTyped } from "~/hooks/useTyped";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import PricingTiers from "~/components/PricingTiers";
@@ -121,18 +123,8 @@ function TerminalDemo() {
         <button
           type="button"
           onClick={togglePause}
-          style={{
-            background: "none",
-            border: "1px solid var(--border-hi)",
-            borderRadius: "var(--radius-sm)",
-            padding: "2px 8px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            color: paused ? "var(--copper)" : "var(--fg-3)",
-            cursor: "pointer",
-            letterSpacing: "0.05em",
-            transition: "color 150ms, border-color 150ms",
-          }}
+          className="rl-btn-terminal"
+          style={{ color: paused ? "var(--copper)" : "var(--fg-3)" }}
         >
           {paused ? "▶ resume" : "⏸ pause"}
         </button>
@@ -563,6 +555,291 @@ function FAQItem({
   );
 }
 
+// ── Grain — animated film grain texture overlay ───────────────────────
+function Grain() {
+  return <div className="rl-grain" aria-hidden="true" />;
+}
+
+// ── HeroBadge — typed.js cycling stats pill ───────────────────────────
+function HeroBadge() {
+  const ref = useTyped(
+    [
+      "v1.0 · now in public beta",
+      "3 sec avg analysis time",
+      "100+ keyword signals",
+      "claude-powered scoring",
+    ],
+    {
+      typeSpeed: 35,
+      backSpeed: 22,
+      backDelay: 2800,
+      startDelay: 1800,
+      showCursor: false,
+    },
+  );
+  return (
+    <span
+      className="rl-pill rl-pill-good"
+      style={{
+        display: "inline-flex",
+        gap: 8,
+        minWidth: 214,
+        whiteSpace: "nowrap",
+        alignItems: "center",
+      }}
+    >
+      <span className="rl-dot" style={{ width: 7, height: 7, flexShrink: 0 }} />
+      <span ref={ref} style={{ minWidth: 180 }} />
+    </span>
+  );
+}
+
+// ── AnimatedStat — react-spring count-up on viewport entry ───────────
+function AnimatedStat({ value }: { value: number }) {
+  const elRef = useRef<HTMLSpanElement>(null);
+  const [{ num }, api] = useSpring(() => ({ num: 0 }));
+
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          api.start({
+            num: value,
+            config: { mass: 1, tension: 35, friction: 18 },
+          });
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [value, api]);
+
+  return (
+    <animated.span ref={elRef}>{num.to((n) => Math.round(n))}</animated.span>
+  );
+}
+
+// ── VivusTrendLine — SVG path drawn in by Vivus ───────────────────────
+function VivusTrendLine() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          obs.disconnect();
+          import("vivus").then(({ default: Vivus }) => {
+            new Vivus(el as unknown as HTMLElement, {
+              type: "delayed",
+              duration: 160,
+              animTimingFunction: Vivus.EASE_OUT,
+            });
+          });
+        }
+      },
+      { threshold: 0.5 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <svg
+      ref={svgRef}
+      width="100%"
+      height={52}
+      viewBox="0 0 200 52"
+      style={{ marginTop: 8, overflow: "visible" }}
+    >
+      <path
+        d="M 0,46 L 40,40 L 80,32 L 120,22 L 160,12 L 200,5"
+        fill="none"
+        stroke="var(--phos)"
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <circle cx={200} cy={5} r={4} fill="var(--phos)" />
+      <circle
+        cx={200}
+        cy={5}
+        r={8}
+        fill="none"
+        stroke="var(--phos)"
+        strokeWidth={1}
+        opacity={0.35}
+      />
+    </svg>
+  );
+}
+
+// ── FeaturesSection — full grid revealed with AOS ─────────────────────
+function FeaturesSection() {
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // GSAP 3-D tilt on hover
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    import("gsap").then(({ gsap }) => {
+      type H = {
+        card: HTMLElement;
+        onMove: (e: MouseEvent) => void;
+        onLeave: () => void;
+      };
+      const handlers: H[] = [];
+      cardRefs.current.forEach((card) => {
+        if (!card) return;
+        const onMove = (e: MouseEvent) => {
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5;
+          const y = (e.clientY - r.top) / r.height - 0.5;
+          gsap.to(card, {
+            rotateX: -y * 10,
+            rotateY: x * 10,
+            scale: 1.025,
+            duration: 0.25,
+            ease: "power2.out",
+            transformPerspective: 800,
+            overwrite: "auto",
+          });
+        };
+        const onLeave = () => {
+          gsap.to(card, {
+            rotateX: 0,
+            rotateY: 0,
+            scale: 1,
+            duration: 0.5,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
+        };
+        card.addEventListener("mousemove", onMove);
+        card.addEventListener("mouseleave", onLeave);
+        handlers.push({ card, onMove, onLeave });
+      });
+      cleanup = () =>
+        handlers.forEach(({ card, onMove, onLeave }) => {
+          card.removeEventListener("mousemove", onMove);
+          card.removeEventListener("mouseleave", onLeave);
+        });
+    });
+    return () => cleanup?.();
+  }, []);
+
+  return (
+    <section
+      id="features"
+      className="rl-landing-section"
+      style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+    >
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 48,
+        }}
+      >
+        <FadeInView
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
+            textAlign: "center",
+          }}
+        >
+          <span className="rl-eyebrow">// features</span>
+          <h2
+            style={{
+              fontSize: "clamp(28px, 4vw, 48px)",
+              color: "var(--fg-1)",
+              fontWeight: 500,
+              letterSpacing: "-1.5px",
+            }}
+          >
+            five signals that matter
+            <Cursor />
+          </h2>
+        </FadeInView>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {FEATURES.map((f, i) => (
+            <div
+              key={f.tag}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              className="rl-card rl-feature-card"
+              style={{ position: "relative" }}
+              data-aos="fade-up"
+              data-aos-delay={i * 90}
+              data-aos-duration="650"
+            >
+              <Corners />
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--copper)",
+                      fontWeight: 700,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    [{f.tag}]
+                  </span>
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: "var(--fg-1)",
+                    }}
+                  >
+                    {f.title}
+                  </h3>
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: "var(--font-body)",
+                    fontSize: 13,
+                    color: "var(--fg-2)",
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {f.desc}
+                </p>
+                {f.tag === "HX" ? <VivusTrendLine /> : f.viz}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── LandingNavbar ──────────────────────────────────────────────────────
 function LandingNavbar() {
   const { auth } = usePuterStore();
@@ -624,24 +901,30 @@ function LandingNavbar() {
         className="rl-mobile-hide"
         style={{ display: "flex", gap: 28, alignItems: "center" }}
       >
-        {["features", "how_it_works", "pricing", "faq"].map((item) => (
-          <a
-            key={item}
-            href={`#${item}`}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-3)",
-              textDecoration: "none",
-              letterSpacing: "0.05em",
-              transition: "color var(--dur-fast)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-3)")}
-          >
-            {item}
-          </a>
-        ))}
+        {["features", "how_it_works", "before_after", "pricing", "faq"].map(
+          (item) => (
+            <a
+              key={item}
+              href={`#${item}`}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                color: "var(--fg-3)",
+                textDecoration: "none",
+                letterSpacing: "0.05em",
+                transition: "color var(--dur-fast)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--fg-1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--fg-3)")
+              }
+            >
+              {item}
+            </a>
+          ),
+        )}
       </div>
 
       {/* Right CTAs */}
@@ -698,8 +981,53 @@ export default function Landing() {
     return () => obs.disconnect();
   }, []);
 
+  // GSAP: cursor spotlight + scroll progress bar
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cleanup: (() => void) | undefined;
+
+    import("gsap").then(({ gsap }) => {
+      const spotlight = document.createElement("div");
+      spotlight.className = "rl-spotlight";
+      document.body.appendChild(spotlight);
+
+      const progressBar = document.querySelector<HTMLElement>(".rl-scroll-bar");
+
+      const onMouseMove = (e: MouseEvent) => {
+        gsap.to(spotlight, {
+          x: e.clientX,
+          y: e.clientY,
+          duration: 0.85,
+          ease: "power3.out",
+        });
+      };
+
+      const onScroll = () => {
+        const scrolled = window.scrollY;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? scrolled / max : 0;
+        if (progressBar) {
+          gsap.set(progressBar, { scaleX: progress });
+        }
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      cleanup = () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("scroll", onScroll);
+        spotlight.remove();
+      };
+    });
+
+    return () => cleanup?.();
+  }, []);
+
   return (
     <main className="rl-page" style={{ paddingBottom: 0 }}>
+      <Grain />
+      <div className="rl-scroll-bar" />
       <LandingNavbar />
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
@@ -722,13 +1050,7 @@ export default function Landing() {
         >
           {/* Badge */}
           <motion.div variants={fadeUp} style={{ display: "inline-flex" }}>
-            <span
-              className="rl-pill rl-pill-good"
-              style={{ display: "inline-flex", gap: 8 }}
-            >
-              <span className="rl-dot" style={{ width: 7, height: 7 }} />
-              v1.0 · now in public beta
-            </span>
+            <HeroBadge />
           </motion.div>
 
           {/* Headline */}
@@ -894,11 +1216,7 @@ export default function Landing() {
             </h2>
           </FadeInView>
 
-          <motion.div
-            variants={staggerContainer(0.1)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
+          <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -924,10 +1242,9 @@ export default function Landing() {
                 title: "Apply tips & ship",
                 desc: "Get specific bullet rewrites, a keyword diff you can copy-paste, and tailored interview questions. Approve or skip each suggestion individually.",
               },
-            ].map((s) => (
+            ].map((s, i) => (
               <motion.div
                 key={s.step}
-                variants={fadeUp}
                 whileHover={{
                   y: -4,
                   boxShadow: "var(--depth-card-hover)",
@@ -936,6 +1253,9 @@ export default function Landing() {
                 transition={springs.smooth}
                 className="rl-card"
                 style={{ position: "relative", willChange: "transform" }}
+                data-aos="fade-up"
+                data-aos-delay={i * 120}
+                data-aos-duration="650"
               >
                 <Corners />
                 <div
@@ -993,9 +1313,12 @@ export default function Landing() {
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
+
+      {/* ── FEATURES ─────────────────────────────────────────────── */}
+      <FeaturesSection />
 
       {/* ── BEFORE / AFTER ───────────────────────────────────────── */}
       <section
@@ -1190,16 +1513,11 @@ export default function Landing() {
                     "Migrated app to React + TypeScript; reduced bundle 38%.",
                     "Reviewed 200+ PRs; mentored 3 juniors, 2 promoted in a year.",
                   ].map((b, i) => (
-                    <motion.div
+                    <div
                       key={b}
-                      initial={{ opacity: 0, x: 8 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        delay: 0.4 + i * 0.07,
-                        duration: 0.45,
-                        ease: [0.19, 1, 0.22, 1],
-                      }}
+                      data-aos="fade-left"
+                      data-aos-delay={400 + i * 70}
+                      data-aos-duration="450"
                       style={{
                         display: "flex",
                         gap: 8,
@@ -1212,7 +1530,7 @@ export default function Landing() {
                         +
                       </span>{" "}
                       {b}
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1546,7 +1864,7 @@ export default function Landing() {
                 display: "inline-block",
               }}
             >
-              87
+              <AnimatedStat value={87} />
             </motion.span>
             <span
               style={{
@@ -1620,6 +1938,102 @@ export default function Landing() {
           </FadeInView>
         </div>
       </section>
+
+      <div
+        style={{
+          background: "#ffffff",
+          overflow: "hidden",
+          margin: "0 0 64px",
+          width: "100%",
+        }}
+        data-aos="fade-up"
+        data-aos-duration="700"
+      >
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1780 345"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="224.495"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 530.492 62.3984)"
+              fill="#E261E5"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="371.11"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 1328.45 62.3984)"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="762.008"
+              y="54.0938"
+              width="235.199"
+              height="236.908"
+              rx="117.599"
+              fill="#3A93FF"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1624.3"
+              y="86.7773"
+              width="154.917"
+              height="171.543"
+              rx="77.4584"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1346.21"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="0.789062"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="450.288"
+              height="236.907"
+              rx="118.454"
+              transform="matrix(-1 0 0 1 893.008 54.0938)"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="167.631"
+              height="236.907"
+              rx="83.8156"
+              transform="matrix(-1 0 0 1 1425.18 54.0938)"
+              fill="#E261E5"
+            />
+          </g>
+        </svg>
+      </div>
 
       <Footer />
       <MobileBottomNav />

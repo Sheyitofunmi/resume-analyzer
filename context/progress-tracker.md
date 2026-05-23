@@ -4,11 +4,53 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Responsiveness audit pass 2 complete (2026-05-22)
+- Animation library integration (2026-05-22)
 
 ## Current Goal
 
 - Testing and iteration
+
+## Recent Changes
+
+### CTA illustration SVG fix (2026-05-23)
+
+- **`app/routes/landing.tsx`**: Fixed the CTA illustration SVG that was invisible. Two root causes: (1) HTML `class` attribute used instead of JSX `className`, (2) `style="mix-blend-mode:multiply"` string attributes used instead of JSX `style={{ mixBlendMode: 'multiply' }}` objects — both are invalid JSX and cause silent render failure. Wrapped the SVG in a white (`#ffffff`) rounded pill (`borderRadius: 32`) container so `mix-blend-mode: multiply` renders correctly (multiply requires a light background). Added `data-aos="fade-up"` for scroll entrance.
+
+### AOS (Animate On Scroll) integration (2026-05-23)
+
+- **`package.json`**: Added `aos` (dependency) and `@types/aos` (devDependency).
+- **`app/hooks/useLenis.ts`**: Wired `lenis.on('scroll', ...)` to dispatch a native `window` scroll event so AOS triggers correctly alongside Lenis smooth scroll.
+- **`app/root.tsx`**: Imported `aos/dist/aos.css`. Dynamic-imported AOS and called `AOS.init({ duration: 650, easing: 'ease-out-cubic', once: true, offset: 80 })` inside `LenisProvider`.
+- **`app/components/atoms.tsx`**: Rewrote `FadeInView` — removed Framer Motion `whileInView`. Now renders a plain `div` with `data-aos`, `data-aos-duration`, `data-aos-delay`, and `data-aos-easing` attributes. Added optional `animation` prop (default `"fade-up"`).
+- **`app/routes/landing.tsx`**:
+  - `FeaturesSection`: Removed ScrollReveal `useEffect`. Added `data-aos="fade-up"` + `data-aos-delay={i * 90}` to each feature card.
+  - HOW IT WORKS section: Replaced `motion.div` stagger container (`staggerContainer`/`fadeUp` variants + `whileInView`) with a plain `div`. Each step card keeps `motion.div` for hover (`whileHover`) but gains `data-aos="fade-up"` with `data-aos-delay={i * 120}`.
+  - Before/After bullets: Replaced `motion.div` with `whileInView` with a plain `div` using `data-aos="fade-left"` and staggered `data-aos-delay`.
+
+### Button hover effects — Lift + Glow pass (2026-05-23)
+
+- **`app/app.css`**: Enhanced all button hover states with `translateY` lift + colored glow box-shadow:
+  - `.rl-btn-primary:hover` — `translateY(-3px) scale(1.02)` + strong phos green glow.
+  - `.rl-btn-secondary:hover` — `translateY(-2px) scale(1.02)` + copper glow.
+  - `.rl-btn-copper:hover` — `translateY(-2px) scale(1.02)` + stronger copper glow.
+  - `.rl-btn-ghost:hover` — `translateY(-1px)` + border reveal + subtle shadow.
+  - Added `:active` press-back states for all variants.
+  - Added `.rl-btn-terminal` class (new) for the terminal demo pause/resume button with phos hover glow.
+- **`app/routes/landing.tsx`**: Terminal pause/resume button updated to use `.rl-btn-terminal` class instead of full inline styles.
+
+### Animation library integration — "wow" factor pass (2026-05-22)
+
+- **`app/hooks/useTyped.ts`** (new): Dynamic-import wrapper around typed.js. Returns a `ref` that typed.js attaches to, cycling through multiple strings with configurable speeds and cursor.
+- **`app/routes/landing.tsx`**: 5 new components + 2 new libraries wired in:
+  - `TypedHeroLine` (typed.js) — hero headline second line now cycles through 4 taglines ("you wish you knew", "that actually lands jobs", "smarter than your recruiter", "your unfair advantage").
+  - `Grain` — animated film grain overlay (`rl-grain` CSS class, SVG fractalNoise texture shifted via 10-keyframe CSS animation).
+  - `VivusTrendLine` (Vivus) — SVG path for the "score history" feature card draws itself in via Vivus on IntersectionObserver trigger.
+  - `FeaturesSection` (ScrollReveal) — new full features grid section (renders the existing `FEATURES` array that was previously unused) with staggered scroll-reveal entrance per card.
+  - GSAP `useEffect` — spawns a `.rl-spotlight` div and animates it to follow the cursor (`power3.out`, 0.85s lag), creating a subtle phosphor glow that tracks the mouse. Also drives the `.rl-scroll-bar` reading-progress indicator at the top of the page.
+  - LandingNavbar nav links updated to include `before_after` anchor.
+- **`app/components/StatsStrip.tsx`**: Replaced manual `requestAnimationFrame` count-up with `@react-spring/web` `useSpring`. Numbers now animate with spring physics (`tension: 52, friction: 16`) for a more natural overshoot feel.
+- **`app/app.css`**: Added `.rl-grain` keyframe + class, `.rl-scroll-bar` (scroll progress, `scaleX` driven by GSAP), `.rl-spotlight` (cursor glow, 640px radial gradient), `.typed-cursor` (overrides typed.js default cursor to use `var(--phos)` colour), `.rl-feature-card` hover transitions.
+- **`package.json`** (devDependencies): Added `@types/vivus` and `@types/scrollreveal` for TypeScript coverage.
 
 ## Recent Changes
 
