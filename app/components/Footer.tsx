@@ -17,7 +17,7 @@ const Footer = () => {
         width: "100%",
         borderTop: "1px solid var(--border)",
         background: "var(--bg-2)",
-        marginTop: 64,
+        marginTop: 0,
         position: "relative",
         zIndex: 2,
       }}

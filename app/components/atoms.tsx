@@ -552,30 +552,31 @@ export const AnimatedScoreCircle = ({
   );
 };
 
-// ── FadeInView — scroll-triggered reveal wrapper ──────────────────────
+// ── FadeInView — AOS scroll-triggered reveal wrapper ──────────────────
 export const FadeInView = ({
   children,
   delay = 0,
   className,
   style,
+  animation = "fade-up",
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
   style?: CSSProperties;
+  animation?: string;
 }) => {
-  const reduced = useReducedMotion();
   return (
-    <motion.div
+    <div
       className={className}
       style={style}
-      initial={reduced ? {} : { opacity: 0, y: 24, filter: "blur(4px)" }}
-      whileInView={reduced ? {} : { opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.65, ease: [0.19, 1, 0.22, 1], delay }}
+      data-aos={animation}
+      data-aos-duration="650"
+      data-aos-delay={delay ? Math.round(delay * 1000) : undefined}
+      data-aos-easing="ease-out-cubic"
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 

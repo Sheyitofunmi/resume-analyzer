@@ -9,11 +9,11 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import "aos/dist/aos.css";
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
 import { ToastProvider } from "~/components/Toast";
 import CommandPalette from "~/components/CommandPalette";
-import { useLenis } from "~/hooks/useLenis";
 
 function PuterLoadingScreen() {
   return (
@@ -99,8 +99,18 @@ function PuterLoadingScreen() {
   );
 }
 
-function LenisProvider({ children }: { children: React.ReactNode }) {
-  useLenis();
+function AOSProvider({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    import("aos").then(({ default: AOS }) => {
+      AOS.init({
+        duration: 650,
+        easing: "ease-out-cubic",
+        once: true,
+        offset: 80,
+      });
+    });
+  }, []);
+
   return <>{children}</>;
 }
 
@@ -142,7 +152,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {showLoader ? (
           <PuterLoadingScreen />
         ) : (
-          <LenisProvider>{children}</LenisProvider>
+          <AOSProvider>{children}</AOSProvider>
         )}
         <ScrollRestoration />
         <Scripts />

@@ -12,6 +12,34 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### UI: Feature section — full responsive overhaul (2026-05-23)
+
+- **`app/routes/landing.tsx`**: Rewrote `FeaturesSection` for all screen sizes. Card uses `flex-direction: column` + `flex: 1` on the viz area so height adapts rather than being fixed. All padding/font-size values use `clamp()`. Mobile-only `rl-features-mobile-arrows` shown below the card; desktop sidebar nav hidden on ≤860px.
+- **`app/app.css`**: Replaced fixed-size layout classes with `.rl-features-section`, `.rl-features-container`, `.rl-features-row`, `.rl-features-deck` (uses `aspect-ratio: 3/4`), `.rl-features-nav`, `.rl-features-mobile-arrows`. Breakpoints at 860px and 420px.
+
+### UI: Feature cards — vibrant palette, new copy, adaptive viz, responsive alignment (2026-05-23)
+
+- **`app/routes/landing.tsx`**: Updated `FEATURE_COLORS` to vibrant editorial palette (orange, emerald, violet, amber, rose, sky). Rewrote all 6 `FEATURES` entries with punchier titles/descriptions and fully adaptive viz components (no CSS variables — inline rgba so they render correctly on any colored card background). Removed `VivusTrendLine` conditional in favor of `f.viz`.
+- **`app/app.css`**: Replaced fixed `minWidth`/`width`/`height` with `clamp()`-based `.rl-features-deck` and `.rl-features-nav` classes; responsive breakpoint at 860px stacks column with `min(380px, 90vw)` card sizing.
+
+### UI: Feature cards redesigned — Streamtime-style Z-stack (2026-05-23)
+
+- **`app/routes/landing.tsx`**: Replaced dark-grid `FeaturesSection` with a Streamtime-inspired colorful Z-stack deck. Added `FEATURE_COLORS` palette (lime, yellow, violet, sage, coral, sand). Active card has GSAP 3D tilt on hover; back cards fan out with spring animation. Sidebar feature-list navigation + prev/next arrows + progress pill dots. Section background changed to `#ffffff`.
+- **`app/app.css`**: Added `.rl-features-stack-layout` with responsive flex → column stacking at 860px breakpoint.
+
+### Performance: remove animation sources causing jank (2026-05-23)
+
+- **`app/hooks/useLenis.ts`**: Removed Lenis smooth scroll entirely. The `window.dispatchEvent(new Event("scroll"))` on every RAF tick was the primary jank source. Replaced with `scroll-behavior: smooth` in CSS.
+- **`app/root.tsx`**: Removed `useLenis` import and call; renamed `LenisProvider` → `AOSProvider` (AOS still initialises on mount, now uses native scroll events).
+- **`app/app.css`**: Added `scroll-behavior: smooth` to `html, body`. Converted `.rl-scroll-bar` from GSAP-driven (`gsap.set` on every scroll) to CSS scroll-driven animation (`animation-timeline: scroll()`).
+- **`app/routes/landing.tsx`**: Removed GSAP cursor spotlight (global `mousemove` → `gsap.to` every frame), GSAP 3D card tilt (`mousemove` per card), `<Grain />` (SVG feTurbulence on a fixed full-screen overlay running a 10-step keyframe loop — very GPU heavy). Replaced `HeroBadge`/`TypedHeroLine` (typed.js cycling text) with a static pill. Removed `useTyped` import.
+- **`package.json`**: Uninstalled `lenis` package.
+
+### Fix page shaking from animations (2026-05-23)
+
+- **`app/app.css`**: Removed the `rl-grain` animation that was constantly translating a 200%×200% fixed overlay (the biggest shake source). Simplified the grain element to `inset: 0` (no oversized translate hack needed). Changed `rl-pulse` keyframe to fade opacity only — removed the `scale(1.3)` that was causing the hero badge dot to physically shift content.
+- **`app/routes/landing.tsx`**: Removed `scale: [1, 1.08, 1]` from the ambient glow `motion.div` in the final CTA section — scaling a full-section `position: absolute; inset: 0` element causes the whole section to visually jitter. Now only animates opacity.
+
 ### CTA illustration SVG fix (2026-05-23)
 
 - **`app/routes/landing.tsx`**: Fixed the CTA illustration SVG that was invisible. Two root causes: (1) HTML `class` attribute used instead of JSX `className`, (2) `style="mix-blend-mode:multiply"` string attributes used instead of JSX `style={{ mixBlendMode: 'multiply' }}` objects — both are invalid JSX and cause silent render failure. Wrapped the SVG in a white (`#ffffff`) rounded pill (`borderRadius: 32`) container so `mix-blend-mode: multiply` renders correctly (multiply requires a light background). Added `data-aos="fade-up"` for scroll entrance.

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSpring, animated } from "@react-spring/web";
-import { useTyped } from "~/hooks/useTyped";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import PricingTiers from "~/components/PricingTiers";
@@ -173,39 +172,62 @@ function TerminalDemo() {
 const FEATURES = [
   {
     tag: "ATS",
-    title: "ATS compatibility score",
-    desc: "Diff against the parser engines actual recruiters use. We tell you whether your resume even makes it past the bouncers.",
+    title: "Beat the bot, reach the human",
+    desc: "We diff against the exact parser engines recruiters use. Know in seconds if your PDF even clears the first filter.",
     viz: (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 5,
-          marginTop: 8,
-        }}
-      >
-        {[82, 71, 55].map((s, i) => (
-          <ScoreBar key={i} score={s} cells={22} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+        {[
+          { label: "keyword density", val: 82 },
+          { label: "format score", val: 71 },
+          { label: "section match", val: 55 },
+        ].map(({ label, val }) => (
+          <div key={label}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.6)" }}>
+              <span>{label}</span>
+              <span style={{ color: "#fff", fontWeight: 600 }}>{val}%</span>
+            </div>
+            <div style={{ height: 7, borderRadius: 4, background: "rgba(255,255,255,0.18)" }}>
+              <div style={{ width: `${val}%`, height: "100%", borderRadius: 4, background: "rgba(255,255,255,0.9)" }} />
+            </div>
+          </div>
         ))}
+        <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+          <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontFamily: "var(--font-mono)", fontSize: 10, color: "#fff" }}>✓ passes ATS</span>
+          <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(0,0,0,0.12)", fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.55)" }}>87 / 100</span>
+        </div>
       </div>
     ),
   },
   {
     tag: "KW",
-    title: "keyword gap analysis",
-    desc: "Compare every signal in the JD to your resume. Get a list of missing terms with relevance scores. Copy-paste ready.",
+    title: "Never miss a keyword again",
+    desc: "Every signal in the JD ranked by frequency and placement. Copy-paste the missing ones directly into your draft.",
     viz: (
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
         {[
-          { label: "+ React", found: true },
-          { label: "+ TypeScript", found: true },
-          { label: "- GraphQL", found: false },
-          { label: "- Postgres", found: false },
+          { label: "React", ok: true },
+          { label: "TypeScript", ok: true },
+          { label: "Docker", ok: true },
+          { label: "GraphQL", ok: false },
+          { label: "Postgres", ok: false },
+          { label: "K8s", ok: false },
         ].map((k) => (
           <span
             key={k.label}
-            className={`rl-chip ${k.found ? "rl-chip-phos" : "rl-chip-ember"}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              padding: "4px 10px",
+              borderRadius: 20,
+              background: k.ok ? "rgba(5,46,22,0.18)" : "rgba(5,46,22,0.07)",
+              border: `1px solid ${k.ok ? "rgba(5,46,22,0.35)" : "rgba(5,46,22,0.15)"}`,
+              color: k.ok ? "#052e16" : "rgba(5,46,22,0.45)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+            }}
           >
+            <span style={{ fontSize: 8 }}>{k.ok ? "✓" : "+"}</span>
             {k.label}
           </span>
         ))}
@@ -214,78 +236,37 @@ const FEATURES = [
   },
   {
     tag: "RW",
-    title: "AI rewrite suggestions",
-    desc: "Each weak bullet gets a rewrite with stronger verbs, quantified impact, and tighter language. Approve or skip per line.",
+    title: "Rewrite every weak bullet instantly",
+    desc: "Each vague line gets a stronger alternative — action verbs, numbers, impact. Approve or skip, one bullet at a time.",
     viz: (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-          marginTop: 8,
-        }}
-      >
-        <div
-          style={{
-            padding: "8px 10px",
-            background: "rgba(227,83,74,0.08)",
-            border: "1px solid var(--ember-dim)",
-            borderRadius: "var(--radius-sm)",
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--ember)",
-          }}
-        >
-          - "Helped improve the website."
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+        <div style={{ padding: "9px 12px", background: "rgba(0,0,0,0.15)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <span style={{ color: "rgba(255,130,130,0.9)", flexShrink: 0, fontSize: 11 }}>✕</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.45)", textDecoration: "line-through", lineHeight: 1.5 }}>Helped improve the website performance.</span>
         </div>
-        <div
-          style={{
-            padding: "8px 10px",
-            background: "rgba(168,230,163,0.08)",
-            border: "1px solid var(--phos-dim)",
-            borderRadius: "var(--radius-sm)",
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--phos)",
-          }}
-        >
-          + "Cut page-load p95 by 200 ms, lifting conversion 8%."
+        <div style={{ padding: "9px 12px", background: "rgba(255,255,255,0.2)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.35)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <span style={{ color: "rgba(180,255,180,0.9)", flexShrink: 0, fontSize: 11 }}>✓</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#fff", lineHeight: 1.5 }}>Cut page-load p95 by 200 ms, lifting conversion 8%.</span>
         </div>
       </div>
     ),
   },
   {
     tag: "IV",
-    title: "interview question prep",
-    desc: "Behavioral + technical questions tailored to the JD and your seniority. Each comes with a confidence rubric.",
+    title: "Walk into interviews fully prepared",
+    desc: "Behavioral + technical questions tailored to the JD and your seniority. Each with a structured confidence rubric.",
     viz: (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 5,
-          marginTop: 8,
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
         {[
-          "tell me about a time you led a high-stakes migration",
-          "walk me through your architecture for…",
-          "what was your most ambiguous project?",
+          "Tell me about a high-stakes migration you led.",
+          "Walk me through your system design approach.",
+          "What was your most ambiguous project?",
         ].map((q, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              gap: 8,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--fg-2)",
-            }}
-          >
-            <span style={{ color: "var(--fg-4)", flexShrink: 0 }}>
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(28,20,0,0.3)", flexShrink: 0, marginTop: 1, fontWeight: 700, letterSpacing: "0.05em" }}>
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span>{q}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(28,20,0,0.72)", lineHeight: 1.5 }}>{q}</span>
           </div>
         ))}
       </div>
@@ -293,64 +274,21 @@ const FEATURES = [
   },
   {
     tag: "TS",
-    title: "tone & style analysis",
-    desc: "Action-verb density, sentence variety, hedging language. ResumeLens flags weak phrasing and shows you the fix.",
+    title: "Sound sharp, not safe",
+    desc: "Action-verb density, hedging language, sentence variety — all scored and flagged with line-level fixes you can apply immediately.",
     viz: (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-          marginTop: 8,
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
         {[
           { label: "action verbs", pct: 72, good: true },
           { label: "hedging words", pct: 38, good: false },
-          { label: "sentence variety", pct: 65, good: true },
+          { label: "sent. variety", pct: 65, good: true },
         ].map(({ label, pct, good }) => (
-          <div
-            key={label}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-            }}
-          >
-            <span style={{ color: "var(--fg-3)", width: 110, flexShrink: 0 }}>
-              {label}
-            </span>
-            <div
-              style={{
-                flex: 1,
-                height: 4,
-                background: "var(--border)",
-                borderRadius: 2,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  width: `${pct}%`,
-                  height: "100%",
-                  background: good ? "var(--phos)" : "var(--ember)",
-                  borderRadius: 2,
-                  boxShadow: good
-                    ? "0 0 6px var(--phos-glow)"
-                    : "0 0 6px var(--ember-glow)",
-                }}
-              />
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.6)", width: 90, flexShrink: 0 }}>{label}</span>
+            <div style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.18)" }}>
+              <div style={{ width: `${pct}%`, height: "100%", borderRadius: 3, background: good ? "rgba(255,255,255,0.85)" : "rgba(255,200,200,0.65)" }} />
             </div>
-            <span
-              style={{
-                color: good ? "var(--phos)" : "var(--ember)",
-                width: 28,
-                textAlign: "right",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: good ? "#fff" : "rgba(255,220,220,0.85)", width: 28, textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
               {pct}%
             </span>
           </div>
@@ -360,25 +298,30 @@ const FEATURES = [
   },
   {
     tag: "HX",
-    title: "score history & trends",
-    desc: "Every analysis is versioned. Watch your overall score climb after each iteration. Diff any two side-by-side.",
+    title: "Track your score climbing over time",
+    desc: "Every analysis is versioned. Watch the graph rise with each revision and diff any two versions side-by-side.",
     viz: (
-      <svg
-        width="100%"
-        height={48}
-        viewBox="0 0 200 48"
-        style={{ marginTop: 8 }}
-      >
-        <polyline
-          points="0,42 40,36 80,28 120,18 160,10 200,4"
-          fill="none"
-          stroke="var(--phos)"
-          strokeWidth={2}
-          strokeLinejoin="round"
-          style={{ filter: "drop-shadow(0 0 6px var(--phos-glow))" }}
-        />
-        <circle cx={200} cy={4} r={4} fill="var(--phos)" />
-      </svg>
+      <div style={{ marginTop: 8 }}>
+        <svg width="100%" height={56} viewBox="0 0 220 56" style={{ overflow: "visible" }}>
+          <defs>
+            <linearGradient id="hxGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(12,26,38,0.25)" />
+              <stop offset="100%" stopColor="rgba(12,26,38,0)" />
+            </linearGradient>
+          </defs>
+          <path d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1" fill="none" stroke="rgba(12,26,38,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1 L220,56 L0,56 Z" fill="url(#hxGrad)" />
+          {[{ x: 0, y: 50, s: 48 }, { x: 80, y: 34, s: 67 }, { x: 160, y: 10, s: 84 }, { x: 220, y: 1, s: 91 }].map(({ x, y, s }) => (
+            <g key={x}>
+              <circle cx={x} cy={y} r={3.5} fill="rgba(12,26,38,0.85)" />
+              <text x={x} y={y - 7} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={8} fill="rgba(12,26,38,0.55)">{s}</text>
+            </g>
+          ))}
+        </svg>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2, fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(12,26,38,0.38)" }}>
+          <span>v1</span><span>v2</span><span>v3</span><span>v4 →</span>
+        </div>
+      </div>
     ),
   },
 ];
@@ -555,41 +498,20 @@ function FAQItem({
   );
 }
 
-// ── Grain — animated film grain texture overlay ───────────────────────
-function Grain() {
-  return <div className="rl-grain" aria-hidden="true" />;
-}
-
-// ── HeroBadge — typed.js cycling stats pill ───────────────────────────
+// ── HeroBadge ─────────────────────────────────────────────────────────
 function HeroBadge() {
-  const ref = useTyped(
-    [
-      "v1.0 · now in public beta",
-      "3 sec avg analysis time",
-      "100+ keyword signals",
-      "claude-powered scoring",
-    ],
-    {
-      typeSpeed: 35,
-      backSpeed: 22,
-      backDelay: 2800,
-      startDelay: 1800,
-      showCursor: false,
-    },
-  );
   return (
     <span
       className="rl-pill rl-pill-good"
       style={{
         display: "inline-flex",
         gap: 8,
-        minWidth: 214,
         whiteSpace: "nowrap",
         alignItems: "center",
       }}
     >
       <span className="rl-dot" style={{ width: 7, height: 7, flexShrink: 0 }} />
-      <span ref={ref} style={{ minWidth: 180 }} />
+      <span>v1.0 · now in public beta</span>
     </span>
   );
 }
@@ -681,164 +603,339 @@ function VivusTrendLine() {
   );
 }
 
-// ── FeaturesSection — full grid revealed with AOS ─────────────────────
-function FeaturesSection() {
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+// ── Feature card palette — vibrant editorial ─────────────────────────
+const FEATURE_COLORS: { bg: string; text: string }[] = [
+  { bg: "#FF8C61", text: "#ffffff" }, // orange  – ATS
+  { bg: "#34D399", text: "#052e16" }, // emerald – Keywords
+  { bg: "#A78BFA", text: "#ffffff" }, // violet  – AI rewrite
+  { bg: "#FBBF24", text: "#1c1400" }, // amber   – Interview
+  { bg: "#F472B6", text: "#ffffff" }, // rose    – Tone
+  { bg: "#38BDF8", text: "#0c1a26" }, // sky     – History
+];
 
-  // GSAP 3-D tilt on hover
+// ── FeaturesSection — Streamtime-style Z-stack, fully responsive ──────
+function FeaturesSection() {
+  const [active, setActive] = useState(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const reduced = useReducedMotion();
+  const total = FEATURES.length;
+
   useEffect(() => {
     let cleanup: (() => void) | undefined;
     import("gsap").then(({ gsap }) => {
-      type H = {
-        card: HTMLElement;
-        onMove: (e: MouseEvent) => void;
-        onLeave: () => void;
-      };
-      const handlers: H[] = [];
-      cardRefs.current.forEach((card) => {
-        if (!card) return;
-        const onMove = (e: MouseEvent) => {
-          const r = card.getBoundingClientRect();
-          const x = (e.clientX - r.left) / r.width - 0.5;
-          const y = (e.clientY - r.top) / r.height - 0.5;
-          gsap.to(card, {
-            rotateX: -y * 10,
-            rotateY: x * 10,
-            scale: 1.025,
-            duration: 0.25,
-            ease: "power2.out",
-            transformPerspective: 800,
-            overwrite: "auto",
-          });
-        };
-        const onLeave = () => {
-          gsap.to(card, {
-            rotateX: 0,
-            rotateY: 0,
-            scale: 1,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        };
-        card.addEventListener("mousemove", onMove);
-        card.addEventListener("mouseleave", onLeave);
-        handlers.push({ card, onMove, onLeave });
-      });
-      cleanup = () =>
-        handlers.forEach(({ card, onMove, onLeave }) => {
-          card.removeEventListener("mousemove", onMove);
-          card.removeEventListener("mouseleave", onLeave);
+      const card = cardRefs.current[active];
+      if (!card) return;
+      const onMove = (e: MouseEvent) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        gsap.to(card, {
+          rotateX: -y * 10,
+          rotateY: x * 10,
+          scale: 1.02,
+          duration: 0.25,
+          ease: "power2.out",
+          transformPerspective: 900,
+          overwrite: "auto",
         });
+      };
+      const onLeave = () => {
+        gsap.to(card, {
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
+          duration: 0.5,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      };
+      card.addEventListener("mousemove", onMove);
+      card.addEventListener("mouseleave", onLeave);
+      cleanup = () => {
+        card.removeEventListener("mousemove", onMove);
+        card.removeEventListener("mouseleave", onLeave);
+        gsap.set(card, { rotateX: 0, rotateY: 0, scale: 1 });
+      };
     });
     return () => cleanup?.();
-  }, []);
+  }, [active]);
 
   return (
     <section
       id="features"
-      className="rl-landing-section"
-      style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+      style={{ background: "#ffffff", width: "100%", boxSizing: "border-box" }}
+      className="rl-features-section"
     >
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 48,
-        }}
-      >
-        <FadeInView
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            textAlign: "center",
-          }}
-        >
-          <span className="rl-eyebrow">// features</span>
-          <h2
-            style={{
-              fontSize: "clamp(28px, 4vw, 48px)",
-              color: "var(--fg-1)",
-              fontWeight: 500,
-              letterSpacing: "-1.5px",
-            }}
-          >
+      <div className="rl-features-container">
+        {/* Header */}
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#aaa", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+            // features
+          </span>
+          <h2 style={{ fontSize: "clamp(26px, 5vw, 48px)", color: "#0d0d0d", fontWeight: 500, letterSpacing: "-1.5px", margin: 0 }}>
             five signals that matter
-            <Cursor />
           </h2>
-        </FadeInView>
+        </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 16,
-          }}
-        >
-          {FEATURES.map((f, i) => (
-            <div
-              key={f.tag}
-              ref={(el) => {
-                cardRefs.current[i] = el;
-              }}
-              className="rl-card rl-feature-card"
-              style={{ position: "relative" }}
-              data-aos="fade-up"
-              data-aos-delay={i * 90}
-              data-aos-duration="650"
-            >
-              <Corners />
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--copper)",
-                      fontWeight: 700,
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    [{f.tag}]
-                  </span>
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: "var(--fg-1)",
-                    }}
-                  >
-                    {f.title}
-                  </h3>
-                </div>
-                <p
+        {/* Main row: card deck + desktop nav */}
+        <div className="rl-features-row">
+
+          {/* Z-stack card deck */}
+          <div className="rl-features-deck">
+            {FEATURES.map((f, i) => {
+              const pos = ((i - active) % total + total) % total;
+              if (pos >= 4) return null;
+              const isActive = pos === 0;
+              const color = FEATURE_COLORS[i];
+              return (
+                <motion.div
+                  key={f.tag}
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                  animate={{
+                    scale: isActive ? 1 : 1 - pos * 0.05,
+                    x: isActive ? 0 : pos * 14,
+                    y: isActive ? 0 : pos * 8,
+                    rotate: isActive ? 0 : pos * 2,
+                    opacity: isActive ? 1 : Math.max(0, 1 - pos * 0.25),
+                  }}
+                  transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 28 }}
+                  onClick={() => !isActive && setActive(i)}
                   style={{
-                    margin: 0,
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    color: "var(--fg-2)",
-                    lineHeight: 1.65,
+                    position: "absolute",
+                    inset: 0,
+                    background: color.bg,
+                    borderRadius: 20,
+                    cursor: isActive ? "default" : "pointer",
+                    overflow: "hidden",
+                    zIndex: total - pos,
+                    boxShadow: isActive
+                      ? "0 20px 56px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.08)"
+                      : "0 4px 16px rgba(0,0,0,0.06)",
+                    transformOrigin: "bottom center",
+                    willChange: "transform",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
-                  {f.desc}
-                </p>
-                {f.tag === "HX" ? <VivusTrendLine /> : f.viz}
-              </div>
+                  {/* Viz area — flex:1 so it takes remaining height */}
+                  <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: -16,
+                        right: -4,
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "clamp(64px, 14vw, 118px)",
+                        fontWeight: 800,
+                        color: color.text + "0e",
+                        lineHeight: 1,
+                        userSelect: "none",
+                        pointerEvents: "none",
+                        letterSpacing: "-4px",
+                      }}
+                    >
+                      {f.tag}
+                    </span>
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        padding: "clamp(14px, 3vw, 24px)",
+                        paddingBottom: 0,
+                        opacity: isActive ? 1 : 0,
+                        transition: "opacity 200ms",
+                      }}
+                    >
+                      {f.viz}
+                    </div>
+                  </div>
+
+                  {/* Text bottom */}
+                  <div
+                    style={{
+                      padding: "clamp(10px, 2vw, 16px) clamp(14px, 3vw, 22px) clamp(14px, 3vw, 22px)",
+                      borderTop: `1px solid ${color.text}12`,
+                      color: color.text,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 9,
+                        letterSpacing: "0.14em",
+                        opacity: 0.4,
+                        display: "block",
+                        marginBottom: 3,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      [{f.tag}]
+                    </span>
+                    <h3
+                      style={{
+                        margin: "0 0 4px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "clamp(13px, 2.2vw, 17px)",
+                        fontWeight: 600,
+                        lineHeight: 1.2,
+                        color: color.text,
+                      }}
+                    >
+                      {f.title}
+                    </h3>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--font-body)",
+                        fontSize: "clamp(11px, 1.6vw, 13px)",
+                        lineHeight: 1.6,
+                        color: color.text,
+                        opacity: 0.65,
+                      }}
+                    >
+                      {f.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Desktop-only nav sidebar */}
+          <nav className="rl-features-nav" aria-label="Feature navigation">
+            {FEATURES.map((f, i) => {
+              const isNav = i === active;
+              return (
+                <button
+                  key={f.tag}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    background: isNav ? FEATURE_COLORS[i].bg + "22" : "transparent",
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "9px 12px",
+                    cursor: "pointer",
+                    transition: "background 220ms",
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: FEATURE_COLORS[i].bg,
+                      flexShrink: 0,
+                      border: "2px solid rgba(0,0,0,0.07)",
+                      boxShadow: isNav ? `0 0 12px ${FEATURE_COLORS[i].bg}` : "none",
+                      transition: "box-shadow 220ms",
+                    }}
+                  />
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#aaa", letterSpacing: "0.1em", display: "block" }}>
+                      [{f.tag}]
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 12,
+                        color: isNav ? "#0d0d0d" : "#666",
+                        fontWeight: isNav ? 600 : 400,
+                        transition: "color 200ms",
+                        display: "block",
+                        marginTop: 1,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {f.title}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+            {/* Prev/Next — desktop */}
+            <div style={{ display: "flex", gap: 8, marginTop: 14, paddingLeft: 12 }}>
+              {[
+                { lbl: "←", fn: () => setActive((v) => (v - 1 + total) % total) },
+                { lbl: "→", fn: () => setActive((v) => (v + 1) % total) },
+              ].map(({ lbl, fn }) => (
+                <button
+                  key={lbl}
+                  type="button"
+                  onClick={fn}
+                  style={{
+                    width: 36, height: 36, borderRadius: 8,
+                    border: "1.5px solid #e8e8e8", background: "#fafafa",
+                    cursor: "pointer", fontSize: 16,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    color: "#444",
+                  }}
+                >
+                  {lbl}
+                </button>
+              ))}
             </div>
-          ))}
+          </nav>
+        </div>
+
+        {/* Bottom controls — progress dots + mobile prev/next */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          {/* Mobile prev/next (hidden on desktop via CSS) */}
+          <div className="rl-features-mobile-arrows">
+            {[
+              { lbl: "←", fn: () => setActive((v) => (v - 1 + total) % total) },
+              { lbl: "→", fn: () => setActive((v) => (v + 1) % total) },
+            ].map(({ lbl, fn }) => (
+              <button
+                key={lbl}
+                type="button"
+                onClick={fn}
+                style={{
+                  width: 44, height: 44, borderRadius: 10,
+                  border: "1.5px solid #e8e8e8", background: "#fafafa",
+                  cursor: "pointer", fontSize: 18,
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  color: "#444",
+                }}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          {/* Progress dots */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            {FEATURES.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActive(i)}
+                style={{
+                  width: i === active ? 26 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: i === active ? FEATURE_COLORS[i].bg : "#e0e0e0",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 320ms ease",
+                  padding: 0,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 // ── LandingNavbar ──────────────────────────────────────────────────────
 function LandingNavbar() {
@@ -981,52 +1078,8 @@ export default function Landing() {
     return () => obs.disconnect();
   }, []);
 
-  // GSAP: cursor spotlight + scroll progress bar
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    let cleanup: (() => void) | undefined;
-
-    import("gsap").then(({ gsap }) => {
-      const spotlight = document.createElement("div");
-      spotlight.className = "rl-spotlight";
-      document.body.appendChild(spotlight);
-
-      const progressBar = document.querySelector<HTMLElement>(".rl-scroll-bar");
-
-      const onMouseMove = (e: MouseEvent) => {
-        gsap.to(spotlight, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.85,
-          ease: "power3.out",
-        });
-      };
-
-      const onScroll = () => {
-        const scrolled = window.scrollY;
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = max > 0 ? scrolled / max : 0;
-        if (progressBar) {
-          gsap.set(progressBar, { scaleX: progress });
-        }
-      };
-
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("scroll", onScroll, { passive: true });
-
-      cleanup = () => {
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("scroll", onScroll);
-        spotlight.remove();
-      };
-    });
-
-    return () => cleanup?.();
-  }, []);
-
   return (
     <main className="rl-page" style={{ paddingBottom: 0 }}>
-      <Grain />
       <div className="rl-scroll-bar" />
       <LandingNavbar />
 
@@ -1810,7 +1863,7 @@ export default function Landing() {
       >
         {/* Ambient pulsing glow */}
         <motion.div
-          animate={{ opacity: [0.04, 0.1, 0.04], scale: [1, 1.08, 1] }}
+          animate={{ opacity: [0.04, 0.1, 0.04] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "absolute",
@@ -1943,7 +1996,7 @@ export default function Landing() {
         style={{
           background: "#ffffff",
           overflow: "hidden",
-          margin: "0 0 64px",
+          margin: "0 0 0px",
           width: "100%",
         }}
         data-aos="fade-up"
