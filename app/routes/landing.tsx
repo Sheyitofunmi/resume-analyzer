@@ -175,25 +175,76 @@ const FEATURES = [
     title: "Beat the bot, reach the human",
     desc: "We diff against the exact parser engines recruiters use. Know in seconds if your PDF even clears the first filter.",
     viz: (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          marginTop: 8,
+        }}
+      >
         {[
           { label: "keyword density", val: 82 },
           { label: "format score", val: 71 },
           { label: "section match", val: 55 },
         ].map(({ label, val }) => (
           <div key={label}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.6)" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 5,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.6)",
+              }}
+            >
               <span>{label}</span>
               <span style={{ color: "#fff", fontWeight: 600 }}>{val}%</span>
             </div>
-            <div style={{ height: 7, borderRadius: 4, background: "rgba(255,255,255,0.18)" }}>
-              <div style={{ width: `${val}%`, height: "100%", borderRadius: 4, background: "rgba(255,255,255,0.9)" }} />
+            <div
+              style={{
+                height: 7,
+                borderRadius: 4,
+                background: "rgba(255,255,255,0.18)",
+              }}
+            >
+              <div
+                style={{
+                  width: `${val}%`,
+                  height: "100%",
+                  borderRadius: 4,
+                  background: "rgba(255,255,255,0.9)",
+                }}
+              />
             </div>
           </div>
         ))}
         <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-          <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontFamily: "var(--font-mono)", fontSize: 10, color: "#fff" }}>✓ passes ATS</span>
-          <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(0,0,0,0.12)", fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.55)" }}>87 / 100</span>
+          <span
+            style={{
+              padding: "3px 10px",
+              borderRadius: 20,
+              background: "rgba(255,255,255,0.2)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "#fff",
+            }}
+          >
+            ✓ passes ATS
+          </span>
+          <span
+            style={{
+              padding: "3px 10px",
+              borderRadius: 20,
+              background: "rgba(0,0,0,0.12)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            87 / 100
+          </span>
         </div>
       </div>
     ),
@@ -239,14 +290,76 @@ const FEATURES = [
     title: "Rewrite every weak bullet instantly",
     desc: "Each vague line gets a stronger alternative — action verbs, numbers, impact. Approve or skip, one bullet at a time.",
     viz: (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-        <div style={{ padding: "9px 12px", background: "rgba(0,0,0,0.15)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)", display: "flex", gap: 8, alignItems: "flex-start" }}>
-          <span style={{ color: "rgba(255,130,130,0.9)", flexShrink: 0, fontSize: 11 }}>✕</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.45)", textDecoration: "line-through", lineHeight: 1.5 }}>Helped improve the website performance.</span>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          marginTop: 8,
+        }}
+      >
+        <div
+          style={{
+            padding: "9px 12px",
+            background: "rgba(0,0,0,0.15)",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.12)",
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-start",
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(255,130,130,0.9)",
+              flexShrink: 0,
+              fontSize: 11,
+            }}
+          >
+            ✕
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "rgba(255,255,255,0.45)",
+              textDecoration: "line-through",
+              lineHeight: 1.5,
+            }}
+          >
+            Helped improve the website performance.
+          </span>
         </div>
-        <div style={{ padding: "9px 12px", background: "rgba(255,255,255,0.2)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.35)", display: "flex", gap: 8, alignItems: "flex-start" }}>
-          <span style={{ color: "rgba(180,255,180,0.9)", flexShrink: 0, fontSize: 11 }}>✓</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#fff", lineHeight: 1.5 }}>Cut page-load p95 by 200 ms, lifting conversion 8%.</span>
+        <div
+          style={{
+            padding: "9px 12px",
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.35)",
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-start",
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(180,255,180,0.9)",
+              flexShrink: 0,
+              fontSize: 11,
+            }}
+          >
+            ✓
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "#fff",
+              lineHeight: 1.5,
+            }}
+          >
+            Cut page-load p95 by 200 ms, lifting conversion 8%.
+          </span>
         </div>
       </div>
     ),
@@ -256,17 +369,46 @@ const FEATURES = [
     title: "Walk into interviews fully prepared",
     desc: "Behavioral + technical questions tailored to the JD and your seniority. Each with a structured confidence rubric.",
     viz: (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          marginTop: 8,
+        }}
+      >
         {[
           "Tell me about a high-stakes migration you led.",
           "Walk me through your system design approach.",
           "What was your most ambiguous project?",
         ].map((q, i) => (
-          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(28,20,0,0.3)", flexShrink: 0, marginTop: 1, fontWeight: 700, letterSpacing: "0.05em" }}>
+          <div
+            key={i}
+            style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 9,
+                color: "rgba(28,20,0,0.3)",
+                flexShrink: 0,
+                marginTop: 1,
+                fontWeight: 700,
+                letterSpacing: "0.05em",
+              }}
+            >
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(28,20,0,0.72)", lineHeight: 1.5 }}>{q}</span>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "rgba(28,20,0,0.72)",
+                lineHeight: 1.5,
+              }}
+            >
+              {q}
+            </span>
           </div>
         ))}
       </div>
@@ -277,18 +419,64 @@ const FEATURES = [
     title: "Sound sharp, not safe",
     desc: "Action-verb density, hedging language, sentence variety — all scored and flagged with line-level fixes you can apply immediately.",
     viz: (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          marginTop: 8,
+        }}
+      >
         {[
           { label: "action verbs", pct: 72, good: true },
           { label: "hedging words", pct: 38, good: false },
           { label: "sent. variety", pct: 65, good: true },
         ].map(({ label, pct, good }) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.6)", width: 90, flexShrink: 0 }}>{label}</span>
-            <div style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.18)" }}>
-              <div style={{ width: `${pct}%`, height: "100%", borderRadius: 3, background: good ? "rgba(255,255,255,0.85)" : "rgba(255,200,200,0.65)" }} />
+          <div
+            key={label}
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.6)",
+                width: 90,
+                flexShrink: 0,
+              }}
+            >
+              {label}
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 6,
+                borderRadius: 3,
+                background: "rgba(255,255,255,0.18)",
+              }}
+            >
+              <div
+                style={{
+                  width: `${pct}%`,
+                  height: "100%",
+                  borderRadius: 3,
+                  background: good
+                    ? "rgba(255,255,255,0.85)"
+                    : "rgba(255,200,200,0.65)",
+                }}
+              />
             </div>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: good ? "#fff" : "rgba(255,220,220,0.85)", width: 28, textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: good ? "#fff" : "rgba(255,220,220,0.85)",
+                width: 28,
+                textAlign: "right",
+                fontVariantNumeric: "tabular-nums",
+                fontWeight: 600,
+              }}
+            >
               {pct}%
             </span>
           </div>
@@ -302,24 +490,65 @@ const FEATURES = [
     desc: "Every analysis is versioned. Watch the graph rise with each revision and diff any two versions side-by-side.",
     viz: (
       <div style={{ marginTop: 8 }}>
-        <svg width="100%" height={56} viewBox="0 0 220 56" style={{ overflow: "visible" }}>
+        <svg
+          width="100%"
+          height={56}
+          viewBox="0 0 220 56"
+          style={{ overflow: "visible" }}
+        >
           <defs>
             <linearGradient id="hxGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(12,26,38,0.25)" />
               <stop offset="100%" stopColor="rgba(12,26,38,0)" />
             </linearGradient>
           </defs>
-          <path d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1" fill="none" stroke="rgba(12,26,38,0.75)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1 L220,56 L0,56 Z" fill="url(#hxGrad)" />
-          {[{ x: 0, y: 50, s: 48 }, { x: 80, y: 34, s: 67 }, { x: 160, y: 10, s: 84 }, { x: 220, y: 1, s: 91 }].map(({ x, y, s }) => (
+          <path
+            d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1"
+            fill="none"
+            stroke="rgba(12,26,38,0.75)"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1 L220,56 L0,56 Z"
+            fill="url(#hxGrad)"
+          />
+          {[
+            { x: 0, y: 50, s: 48 },
+            { x: 80, y: 34, s: 67 },
+            { x: 160, y: 10, s: 84 },
+            { x: 220, y: 1, s: 91 },
+          ].map(({ x, y, s }) => (
             <g key={x}>
               <circle cx={x} cy={y} r={3.5} fill="rgba(12,26,38,0.85)" />
-              <text x={x} y={y - 7} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={8} fill="rgba(12,26,38,0.55)">{s}</text>
+              <text
+                x={x}
+                y={y - 7}
+                textAnchor="middle"
+                fontFamily="var(--font-mono)"
+                fontSize={8}
+                fill="rgba(12,26,38,0.55)"
+              >
+                {s}
+              </text>
             </g>
           ))}
         </svg>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2, fontFamily: "var(--font-mono)", fontSize: 9, color: "rgba(12,26,38,0.38)" }}>
-          <span>v1</span><span>v2</span><span>v3</span><span>v4 →</span>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: 2,
+            fontFamily: "var(--font-mono)",
+            fontSize: 9,
+            color: "rgba(12,26,38,0.38)",
+          }}
+        >
+          <span>v1</span>
+          <span>v2</span>
+          <span>v3</span>
+          <span>v4 →</span>
         </div>
       </div>
     ),
@@ -668,29 +897,53 @@ function FeaturesSection() {
     >
       <div className="rl-features-container">
         {/* Header */}
-        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#aaa", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+        <div
+          style={{
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "#aaa",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
+          >
             // features
           </span>
-          <h2 style={{ fontSize: "clamp(26px, 5vw, 48px)", color: "#0d0d0d", fontWeight: 500, letterSpacing: "-1.5px", margin: 0 }}>
+          <h2
+            style={{
+              fontSize: "clamp(26px, 5vw, 48px)",
+              color: "#0d0d0d",
+              fontWeight: 500,
+              letterSpacing: "-1.5px",
+              margin: 0,
+            }}
+          >
             five signals that matter
           </h2>
         </div>
 
         {/* Main row: card deck + desktop nav */}
         <div className="rl-features-row">
-
           {/* Z-stack card deck */}
           <div className="rl-features-deck">
             {FEATURES.map((f, i) => {
-              const pos = ((i - active) % total + total) % total;
+              const pos = (((i - active) % total) + total) % total;
               if (pos >= 4) return null;
               const isActive = pos === 0;
               const color = FEATURE_COLORS[i];
               return (
                 <motion.div
                   key={f.tag}
-                  ref={(el) => { cardRefs.current[i] = el; }}
+                  ref={(el) => {
+                    cardRefs.current[i] = el;
+                  }}
                   animate={{
                     scale: isActive ? 1 : 1 - pos * 0.05,
                     x: isActive ? 0 : pos * 14,
@@ -698,7 +951,11 @@ function FeaturesSection() {
                     rotate: isActive ? 0 : pos * 2,
                     opacity: isActive ? 1 : Math.max(0, 1 - pos * 0.25),
                   }}
-                  transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 280, damping: 28 }}
+                  transition={
+                    reduced
+                      ? { duration: 0 }
+                      : { type: "spring", stiffness: 280, damping: 28 }
+                  }
                   onClick={() => !isActive && setActive(i)}
                   style={{
                     position: "absolute",
@@ -718,7 +975,13 @@ function FeaturesSection() {
                   }}
                 >
                   {/* Viz area — flex:1 so it takes remaining height */}
-                  <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
                     <span
                       style={{
                         position: "absolute",
@@ -753,7 +1016,8 @@ function FeaturesSection() {
                   {/* Text bottom */}
                   <div
                     style={{
-                      padding: "clamp(10px, 2vw, 16px) clamp(14px, 3vw, 22px) clamp(14px, 3vw, 22px)",
+                      padding:
+                        "clamp(10px, 2vw, 16px) clamp(14px, 3vw, 22px) clamp(14px, 3vw, 22px)",
                       borderTop: `1px solid ${color.text}12`,
                       color: color.text,
                     }}
@@ -814,7 +1078,9 @@ function FeaturesSection() {
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
-                    background: isNav ? FEATURE_COLORS[i].bg + "22" : "transparent",
+                    background: isNav
+                      ? FEATURE_COLORS[i].bg + "22"
+                      : "transparent",
                     border: "none",
                     borderRadius: 10,
                     padding: "9px 12px",
@@ -832,12 +1098,22 @@ function FeaturesSection() {
                       background: FEATURE_COLORS[i].bg,
                       flexShrink: 0,
                       border: "2px solid rgba(0,0,0,0.07)",
-                      boxShadow: isNav ? `0 0 12px ${FEATURE_COLORS[i].bg}` : "none",
+                      boxShadow: isNav
+                        ? `0 0 12px ${FEATURE_COLORS[i].bg}`
+                        : "none",
                       transition: "box-shadow 220ms",
                     }}
                   />
                   <div style={{ minWidth: 0 }}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#aaa", letterSpacing: "0.1em", display: "block" }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 9,
+                        color: "#aaa",
+                        letterSpacing: "0.1em",
+                        display: "block",
+                      }}
+                    >
                       [{f.tag}]
                     </span>
                     <span
@@ -861,9 +1137,19 @@ function FeaturesSection() {
               );
             })}
             {/* Prev/Next — desktop */}
-            <div style={{ display: "flex", gap: 8, marginTop: 14, paddingLeft: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                marginTop: 14,
+                paddingLeft: 12,
+              }}
+            >
               {[
-                { lbl: "←", fn: () => setActive((v) => (v - 1 + total) % total) },
+                {
+                  lbl: "←",
+                  fn: () => setActive((v) => (v - 1 + total) % total),
+                },
                 { lbl: "→", fn: () => setActive((v) => (v + 1) % total) },
               ].map(({ lbl, fn }) => (
                 <button
@@ -871,10 +1157,16 @@ function FeaturesSection() {
                   type="button"
                   onClick={fn}
                   style={{
-                    width: 36, height: 36, borderRadius: 8,
-                    border: "1.5px solid #e8e8e8", background: "#fafafa",
-                    cursor: "pointer", fontSize: 16,
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    border: "1.5px solid #e8e8e8",
+                    background: "#fafafa",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     color: "#444",
                   }}
                 >
@@ -886,7 +1178,15 @@ function FeaturesSection() {
         </div>
 
         {/* Bottom controls — progress dots + mobile prev/next */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 14,
+            marginTop: 20,
+          }}
+        >
           {/* Mobile prev/next (hidden on desktop via CSS) */}
           <div className="rl-features-mobile-arrows">
             {[
@@ -898,10 +1198,16 @@ function FeaturesSection() {
                 type="button"
                 onClick={fn}
                 style={{
-                  width: 44, height: 44, borderRadius: 10,
-                  border: "1.5px solid #e8e8e8", background: "#fafafa",
-                  cursor: "pointer", fontSize: 18,
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  border: "1.5px solid #e8e8e8",
+                  background: "#fafafa",
+                  cursor: "pointer",
+                  fontSize: 18,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   color: "#444",
                 }}
               >
@@ -935,7 +1241,6 @@ function FeaturesSection() {
     </section>
   );
 }
-
 
 // ── LandingNavbar ──────────────────────────────────────────────────────
 function LandingNavbar() {
@@ -1054,6 +1359,207 @@ function LandingNavbar() {
         )}
       </div>
     </nav>
+  );
+}
+
+// ── ResumeLens wordmark ─────────────────────────────────────────────────
+const WORDMARK_LETTERS = [
+  { char: "R", rot: -8 },
+  { char: "E", rot: 5 },
+  { char: "S", rot: -3 },
+  { char: "U", rot: 7 },
+  { char: "M", rot: -5 },
+  { char: "E", rot: 4 },
+  { char: "L", rot: -2 },
+  { char: "E", rot: 6 },
+  { char: "N", rot: -4 },
+  { char: "S", rot: 3 },
+];
+
+const WORDMARK_SHAPES = [
+  // R – starburst (copper)
+  <svg
+    key="s0"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#c47b4a"
+    aria-hidden="true"
+  >
+    <path d="M40 5 L43 28 L62 15 L52 35 L75 38 L54 48 L64 68 L43 55 L40 75 L37 55 L16 68 L26 48 L5 38 L28 35 L18 15 L37 28 Z" />
+  </svg>,
+  // E – ring (phos)
+  <svg
+    key="s1"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#a8e6a3"
+    aria-hidden="true"
+  >
+    <circle cx="40" cy="40" r="28" />
+    <circle cx="40" cy="40" r="16" fill="#0b0b0a" />
+  </svg>,
+  // S – triangle (ember)
+  <svg
+    key="s2"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#e3534a"
+    aria-hidden="true"
+  >
+    <polygon points="40,8 72,68 8,68" />
+  </svg>,
+  // U – diamond (copper-hi)
+  <svg
+    key="s3"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#e69968"
+    aria-hidden="true"
+  >
+    <polygon points="40,6 74,40 40,74 6,40" />
+  </svg>,
+  // M – hexagon (phos)
+  <svg
+    key="s4"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#a8e6a3"
+    aria-hidden="true"
+  >
+    <polygon points="40,6 68,23 68,57 40,74 12,57 12,23" />
+  </svg>,
+  // E – cross (ember)
+  <svg
+    key="s5"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#e3534a"
+    aria-hidden="true"
+  >
+    <rect x="32" y="8" width="16" height="64" rx="5" />
+    <rect x="8" y="32" width="64" height="16" rx="5" />
+  </svg>,
+  // L – teardrop ring (copper)
+  <svg
+    key="s6"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#c47b4a"
+    aria-hidden="true"
+  >
+    <path d="M40 8 C62 8 72 24 72 40 C72 58 58 72 40 72 C22 72 8 58 8 40 C8 22 20 8 40 8 Z" />
+    <circle cx="40" cy="40" r="14" fill="#0b0b0a" />
+  </svg>,
+  // E – rotated square (phos-dim)
+  <svg
+    key="s7"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#5fa55c"
+    aria-hidden="true"
+  >
+    <rect
+      x="16"
+      y="16"
+      width="48"
+      height="48"
+      rx="4"
+      transform="rotate(15 40 40)"
+    />
+  </svg>,
+  // N – horizontal pill (ember-dim)
+  <svg
+    key="s8"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#a8332c"
+    aria-hidden="true"
+  >
+    <ellipse cx="40" cy="40" rx="33" ry="20" />
+  </svg>,
+  // S – 5-point star (copper-hi)
+  <svg
+    key="s9"
+    viewBox="0 0 80 80"
+    width="48"
+    height="48"
+    fill="#e69968"
+    aria-hidden="true"
+  >
+    <path d="M40 8 L45 28 L66 28 L49 41 L55 62 L40 50 L25 62 L31 41 L14 28 L35 28 Z" />
+  </svg>,
+];
+
+function ResumeLensWordmark() {
+  return (
+    <section
+      aria-label="ResumeLens wordmark"
+      style={{
+        padding: "80px 16px 56px",
+        overflow: "hidden",
+        background: "var(--bg)",
+        borderTop: "1px solid var(--border)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-end",
+          flexWrap: "wrap",
+          maxWidth: 1400,
+          margin: "0 auto",
+          gap: 0,
+        }}
+      >
+        {WORDMARK_LETTERS.map((l, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "0 clamp(2px, 0.5vw, 8px)",
+              userSelect: "none",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "clamp(3.5rem, 7.5vw, 8.5rem)",
+                fontWeight: 900,
+                lineHeight: 0.88,
+                color: "var(--fg-1)",
+                fontFamily:
+                  "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                display: "block",
+                transform: `rotate(${l.rot}deg)`,
+                letterSpacing: "-1px",
+              }}
+            >
+              {l.char}
+            </span>
+            <div
+              style={{
+                marginTop: 10,
+                transform: `rotate(${-(l.rot * 0.6)}deg)`,
+                opacity: 0.9,
+              }}
+            >
+              {WORDMARK_SHAPES[i]}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -1793,6 +2299,104 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* svg */}
+
+      <div
+        style={{
+          background: "#ffffff",
+          overflow: "hidden",
+          margin: "0 0 0px",
+          width: "100%",
+        }}
+        data-aos="fade-up"
+        data-aos-duration="700"
+      >
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1780 345"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="224.495"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 530.492 62.3984)"
+              fill="#E261E5"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="371.11"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 1328.45 62.3984)"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="762.008"
+              y="54.0938"
+              width="235.199"
+              height="236.908"
+              rx="117.599"
+              fill="#3A93FF"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1624.3"
+              y="86.7773"
+              width="154.917"
+              height="171.543"
+              rx="77.4584"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1346.21"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="0.789062"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="450.288"
+              height="236.907"
+              rx="118.454"
+              transform="matrix(-1 0 0 1 893.008 54.0938)"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="167.631"
+              height="236.907"
+              rx="83.8156"
+              transform="matrix(-1 0 0 1 1425.18 54.0938)"
+              fill="#E261E5"
+            />
+          </g>
+        </svg>
+      </div>
+
       {/* ── FAQ ──────────────────────────────────────────────────── */}
       <section
         id="faq"
@@ -1992,101 +2596,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <div
-        style={{
-          background: "#ffffff",
-          overflow: "hidden",
-          margin: "0 0 0px",
-          width: "100%",
-        }}
-        data-aos="fade-up"
-        data-aos-duration="700"
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 1780 345"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="224.495"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 530.492 62.3984)"
-              fill="#E261E5"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="371.11"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 1328.45 62.3984)"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="762.008"
-              y="54.0938"
-              width="235.199"
-              height="236.908"
-              rx="117.599"
-              fill="#3A93FF"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1624.3"
-              y="86.7773"
-              width="154.917"
-              height="171.543"
-              rx="77.4584"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1346.21"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="0.789062"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="450.288"
-              height="236.907"
-              rx="118.454"
-              transform="matrix(-1 0 0 1 893.008 54.0938)"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="167.631"
-              height="236.907"
-              rx="83.8156"
-              transform="matrix(-1 0 0 1 1425.18 54.0938)"
-              fill="#E261E5"
-            />
-          </g>
-        </svg>
-      </div>
+      <ResumeLensWordmark />
 
       <Footer />
       <MobileBottomNav />

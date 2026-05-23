@@ -1776,7 +1776,14 @@ label {
 
 /* ── Features section — responsive Z-stack ───────────────────────────── */
 .rl-features-section {
-  padding: clamp(48px, 8vw, 96px) 0;
+  /* padding: clamp(48px, 8vw, 96px) 0; */
+  padding: clamp(30px, 8vw, 30px) 0;
+
+  
+}
+
+.rl-features-row{
+  margin-left: -1.5rem;
 }
 
 .rl-features-container {
@@ -1792,7 +1799,7 @@ label {
 /* Main row: card + sidebar nav side by side */
 .rl-features-row {
   display: flex;
-  gap: clamp(24px, 5vw, 72px);
+  gap: 10rem;
   align-items: center;
   justify-content: center;
   width: 100%;

@@ -4,13 +4,17 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Animation library integration (2026-05-22)
+- UI polish (2026-05-23)
 
 ## Current Goal
 
 - Testing and iteration
 
 ## Recent Changes
+
+### UI: ResumeLens wordmark section (2026-05-23)
+
+- **`app/routes/landing.tsx`**: Added `ResumeLensWordmark` component — a Streamtime-style footer wordmark that spells out "RESUMELENS". Each letter is a large bold span with a slight per-letter rotation; below each letter sits a unique SVG decorative shape (starburst, ring, triangle, diamond, hexagon, cross, teardrop, rotated square, pill, 5-point star) in the brand accent colors (copper, phos-green, ember-red). Rendered just before the footer.
 
 ### UI: Feature section — full responsive overhaul (2026-05-23)
 
