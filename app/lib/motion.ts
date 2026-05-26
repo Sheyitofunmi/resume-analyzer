@@ -31,6 +31,25 @@ export const fadeUp: Variants = {
   },
 };
 
+// Scroll reveal variants — no blur, lighter than fadeUp, for below-fold content
+export const revealUp: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: easings.expo },
+  },
+};
+
+export const revealLeft: Variants = {
+  hidden: { opacity: 0, x: 28 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.5, ease: easings.expo },
+  },
+};
+
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   visible: {

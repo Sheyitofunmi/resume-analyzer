@@ -5,13 +5,14 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import "aos/dist/aos.css";
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ToastProvider } from "~/components/Toast";
 import CommandPalette from "~/components/CommandPalette";
 
@@ -99,19 +100,22 @@ function PuterLoadingScreen() {
   );
 }
 
-function AOSProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    import("aos").then(({ default: AOS }) => {
-      AOS.init({
-        duration: 650,
-        easing: "ease-out-cubic",
-        once: true,
-        offset: 80,
-      });
-    });
-  }, []);
-
-  return <>{children}</>;
+function PageTransition({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, scale: 0.99 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.99 }}
+        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 export const links: Route.LinksFunction = () => [
@@ -152,7 +156,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {showLoader ? (
           <PuterLoadingScreen />
         ) : (
-          <AOSProvider>{children}</AOSProvider>
+          <PageTransition>{children}</PageTransition>
         )}
         <ScrollRestoration />
         <Scripts />

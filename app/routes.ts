@@ -7,7 +7,6 @@ export default [
   route("/onboarding", "routes/onboarding.tsx"),
   route("/upload", "routes/upload.tsx"),
   route("/resume/:id", "routes/resume.tsx"),
-  route("/resume/:id/edit", "routes/resume-edit.tsx"),
   route("/history", "routes/history.tsx"),
   route("/settings", "routes/settings.tsx"),
   route("/pricing", "routes/pricing.tsx"),

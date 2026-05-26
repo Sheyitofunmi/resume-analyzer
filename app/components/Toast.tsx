@@ -7,6 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { springs } from "~/lib/motion";
 
 type ToastTier = "good" | "warn" | "bad";
 
@@ -39,10 +41,10 @@ function ToastEntry({
   item: ToastItem;
   onDone: (id: string) => void;
 }) {
-  const [visible, setVisible] = useState(true);
+  const [alive, setAlive] = useState(true);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setVisible(false), 2800);
+    const t1 = setTimeout(() => setAlive(false), 2800);
     const t2 = setTimeout(() => onDone(item.id), 3200);
     return () => {
       clearTimeout(t1);
@@ -51,29 +53,34 @@ function ToastEntry({
   }, [item.id, onDone]);
 
   return (
-    <div
-      className="rl-toast"
-      style={{
-        borderLeftColor: TIER_COLOR[item.tier],
-        opacity: visible ? 1 : 0,
-        transition: "opacity 320ms var(--ease-out)",
-      }}
-    >
-      <span
-        style={{
-          color:
-            item.tier === "good"
-              ? "var(--phos)"
-              : item.tier === "warn"
-                ? "var(--copper-hi)"
-                : "var(--ember)",
-          fontWeight: 700,
-        }}
-      >
-        {item.tier === "good" ? "✓" : item.tier === "warn" ? "!" : "✕"}
-      </span>
-      <span>{item.message}</span>
-    </div>
+    <AnimatePresence>
+      {alive && (
+        <motion.div
+          className="rl-toast"
+          initial={{ opacity: 0, x: 40, scale: 0.96 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 40, scale: 0.96 }}
+          transition={{ ...springs.snappy }}
+          style={{ borderLeftColor: TIER_COLOR[item.tier] }}
+          layout
+        >
+          <span
+            style={{
+              color:
+                item.tier === "good"
+                  ? "var(--phos)"
+                  : item.tier === "warn"
+                    ? "var(--copper-hi)"
+                    : "var(--ember)",
+              fontWeight: 700,
+            }}
+          >
+            {item.tier === "good" ? "✓" : item.tier === "warn" ? "!" : "✕"}
+          </span>
+          <span>{item.message}</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -93,9 +100,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ show }}>
       {children}
-      {toasts.map((t) => (
-        <ToastEntry key={t.id} item={t} onDone={remove} />
-      ))}
+      <motion.div layout style={{ display: "contents" }}>
+        {toasts.map((t) => (
+          <ToastEntry key={t.id} item={t} onDone={remove} />
+        ))}
+      </motion.div>
     </ToastContext.Provider>
   );
 }

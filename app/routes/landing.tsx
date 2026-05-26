@@ -8,7 +8,13 @@ import PricingTiers from "~/components/PricingTiers";
 import StatsStrip from "~/components/StatsStrip";
 import { Corners, Cursor, FadeInView } from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
-import { springs, staggerContainer, fadeUp } from "~/lib/motion";
+import {
+  springs,
+  staggerContainer,
+  fadeUp,
+  revealUp,
+  revealLeft,
+} from "~/lib/motion";
 
 // ── Animated terminal demo ─────────────────────────────────────────────
 const TERMINAL_LINES = [
@@ -1564,6 +1570,10 @@ export default function Landing() {
             ].map((s, i) => (
               <motion.div
                 key={s.step}
+                variants={revealUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
                 whileHover={{
                   y: -4,
                   boxShadow: "var(--depth-card-hover)",
@@ -1577,10 +1587,8 @@ export default function Landing() {
                   background: "var(--bg-3)",
                   borderColor: "var(--border-hi)",
                   boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+                  transitionDelay: `${i * 120}ms`,
                 }}
-                data-aos="fade-up"
-                data-aos-delay={i * 120}
-                data-aos-duration="650"
               >
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 10 }}
@@ -1689,7 +1697,16 @@ export default function Landing() {
           <div className="rl-ba-grid">
             {/* Before */}
             <FadeInView delay={0.05}>
-              <div className="rl-card" style={{ position: "relative" }}>
+              <motion.div
+                className="rl-card"
+                style={{ position: "relative" }}
+                whileHover={{
+                  rotate: -2,
+                  y: -6,
+                  borderColor: "var(--ember)",
+                  transition: springs.snappy,
+                }}
+              >
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
@@ -1746,7 +1763,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </FadeInView>
 
             {/* Rewrite button */}
@@ -1761,6 +1778,8 @@ export default function Landing() {
               }}
             >
               <motion.div
+                whileHover={{ scale: 1.08, transition: springs.snappy }}
+                whileTap={{ scale: 0.96, transition: springs.snappy }}
                 animate={{
                   boxShadow: [
                     "var(--glow-copper)",
@@ -1790,7 +1809,17 @@ export default function Landing() {
 
             {/* After */}
             <FadeInView delay={0.25}>
-              <div className="rl-card is-phos" style={{ position: "relative" }}>
+              <motion.div
+                className="rl-card is-phos"
+                style={{ position: "relative" }}
+                whileHover={{
+                  rotate: 2,
+                  y: -6,
+                  boxShadow:
+                    "0 0 56px rgba(168,230,163,0.38), 0 0 0 1px rgba(168,230,163,0.3), 0 16px 40px rgba(0,0,0,0.5)",
+                  transition: springs.snappy,
+                }}
+              >
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
@@ -1834,27 +1863,29 @@ export default function Landing() {
                     "Migrated app to React + TypeScript; reduced bundle 38%.",
                     "Reviewed 200+ PRs; mentored 3 juniors, 2 promoted in a year.",
                   ].map((b, i) => (
-                    <div
+                    <motion.div
                       key={b}
-                      data-aos="fade-left"
-                      data-aos-delay={400 + i * 70}
-                      data-aos-duration="450"
+                      variants={revealLeft}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.5 }}
                       style={{
                         display: "flex",
                         gap: 8,
                         fontFamily: "var(--font-body)",
                         fontSize: 13,
                         color: "var(--fg-1)",
+                        transitionDelay: `${400 + i * 70}ms`,
                       }}
                     >
                       <span style={{ color: "var(--phos)", flexShrink: 0 }}>
                         +
                       </span>{" "}
                       {b}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             </FadeInView>
           </div>
 

@@ -6,6 +6,8 @@ import {
   useRouteError,
 } from "react-router";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { springs } from "~/lib/motion";
 import { usePuterStore } from "~/lib/puter";
 import Summary from "~/components/Summary";
 import ATS from "~/components/ATS";
@@ -263,15 +265,6 @@ const Resume = () => {
             </button>
           )}
           {feedback && (
-            <Link
-              to={`/resume/${id}/edit`}
-              className="rl-btn rl-btn-secondary"
-              style={{ fontSize: 11, padding: "6px 12px" }}
-            >
-              ✎ edit_resume
-            </Link>
-          )}
-          {feedback && (
             <button
               onClick={() => window.print()}
               className="rl-btn rl-btn-ghost rl-mobile-hide"
@@ -321,117 +314,165 @@ const Resume = () => {
       )}
 
       {/* Re-analyze modal */}
-      {showReanalyze && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reanalyze-title"
-          className="print:hidden"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-          }}
-        >
-          <div
+      <AnimatePresence>
+        {showReanalyze && (
+          <motion.div
+            key="reanalyze-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reanalyze-title"
+            className="print:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             style={{
-              position: "absolute",
+              position: "fixed",
               inset: 0,
-              background: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(4px)",
-            }}
-            onClick={() => setShowReanalyze(false)}
-            aria-hidden="true"
-          />
-          <div
-            className="rl-card is-raised rl-fade-in"
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: 520,
-              zIndex: 1,
+              zIndex: 50,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
             }}
           >
-            <span className="rl-corner tl" />
-            <span className="rl-corner tr" />
-            <span className="rl-corner bl" />
-            <span className="rl-corner br" />
-
-            <span
-              id="reanalyze-title"
-              className="rl-eyebrow-prompt"
-              style={{ marginBottom: 16, display: "block" }}
-            >
-              re-analyze resume
-            </span>
-
             <div
               style={{
-                background: "rgba(230,153,104,0.06)",
-                border: "1px dashed var(--copper-deep)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 12px",
-                marginBottom: 16,
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--copper-hi)",
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.6)",
+                backdropFilter: "blur(4px)",
+              }}
+              onClick={() => setShowReanalyze(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              className="rl-card is-raised"
+              initial={{ scale: 0.96, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.96, opacity: 0, y: 12 }}
+              transition={{ ...springs.smooth }}
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: 520,
+                zIndex: 1,
               }}
             >
-              ! this will replace your current analysis
-            </div>
+              <span className="rl-corner tl" />
+              <span className="rl-corner tr" />
+              <span className="rl-corner bl" />
+              <span className="rl-corner br" />
 
-            <form
-              onSubmit={handleReanalyze}
-              style={{ display: "flex", flexDirection: "column", gap: 16 }}
-              noValidate
-            >
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label htmlFor="reanalyze-job-title">// job_title</label>
-                <input
-                  id="reanalyze-job-title"
-                  type="text"
-                  value={newJobTitle}
-                  onChange={(e) => setNewJobTitle(e.target.value)}
-                  placeholder="e.g. Senior Frontend Engineer"
-                  required
-                />
+              <span
+                id="reanalyze-title"
+                className="rl-eyebrow-prompt"
+                style={{ marginBottom: 16, display: "block" }}
+              >
+                re-analyze resume
+              </span>
+
+              <div
+                style={{
+                  background: "rgba(230,153,104,0.06)",
+                  border: "1px dashed var(--copper-deep)",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "8px 12px",
+                  marginBottom: 16,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  color: "var(--copper-hi)",
+                }}
+              >
+                ! this will replace your current analysis
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label htmlFor="reanalyze-job-desc">// job_description</label>
-                <textarea
-                  id="reanalyze-job-desc"
-                  rows={5}
-                  value={newJobDescription}
-                  onChange={(e) => setNewJobDescription(e.target.value)}
-                  placeholder="Paste job description here…"
-                  required
-                />
-              </div>
-              <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
-                <button
-                  type="submit"
-                  className="rl-btn rl-btn-primary"
-                  style={{ fontSize: 12 }}
+
+              <form
+                onSubmit={handleReanalyze}
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+                noValidate
+              >
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
                 >
-                  $ analyze →
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowReanalyze(false)}
-                  className="rl-btn rl-btn-ghost"
-                  style={{ fontSize: 12 }}
+                  <label htmlFor="reanalyze-job-title">// job_title</label>
+                  <input
+                    id="reanalyze-job-title"
+                    type="text"
+                    value={newJobTitle}
+                    onChange={(e) => setNewJobTitle(e.target.value)}
+                    placeholder="e.g. Senior Frontend Engineer"
+                    required
+                  />
+                </div>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
                 >
-                  cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                  <label htmlFor="reanalyze-job-desc">// job_description</label>
+                  <textarea
+                    id="reanalyze-job-desc"
+                    rows={5}
+                    value={newJobDescription}
+                    onChange={(e) => setNewJobDescription(e.target.value)}
+                    placeholder="Paste job description here…"
+                    required
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
+                  <motion.button
+                    type="submit"
+                    className="rl-btn rl-btn-primary"
+                    style={{
+                      fontSize: 12,
+                      position: "relative",
+                      overflow: "hidden",
+                      minWidth: 100,
+                    }}
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={springs.snappy}
+                    disabled={isReanalyzing}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isReanalyzing ? (
+                        <motion.span
+                          key="loading"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          analyzing…
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="idle"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          $ analyze →
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowReanalyze(false)}
+                    className="rl-btn rl-btn-ghost"
+                    style={{ fontSize: 12 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={springs.snappy}
+                  >
+                    cancel
+                  </motion.button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Re-analyzing status */}
       {isReanalyzing && (

@@ -74,9 +74,13 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
         }}
       >
         <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: reduced ? 0 : 0.2 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={
+            reduced
+              ? { duration: 0 }
+              : { delay: 1.1, type: "spring", stiffness: 400, damping: 20 }
+          }
           style={{
             fontSize: 22,
             fontWeight: 500,

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { usePuterStore } from "~/lib/puter";
@@ -18,6 +19,8 @@ const Navbar = () => {
   const location = useLocation();
   const reduced = useReducedMotion();
   const { startTour } = useProductTour();
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+
   const user = auth.user;
   const initials = user?.username
     ? user.username.slice(0, 2).toUpperCase()
@@ -67,42 +70,52 @@ const Navbar = () => {
           flex: 1,
           justifyContent: "center",
         }}
+        onMouseLeave={() => setHoveredLink(null)}
       >
         {NAV_LINKS.map(({ to, label, exact }) => {
           const active = isActive(to, exact);
+          const isHovered = hoveredLink === to;
+
           return (
             <Link
               key={to}
               to={to}
+              onMouseEnter={() => setHoveredLink(to)}
               style={{
                 position: "relative",
                 fontFamily: "var(--font-mono)",
                 fontSize: 12,
-                color: active ? "var(--fg-1)" : "var(--fg-3)",
+                color: active
+                  ? "var(--fg-1)"
+                  : isHovered
+                    ? "var(--fg-1)"
+                    : "var(--fg-3)",
                 textDecoration: "none",
                 padding: "5px 12px",
                 borderRadius: "var(--radius-sm)",
                 letterSpacing: "0.04em",
-                transition: "color var(--dur-fast), background var(--dur-fast)",
+                transition: "color 120ms ease",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.color = "var(--fg-1)";
-                  el.style.background = "var(--surface)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.color = "var(--fg-3)";
-                  el.style.background = "transparent";
-                }
+                zIndex: 0,
               }}
             >
+              {/* Sliding hover background — magic pill */}
+              {isHovered && !active && (
+                <motion.span
+                  layoutId="nav-hover-bg"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "var(--surface)",
+                    borderRadius: "var(--radius-sm)",
+                    zIndex: -1,
+                  }}
+                  transition={reduced ? { duration: 0 } : springs.smooth}
+                />
+              )}
+
               {/* Sliding active background */}
               {active && (
                 <motion.span

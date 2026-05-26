@@ -6,6 +6,8 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useNavigate } from "react-router";
+import { AnimatePresence, motion } from "framer-motion";
+import { springs } from "~/lib/motion";
 import { usePuterStore } from "~/lib/puter";
 
 interface Command {
@@ -160,8 +162,6 @@ export default function CommandPalette() {
     }
   };
 
-  if (!open) return null;
-
   // Group filtered by category
   const grouped: Record<string, Command[]> = {};
   for (const cmd of filtered) {
@@ -172,197 +172,212 @@ export default function CommandPalette() {
   let globalIdx = 0;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={close}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(11,11,10,0.72)",
-          backdropFilter: "blur(6px)",
-          zIndex: 200,
-        }}
-      />
-
-      {/* Panel */}
-      <div
-        className="rl-fade-in"
-        style={{
-          position: "fixed",
-          top: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "min(560px, calc(100vw - 32px))",
-          background: "var(--bg-3)",
-          border: "1px solid var(--border-hi)",
-          borderRadius: "var(--radius-md)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
-          zIndex: 201,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* Input row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "12px 16px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <span
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="cp-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            onClick={close}
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 14,
-              color: "var(--fg-3)",
-            }}
-          >
-            $
-          </span>
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="type a command…"
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              fontFamily: "var(--font-mono)",
-              fontSize: 14,
-              color: "var(--fg-1)",
-              boxShadow: "none",
-              padding: 0,
+              position: "fixed",
+              inset: 0,
+              background: "rgba(11,11,10,0.72)",
+              backdropFilter: "blur(6px)",
+              zIndex: 200,
             }}
           />
-          <span
+
+          {/* Panel */}
+          <motion.div
+            key="cp-panel"
+            initial={{ opacity: 0, scale: 0.97, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -8 }}
+            transition={{ ...springs.snappy, duration: 0.18 }}
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--fg-4)",
-              padding: "2px 6px",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
+              position: "fixed",
+              top: "20%",
+              left: "50%",
+              x: "-50%",
+              width: "min(560px, calc(100vw - 32px))",
+              background: "var(--bg-3)",
+              border: "1px solid var(--border-hi)",
+              borderRadius: "var(--radius-md)",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
+              zIndex: 201,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            ESC
-          </span>
-        </div>
-
-        {/* Results */}
-        <div style={{ maxHeight: 360, overflowY: "auto" }}>
-          {Object.entries(grouped).map(([cat, cmds]) => (
-            <div key={cat}>
-              <div
+            {/* Input row */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "12px 16px",
+                borderBottom: "1px solid var(--border)",
+              }}
+            >
+              <span
                 style={{
-                  padding: "8px 16px 4px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  color: "var(--fg-3)",
+                }}
+              >
+                $
+              </span>
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKey}
+                placeholder="type a command…"
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  color: "var(--fg-1)",
+                  boxShadow: "none",
+                  padding: 0,
+                }}
+              />
+              <span
+                style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: 10,
                   color: "var(--fg-4)",
-                  letterSpacing: "0.12em",
+                  padding: "2px 6px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)",
                 }}
               >
-                {CategoryLabel[cat] ?? cat}
-              </div>
-              {cmds.map((cmd) => {
-                const idx = globalIdx++;
-                const isActive = idx === activeIdx;
-                return (
+                ESC
+              </span>
+            </div>
+
+            {/* Results */}
+            <div style={{ maxHeight: 360, overflowY: "auto" }}>
+              {Object.entries(grouped).map(([cat, cmds]) => (
+                <div key={cat}>
                   <div
-                    key={cmd.id}
-                    onClick={() => runCommand(cmd)}
-                    onMouseEnter={() => setActiveIdx(idx)}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "10px 16px",
-                      cursor: "pointer",
-                      background: isActive ? "var(--surface-2)" : "transparent",
-                      borderLeft: isActive
-                        ? "2px solid var(--phos)"
-                        : "2px solid transparent",
-                      transition: "background var(--dur-fast)",
+                      padding: "8px 16px 4px",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      color: "var(--fg-4)",
+                      letterSpacing: "0.12em",
                     }}
                   >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 13,
-                        color: isActive ? "var(--fg-1)" : "var(--fg-2)",
-                        flex: 1,
-                      }}
-                    >
-                      {cmd.label}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--fg-4)",
-                      }}
-                    >
-                      {cmd.hint}
-                    </span>
+                    {CategoryLabel[cat] ?? cat}
                   </div>
-                );
-              })}
+                  {cmds.map((cmd) => {
+                    const idx = globalIdx++;
+                    const isActive = idx === activeIdx;
+                    return (
+                      <div
+                        key={cmd.id}
+                        onClick={() => runCommand(cmd)}
+                        onMouseEnter={() => setActiveIdx(idx)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "10px 16px",
+                          cursor: "pointer",
+                          background: isActive
+                            ? "var(--surface-2)"
+                            : "transparent",
+                          borderLeft: isActive
+                            ? "2px solid var(--phos)"
+                            : "2px solid transparent",
+                          transition: "background var(--dur-fast)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 13,
+                            color: isActive ? "var(--fg-1)" : "var(--fg-2)",
+                            flex: 1,
+                          }}
+                        >
+                          {cmd.label}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 11,
+                            color: "var(--fg-4)",
+                          }}
+                        >
+                          {cmd.hint}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+              {filtered.length === 0 && (
+                <div
+                  style={{
+                    padding: "24px 16px",
+                    textAlign: "center",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    color: "var(--fg-4)",
+                  }}
+                >
+                  // no commands match
+                </div>
+              )}
             </div>
-          ))}
-          {filtered.length === 0 && (
+
+            {/* Footer hints */}
             <div
               style={{
-                padding: "24px 16px",
-                textAlign: "center",
+                padding: "8px 16px",
+                borderTop: "1px solid var(--border)",
+                display: "flex",
+                gap: 16,
                 fontFamily: "var(--font-mono)",
-                fontSize: 12,
+                fontSize: 10,
                 color: "var(--fg-4)",
               }}
             >
-              // no commands match
+              {[
+                ["↑↓", "navigate"],
+                ["↵", "select"],
+                ["Esc", "close"],
+              ].map(([key, desc]) => (
+                <span key={key}>
+                  <span
+                    style={{
+                      padding: "1px 5px",
+                      border: "1px solid var(--border-hi)",
+                      borderRadius: "var(--radius-sm)",
+                      marginRight: 4,
+                    }}
+                  >
+                    {key}
+                  </span>
+                  {desc}
+                </span>
+              ))}
             </div>
-          )}
-        </div>
-
-        {/* Footer hints */}
-        <div
-          style={{
-            padding: "8px 16px",
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            gap: 16,
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            color: "var(--fg-4)",
-          }}
-        >
-          {[
-            ["↑↓", "navigate"],
-            ["↵", "select"],
-            ["Esc", "close"],
-          ].map(([key, desc]) => (
-            <span key={key}>
-              <span
-                style={{
-                  padding: "1px 5px",
-                  border: "1px solid var(--border-hi)",
-                  borderRadius: "var(--radius-sm)",
-                  marginRight: 4,
-                }}
-              >
-                {key}
-              </span>
-              {desc}
-            </span>
-          ))}
-        </div>
-      </div>
-    </>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

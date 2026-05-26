@@ -27,7 +27,6 @@
     "react-dropzone": "^15.0.0",
     "react-router": "7.15.0",
     "tailwind-merge": "^3.6.0",
-    "vivus": "^0.4.6",
     "zustand": "^5.0.13"
   },
   "devDependencies": {

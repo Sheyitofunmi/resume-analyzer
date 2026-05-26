@@ -12,6 +12,35 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### UI: Hover + layout improvements across 4 components (2026-05-26)
+
+- **`app/components/PricingTiers.tsx`**: Cards now use `motion.div` with `whileHover` — scale 1.025 + colored top accent bar (copper/phos/copper-hi) slides in from left via `scaleX: 0 → 1` on hover. Tier name color transitions to accent color on hover. Added `accentColor` field to `Tier` type.
+- **`app/components/Navbar.tsx`**: Nav link hover upgraded from raw `onMouseEnter`/`onMouseLeave` style manipulation to a magic sliding pill using `layoutId="nav-hover-bg"` framer-motion shared layout — pill slides smoothly between hovered links. `hoveredLink` state tracks which link is hovered.
+- **`app/components/HowItWorks.tsx`**: Full upgrade from vanilla `IntersectionObserver` + CSS transitions to framer-motion `useInView` + `staggerContainer`/`revealUp` variants. Layout changed to **diagonal cascade** — each card has `--cascade-offset` CSS custom property (0 / 56px / 112px `margin-top`) creating a staircase on desktop. Connector `↘` arrows pulse between steps. Each card has a giant watermark step number (`opacity: 0.06`) and a bottom accent bar that slides in on hover. Mobile: cascade resets to flat column.
+- **`app/app.css`**: Added `.rl-hiw-cascade`, `.rl-hiw-card-wrap`, `.rl-hiw-card`, `.rl-hiw-connector` — cascade layout classes with `@media (max-width: 768px)` reset to flat column.
+- **`app/routes/landing.tsx`** (before/after section): BEFORE card wrapped in `motion.div` with `whileHover={{ rotate: -2, y: -6, borderColor: "var(--ember)" }}`. AFTER card wrapped in `motion.div` with `whileHover={{ rotate: 2, y: -6, boxShadow: intensified phos glow }}`. Rewrite button gains `whileHover={{ scale: 1.08 }}` + `whileTap={{ scale: 0.96 }}`.
+
+### Full animation & motion system implementation (2026-05-26)
+
+- **`app/lib/motion.ts`**: Added `revealUp` and `revealLeft` variants — lightweight scroll-reveal variants (no blur) for below-fold content.
+- **`app/root.tsx`**: Added `PageTransition` component with `AnimatePresence` — 180ms fade+scale(0.99) on every route change. Removed `AOSProvider` and `aos/dist/aos.css` import (AOS fully replaced by framer-motion `whileInView`).
+- **`app/components/CommandPalette.tsx`**: Replaced instant `if (!open) return null` unmount with `AnimatePresence` — backdrop fades in/out (150ms), panel scales+fades (0.97→1, springs.snappy). Both animate on close.
+- **`app/components/Toast.tsx`**: Replaced CSS-only opacity fade with framer-motion `AnimatePresence` — toasts slide in from right (x: 40→0) and exit to right. Container uses `layout` for smooth reflow when toasts stack/dismiss.
+- **`app/components/MobileBottomNav.tsx`**: Added `layoutId="mobile-nav-active"` sliding background pill — matches desktop Navbar's shared layout animation pattern across breakpoints.
+- **`app/routes/history.tsx`**: Added `KPICard` component with `useInView` + `useCountUp` — KPI values count up from 0 on scroll. KPI grid uses `staggerContainer`, chart uses `revealLeft whileInView`, sparklines stagger with `revealUp`, run log rows fade in sequentially.
+- **`app/routes/resume.tsx`**: Reanalyze submit button wraps label in `AnimatePresence mode="wait"` — text swaps between "$ analyze →" and "analyzing…" with y-offset. Modal open/close uses `AnimatePresence` with scale+fade (springs.smooth).
+- **`app/routes/settings.tsx`**: Header uses `staggerContainer` on load. All 6 Section blocks individually wrapped in `motion.div variants={revealUp}` with stagger.
+- **`app/routes/landing.tsx`**: Replaced all `data-aos` attributes with framer-motion `whileInView` — step cards use `revealUp viewport once`, testimonial bullets use `revealLeft viewport once`. Added `revealUp`/`revealLeft` to imports.
+- **`app/components/ScoreCircle.tsx`**: Score number enters with elastic spring (stiffness 400, damping 20) at delay 1.1s — "lands" after the stroke ring finishes drawing.
+- **`app/routes/home.tsx`**: Loading state replaced with 3 staggered skeleton shimmer placeholders (`.rl-shimmer` class, 88px height, 60ms stagger) instead of centered spinner.
+- **`app/app.css`**: `rl-grain` animation now gated — `animation: none` by default, restored only under `@media (prefers-reduced-motion: no-preference)`.
+- **`package.json`**: Removed unused `vivus` dependency.
+
+### Remove edit resume (2026-05-26)
+
+- **`app/routes/resume.tsx`**: Removed "✎ edit_resume" `Link` button from the resume action bar.
+- **`app/routes.ts`**: Removed `/resume/:id/edit` route registration.
+
 ### Interactive element audit & hover/state polish (2026-05-26)
 
 - **`app/app.css`**: Added `input[aria-invalid="true"]` and `textarea[aria-invalid="true"]` error border (ember) + focus glow states — inputs now visually distinguish invalid state from default.

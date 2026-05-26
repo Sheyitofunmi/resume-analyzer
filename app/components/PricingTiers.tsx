@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { motion, useReducedMotion } from "framer-motion";
+import { springs } from "~/lib/motion";
 
 type FeatureItem = string | { type: "inherit"; label: string };
 
@@ -15,6 +17,7 @@ interface Tier {
   cta: string;
   ctaTo: string;
   variant: "primary" | "secondary";
+  accentColor: string;
 }
 
 export const TIERS: Tier[] = [
@@ -26,6 +29,7 @@ export const TIERS: Tier[] = [
     period: "/month",
     tagline: "enough to land your first offer",
     recommended: false,
+    accentColor: "var(--copper)",
     features: [
       "up to 5 analyses / month",
       "5-dimension scoring",
@@ -45,6 +49,7 @@ export const TIERS: Tier[] = [
     period: "/month",
     tagline: "for active job searches",
     recommended: true,
+    accentColor: "var(--phos)",
     features: [
       { type: "inherit", label: "all of free, plus:" },
       "unlimited analyses",
@@ -66,6 +71,7 @@ export const TIERS: Tier[] = [
     period: "/month",
     tagline: "for hiring teams · evaluate candidates at scale",
     recommended: false,
+    accentColor: "var(--copper-hi)",
     features: [
       { type: "inherit", label: "all of pro, plus:" },
       "bulk analyze (50+ resumes)",
@@ -82,6 +88,7 @@ export const TIERS: Tier[] = [
 
 export default function PricingTiers() {
   const [annual, setAnnual] = useState(false);
+  const reduced = useReducedMotion();
 
   return (
     <div className="rl-pricing-wrap">
@@ -111,12 +118,47 @@ export default function PricingTiers() {
         {TIERS.map((t) => {
           const price = annual ? t.yearlyPrice : t.monthlyPrice;
           return (
-            <div
+            <motion.div
               key={t.id}
               className={`rl-card rl-pricing-card${t.recommended ? " is-phos" : ""}`}
               aria-label={`${t.tier} plan${t.recommended ? " — recommended" : ""}`}
-              style={t.id === "recruiter" ? { opacity: 0.72 } : undefined}
+              style={{
+                ...(t.id === "recruiter" ? { opacity: 0.72 } : {}),
+                overflow: "hidden",
+              }}
+              initial="rest"
+              whileHover={reduced ? "rest" : "hover"}
+              animate="rest"
+              variants={{
+                rest: { scale: 1, transition: springs.snappy },
+                hover: { scale: 1.025, transition: springs.snappy },
+              }}
             >
+              {/* Accent bar — slides in from left on hover */}
+              <motion.div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 3,
+                  background: t.accentColor,
+                  transformOrigin: "left",
+                  borderRadius: "var(--radius-md) var(--radius-md) 0 0",
+                  ...(t.recommended
+                    ? { boxShadow: `0 0 12px ${t.accentColor}` }
+                    : {}),
+                }}
+                variants={{
+                  rest: { scaleX: 0 },
+                  hover: {
+                    scaleX: 1,
+                    transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                  },
+                }}
+              />
+
               {t.recommended && (
                 <div className="rl-pricing-badge" aria-hidden="true">
                   RECOMMENDED
@@ -125,14 +167,20 @@ export default function PricingTiers() {
 
               {/* Header */}
               <div className="rl-pricing-header">
-                <span
+                <motion.span
                   className="rl-pricing-tier-name"
                   style={{
                     color: t.recommended ? "var(--phos)" : "var(--fg-3)",
                   }}
+                  variants={{
+                    rest: {
+                      color: t.recommended ? "var(--phos)" : "var(--fg-3)",
+                    },
+                    hover: { color: t.accentColor },
+                  }}
                 >
                   {t.tier}
-                </span>
+                </motion.span>
                 <div className="rl-pricing-price-row">
                   <span className="rl-pricing-price">{price}</span>
                   <span className="rl-pricing-period">{t.period}</span>
@@ -173,7 +221,7 @@ export default function PricingTiers() {
               >
                 {t.cta}
               </Link>
-            </div>
+            </motion.div>
           );
         })}
       </div>

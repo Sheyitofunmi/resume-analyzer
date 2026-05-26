@@ -537,7 +537,7 @@ export default function Home() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Loading */}
+        {/* Loading — skeleton shimmer placeholders */}
         <AnimatePresence>
           {loadingResumes && (
             <motion.div
@@ -545,42 +545,24 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 16,
-                padding: "48px 0",
-              }}
+              transition={{ duration: 0.2 }}
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
             >
-              <motion.span
-                className="rl-dot"
-                animate={
-                  reduced ? {} : { scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }
-                }
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                style={{ width: 12, height: 12, display: "block" }}
-              />
-              <motion.p
-                animate={reduced ? {} : { opacity: [0.5, 1, 0.5] }}
-                transition={{
-                  duration: 1.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  color: "var(--fg-3)",
-                }}
-              >
-                loading resumes…
-              </motion.p>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06, duration: 0.25 }}
+                  className="rl-shimmer"
+                  style={{
+                    height: 88,
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              ))}
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { motion, useInView } from "framer-motion";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
@@ -12,6 +13,58 @@ import {
   scoreTierColor,
 } from "~/components/ScoreCharts";
 import { usePuterStore } from "~/lib/puter";
+import { useCountUp } from "~/hooks/useCountUp";
+import { revealLeft, revealUp, staggerContainer } from "~/lib/motion";
+
+function KPICard({
+  kpi,
+  index,
+}: {
+  kpi: { label: string; value: number; suffix: string; prefix?: string };
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const display = useCountUp(inView ? kpi.value : 0, 1200);
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={revealUp}
+      custom={index}
+      className="rl-card"
+      style={{ position: "relative" }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 28,
+            fontWeight: 700,
+            color: scoreTierColor(kpi.label === "avg_lift" ? 70 : kpi.value),
+            letterSpacing: "-1px",
+            fontVariantNumeric: "tabular-nums",
+            textShadow: "0 0 14px currentColor",
+          }}
+        >
+          {kpi.prefix ?? ""}
+          {Math.round(display)}
+          {kpi.suffix}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            color: "var(--fg-3)",
+            letterSpacing: "0.12em",
+          }}
+        >
+          {kpi.label}
+        </span>
+      </div>
+    </motion.div>
+  );
+}
 
 // ── Main ───────────────────────────────────────────────────────────────
 export default function History() {
@@ -119,56 +172,30 @@ export default function History() {
         ) : (
           <>
             {/* KPI cards */}
-            <div
+            <motion.div
+              variants={staggerContainer(0.08)}
+              initial="hidden"
+              animate="visible"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
                 gap: 16,
               }}
             >
-              {KPIs.map((kpi) => (
-                <div
-                  key={kpi.label}
-                  className="rl-card"
-                  style={{ position: "relative" }}
-                >
-                  <div
-                    style={{ display: "flex", flexDirection: "column", gap: 4 }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: scoreTierColor(
-                          kpi.label === "avg_lift" ? 70 : (kpi.value as number),
-                        ),
-                        letterSpacing: "-1px",
-                        fontVariantNumeric: "tabular-nums",
-                        textShadow: "0 0 14px currentColor",
-                      }}
-                    >
-                      {kpi.prefix ?? ""}
-                      {kpi.value}
-                      {kpi.suffix}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color: "var(--fg-3)",
-                        letterSpacing: "0.12em",
-                      }}
-                    >
-                      {kpi.label}
-                    </span>
-                  </div>
-                </div>
+              {KPIs.map((kpi, i) => (
+                <KPICard key={kpi.label} kpi={kpi} index={i} />
               ))}
-            </div>
+            </motion.div>
 
             {/* Line chart */}
-            <div className="rl-card" style={{ position: "relative" }}>
+            <motion.div
+              className="rl-card"
+              variants={revealLeft}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              style={{ position: "relative" }}
+            >
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
               >
@@ -192,10 +219,14 @@ export default function History() {
                 </div>
                 <LineChart runs={runs} />
               </div>
-            </div>
+            </motion.div>
 
             {/* Per-dimension sparklines */}
-            <div
+            <motion.div
+              variants={staggerContainer(0.06)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
@@ -209,18 +240,20 @@ export default function History() {
                       .score,
                 );
                 return (
-                  <DimSparklineCard
-                    key={key}
-                    label={label}
-                    dimScores={dimScores}
-                  />
+                  <motion.div key={key} variants={revealUp}>
+                    <DimSparklineCard label={label} dimScores={dimScores} />
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
 
             {/* Run log table */}
-            <div
+            <motion.div
               className="rl-card"
+              variants={revealUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
               style={{ position: "relative", padding: 0 }}
             >
               <div
@@ -236,10 +269,13 @@ export default function History() {
                 const s = r.feedback.overallScore;
                 const tier = scoreTier(s);
                 return (
-                  <div
+                  <motion.div
                     key={r.id}
                     className="rl-row rl-history-row rl-row-clickable"
                     onClick={() => navigate(`/resume/${r.id}`)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.04, duration: 0.3 }}
                     style={{ cursor: "pointer", gap: 16, padding: "12px 20px" }}
                   >
                     <span
@@ -308,10 +344,10 @@ export default function History() {
                     >
                       →
                     </span>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </>
         )}
       </div>
