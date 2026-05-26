@@ -20,6 +20,7 @@ function Toggle({
     <button
       type="button"
       onClick={() => onChange(!on)}
+      className="rl-toggle"
       style={{
         width: 40,
         height: 22,
@@ -423,12 +424,8 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={handleWipeData}
-                className="rl-btn rl-btn-ghost"
-                style={{
-                  fontSize: 12,
-                  color: "var(--ember)",
-                  borderColor: "var(--ember-dim)",
-                }}
+                className="rl-btn rl-btn-ghost-ember"
+                style={{ fontSize: 12 }}
               >
                 ✕ delete_all_data
               </button>

@@ -83,18 +83,24 @@ const Navbar = () => {
                 padding: "5px 12px",
                 borderRadius: "var(--radius-sm)",
                 letterSpacing: "0.04em",
-                transition: "color var(--dur-fast)",
+                transition: "color var(--dur-fast), background var(--dur-fast)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
               }}
               onMouseEnter={(e) => {
-                if (!active)
-                  (e.currentTarget as HTMLElement).style.color = "var(--fg-1)";
+                if (!active) {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.color = "var(--fg-1)";
+                  el.style.background = "var(--surface)";
+                }
               }}
               onMouseLeave={(e) => {
-                if (!active)
-                  (e.currentTarget as HTMLElement).style.color = "var(--fg-3)";
+                if (!active) {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.color = "var(--fg-3)";
+                  el.style.background = "transparent";
+                }
               }}
             >
               {/* Sliding active background */}

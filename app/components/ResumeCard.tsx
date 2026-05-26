@@ -228,7 +228,8 @@ const ResumeCard = ({
           <div style={{ display: "flex", gap: 6 }}>
             <motion.button
               onClick={handleConfirm}
-              whileTap={{ scale: 0.96 }}
+              whileHover={reduced ? {} : { background: "#f0605a", scale: 1.02 }}
+              whileTap={reduced ? {} : { scale: 0.96 }}
               transition={springs.snappy}
               style={{
                 flex: 1,
@@ -247,7 +248,16 @@ const ResumeCard = ({
             </motion.button>
             <motion.button
               onClick={handleCancel}
-              whileTap={{ scale: 0.96 }}
+              whileHover={
+                reduced
+                  ? {}
+                  : {
+                      background: "var(--surface)",
+                      borderColor: "var(--border-hi)",
+                      scale: 1.02,
+                    }
+              }
+              whileTap={reduced ? {} : { scale: 0.96 }}
               transition={springs.snappy}
               style={{
                 flex: 1,

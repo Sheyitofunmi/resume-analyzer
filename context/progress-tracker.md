@@ -12,6 +12,24 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Interactive element audit & hover/state polish (2026-05-26)
+
+- **`app/app.css`**: Added `input[aria-invalid="true"]` and `textarea[aria-invalid="true"]` error border (ember) + focus glow states — inputs now visually distinguish invalid state from default.
+- **`app/app.css`**: Added `.rl-pricing-toggle-btn:hover:not(.is-active)` — inactive Monthly/Annual toggle buttons now show subtle highlight on hover.
+- **`app/app.css`**: Added `transition: background, box-shadow` to `.rl-row` — history run rows no longer instant-jump on hover; added `.rl-row-clickable:hover` inset left-border glow + `.rl-row-arrow` translate effect.
+- **`app/app.css`**: Added `.rl-btn:disabled` with `cursor: not-allowed; pointer-events: none` — disabled buttons no longer animate on hover.
+- **`app/app.css`**: Added `.rl-toggle` hover/active CSS — settings toggle switches now have opacity feedback.
+- **`app/app.css`**: Added `.rl-btn-ghost-ember` — dedicated ember danger button class with correct hover (red glow) replacing `.rl-btn-ghost` + inline color overrides.
+- **`app/app.css`**: Added `.rl-link-phos` — phos-colored inline link with underline + brighten hover effect.
+- **`app/app.css`**: Added `.rl-bottom-nav-link` with `:hover:not(.is-active)` background highlight.
+- **`app/routes/settings.tsx`**: Toggle button gains `className="rl-toggle"` for hover feedback; delete button switched to `rl-btn-ghost-ember`.
+- **`app/routes/history.tsx`**: Run log rows gain `rl-row-clickable` class; arrow span gains `rl-row-arrow` class for translate-on-hover; removed unused `Cursor` import.
+- **`app/routes/home.tsx`**: ComparePanel `view_report` links use `rl-link-phos` for underline hover. Pagination prev/next buttons guard `whileHover`/`whileTap` when disabled and set `cursor: not-allowed; pointer-events: none`.
+- **`app/components/ResumeCard.tsx`**: Delete-confirm "✕ delete" and "cancel" buttons gain `whileHover` animations.
+- **`app/components/MobileBottomNav.tsx`**: Nav links use `rl-bottom-nav-link` class (with `.is-active` modifier) for consistent hover.
+- **`app/components/Navbar.tsx`**: Inactive nav links now fade in a background pill on hover (`background: var(--surface)`) with `transition: color, background`.
+- **`app/components/Footer.tsx`**: Footer product links — arrow `→` now inherits hover color (copper-hi) and gap widens slightly on hover for tactile feel.
+
 ### Landing page content + UX review fixes (2026-05-26)
 
 - **`app/routes/landing.tsx`**: Promoted hero H1 to functional copy ("score your resume against any job description"); old tagline demoted to monospace comment above it.

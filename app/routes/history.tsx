@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
-import { Cursor, Eyebrow, ScoreBar, StatusPill } from "~/components/atoms";
+import { Eyebrow, ScoreBar, StatusPill } from "~/components/atoms";
 import {
   DIMS,
   DimSparklineCard,
@@ -238,7 +238,7 @@ export default function History() {
                 return (
                   <div
                     key={r.id}
-                    className="rl-row rl-history-row"
+                    className="rl-row rl-history-row rl-row-clickable"
                     onClick={() => navigate(`/resume/${r.id}`)}
                     style={{ cursor: "pointer", gap: 16, padding: "12px 20px" }}
                   >
@@ -297,11 +297,13 @@ export default function History() {
                       </StatusPill>
                     </span>
                     <span
+                      className="rl-row-arrow"
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: 11,
                         color: "var(--phos)",
                         flexShrink: 0,
+                        display: "inline-block",
                       }}
                     >
                       →

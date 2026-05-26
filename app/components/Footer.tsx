@@ -94,16 +94,18 @@ const Footer = () => {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                transition: "color var(--dur-fast)",
+                transition: "color var(--dur-fast), gap var(--dur-fast)",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--copper-hi)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--fg-2)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--copper-hi)";
+                e.currentTarget.style.gap = "12px";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--fg-2)";
+                e.currentTarget.style.gap = "8px";
+              }}
             >
-              <span style={{ color: "var(--fg-3)" }}>→</span> {item.label}
+              <span>→</span> {item.label}
             </Link>
           ))}
         </div>

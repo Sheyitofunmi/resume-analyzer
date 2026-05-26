@@ -395,11 +395,10 @@ const ComparePanel = ({
           <div key={r.id} style={{ display: "flex", justifyContent: "center" }}>
             <Link
               to={`/resume/${r.id}`}
+              className="rl-link-phos"
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 12,
-                color: "var(--phos)",
-                textDecoration: "none",
               }}
             >
               → view_report
@@ -690,11 +689,18 @@ export default function Home() {
                 <motion.button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  whileHover={reduced ? {} : { scale: 1.04 }}
-                  whileTap={reduced ? {} : { scale: 0.96 }}
+                  whileHover={
+                    currentPage === 1 || reduced ? {} : { scale: 1.04 }
+                  }
+                  whileTap={currentPage === 1 || reduced ? {} : { scale: 0.96 }}
                   transition={springs.snappy}
                   className="rl-btn rl-btn-secondary"
-                  style={{ fontSize: 12, opacity: currentPage === 1 ? 0.4 : 1 }}
+                  style={{
+                    fontSize: 12,
+                    opacity: currentPage === 1 ? 0.4 : 1,
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    pointerEvents: currentPage === 1 ? "none" : "auto",
+                  }}
                 >
                   ← prev
                 </motion.button>
@@ -712,13 +718,20 @@ export default function Home() {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  whileHover={reduced ? {} : { scale: 1.04 }}
-                  whileTap={reduced ? {} : { scale: 0.96 }}
+                  whileHover={
+                    currentPage === totalPages || reduced ? {} : { scale: 1.04 }
+                  }
+                  whileTap={
+                    currentPage === totalPages || reduced ? {} : { scale: 0.96 }
+                  }
                   transition={springs.snappy}
                   className="rl-btn rl-btn-secondary"
                   style={{
                     fontSize: 12,
                     opacity: currentPage === totalPages ? 0.4 : 1,
+                    cursor:
+                      currentPage === totalPages ? "not-allowed" : "pointer",
+                    pointerEvents: currentPage === totalPages ? "none" : "auto",
                   }}
                 >
                   next →

@@ -30,18 +30,9 @@ const MobileBottomNav = () => {
             <Link
               key={slot.to}
               to={slot.to}
+              className={`rl-bottom-nav-link${active ? " is-active" : ""}`}
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 3,
-                padding: "6px 12px",
-                textDecoration: "none",
-                fontFamily: "var(--font-mono)",
                 color: active ? "var(--phos)" : "var(--fg-3)",
-                fontSize: 10,
-                letterSpacing: "0.1em",
-                transition: "color var(--dur-fast)",
                 filter: active ? "drop-shadow(0 0 6px var(--phos))" : "none",
               }}
             >

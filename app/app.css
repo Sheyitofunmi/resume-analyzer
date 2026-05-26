@@ -213,6 +213,19 @@ input::placeholder,
 textarea::placeholder {
   color: var(--fg-3);
 }
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--ember);
+  box-shadow: 0 0 0 1px var(--ember-dim);
+}
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus {
+  border-color: var(--ember);
+  box-shadow:
+    0 0 0 1px var(--ember),
+    0 0 12px var(--ember-glow);
+}
 textarea {
   resize: vertical;
   min-height: 120px;
@@ -395,6 +408,13 @@ label {
   transform: translateY(0);
 }
 
+/* Disabled state — prevents hover transforms leaking on framer-motion buttons */
+.rl-btn:disabled,
+.rl-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* ── Cards ────────────────────────────────────────────────────────── */
 .rl-card {
   position: relative;
@@ -459,6 +479,10 @@ label {
 .rl-pricing-toggle-btn.is-active {
   background: var(--surface-2);
   color: var(--fg-1);
+}
+.rl-pricing-toggle-btn:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg-2);
 }
 
 .rl-pricing-save-badge {
@@ -1060,12 +1084,25 @@ label {
   padding: 10px var(--space-4);
   border-bottom: 1px dashed var(--border);
   font-size: var(--text-sm);
+  transition:
+    background var(--dur-fast),
+    box-shadow var(--dur-fast);
 }
 .rl-row:last-child {
   border-bottom: none;
 }
 .rl-row:hover {
   background: var(--surface);
+}
+.rl-row-clickable:hover {
+  box-shadow: inset 3px 0 0 var(--phos);
+}
+.rl-row-clickable:hover .rl-row-arrow {
+  color: #c8f5c5;
+  transform: translateX(3px);
+  transition:
+    color var(--dur-fast),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 /* ── Divider ──────────────────────────────────────────────────────── */
@@ -1895,4 +1932,75 @@ label {
   .rl-features-deck {
     width: 80vw;
   }
+}
+
+/* ── Toggle switch ──────────────────────────────────────────────────── */
+.rl-toggle {
+  transition:
+    opacity var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+.rl-toggle:hover {
+  opacity: 0.85;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+}
+.rl-toggle:active {
+  opacity: 1;
+  transform: scale(0.97);
+}
+
+/* ── Ghost-ember button (danger action) ─────────────────────────────── */
+.rl-btn-ghost-ember {
+  background: transparent;
+  color: var(--ember);
+  border: 1px solid var(--ember-dim);
+  padding: 8px 12px;
+}
+.rl-btn-ghost-ember:hover {
+  background: rgba(227, 83, 74, 0.08);
+  border-color: var(--ember);
+  color: var(--ember);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px var(--ember-glow);
+}
+.rl-btn-ghost-ember:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* ── Inline link hover ──────────────────────────────────────────────── */
+.rl-link-phos {
+  color: var(--phos);
+  text-decoration: none;
+  transition:
+    color var(--dur-fast),
+    text-decoration-color var(--dur-fast);
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+.rl-link-phos:hover {
+  color: #c8f5c5;
+  text-decoration: underline;
+  text-decoration-color: var(--phos-dim);
+}
+
+/* ── Mobile bottom nav hover ────────────────────────────────────────── */
+.rl-bottom-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  transition:
+    color var(--dur-fast),
+    filter var(--dur-fast);
+  border-radius: var(--radius-sm);
+}
+.rl-bottom-nav-link:hover:not(.is-active) {
+  color: var(--fg-1);
+  background: var(--surface);
 }
