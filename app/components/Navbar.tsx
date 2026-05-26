@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { usePuterStore } from "~/lib/puter";
 import { Logo } from "~/components/atoms";
 import { springs } from "~/lib/motion";
+import { useProductTour } from "~/hooks/useProductTour";
 
 const NAV_LINKS = [
   { to: "/", label: "dashboard", exact: true },
@@ -16,6 +17,7 @@ const Navbar = () => {
   const { auth } = usePuterStore();
   const location = useLocation();
   const reduced = useReducedMotion();
+  const { startTour } = useProductTour();
   const user = auth.user;
   const initials = user?.username
     ? user.username.slice(0, 2).toUpperCase()
@@ -56,6 +58,7 @@ const Navbar = () => {
 
       {/* Nav links — desktop */}
       <div
+        id="nav-links"
         className="rl-mobile-hide"
         style={{
           display: "flex",
@@ -184,7 +187,11 @@ const Navbar = () => {
         )}
 
         {auth.isAuthenticated && (
-          <Link to="/upload" style={{ textDecoration: "none" }}>
+          <Link
+            id="nav-upload-btn"
+            to="/upload"
+            style={{ textDecoration: "none" }}
+          >
             <motion.span
               className="rl-btn rl-btn-primary"
               style={{
@@ -200,6 +207,21 @@ const Navbar = () => {
               $ upload<span className="rl-mobile-hide">_resume</span> →
             </motion.span>
           </Link>
+        )}
+
+        {auth.isAuthenticated && (
+          <motion.button
+            id="tour-btn"
+            onClick={startTour}
+            className="rl-btn rl-btn-ghost rl-mobile-hide"
+            style={{ fontSize: 12 }}
+            whileHover={reduced ? {} : { color: "var(--phos)" }}
+            whileTap={reduced ? {} : { scale: 0.97 }}
+            transition={springs.snappy}
+            title="take a tour"
+          >
+            ? tour
+          </motion.button>
         )}
 
         {auth.isAuthenticated ? (

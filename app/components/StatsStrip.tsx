@@ -80,7 +80,7 @@ function StatItem({
   );
 }
 
-const StatsStrip = () => {
+const StatsStrip = ({ id }: { id?: string } = {}) => {
   const [animate, setAnimate] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -102,6 +102,7 @@ const StatsStrip = () => {
 
   return (
     <div
+      id={id}
       ref={ref}
       className="rl-stats-grid"
       style={{

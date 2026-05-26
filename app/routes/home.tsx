@@ -590,7 +590,7 @@ export default function Home() {
         {/* Populated state */}
         {!loadingResumes && resumes.length > 0 && (
           <>
-            <StatsStrip />
+            <StatsStrip id="stats-strip" />
 
             {/* Toolbar */}
             <div
@@ -620,6 +620,7 @@ export default function Home() {
               </div>
               {resumes.length >= 2 && (
                 <motion.button
+                  id="compare-btn"
                   onClick={toggleCompareMode}
                   whileHover={reduced ? {} : { scale: 1.03 }}
                   whileTap={reduced ? {} : { scale: 0.97 }}
@@ -634,6 +635,7 @@ export default function Home() {
 
             {/* Resume grid */}
             <motion.div
+              id="resume-grid"
               variants={staggerContainer(0.07, 0)}
               initial={reduced ? false : "hidden"}
               animate="visible"

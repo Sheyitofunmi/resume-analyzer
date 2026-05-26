@@ -12,6 +12,16 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Feature: Driver.js product tour + dependency cleanup (2026-05-26)
+
+- **`package.json`**: Added `driver.js@^1.4.0`. Removed 5 unused packages: `scrollmagic`, `scrollreveal`, `lottie-web`, `lenis`, `typed.js` (+ their `@types/` entries).
+- **`app/hooks/useProductTour.ts`**: New hook — wraps `driver.js` with a 6-step tour covering welcome, upload button, nav links, resume grid, compare button, and stats strip. Exposes `startTour` (manual trigger) and `startTourIfNew` (auto-start once via `localStorage`).
+- **`app/components/Navbar.tsx`**: Imported `useProductTour`, added `? tour` button (ghost style, phos hover) visible to authenticated users. Added `id="nav-links"` to nav link container and `id="nav-upload-btn"` to upload link.
+- **`app/routes/home.tsx`**: Added `id="stats-strip"` on `<StatsStrip>`, `id="compare-btn"` on compare button, `id="resume-grid"` on resume grid `motion.div`.
+- **`app/components/StatsStrip.tsx`**: Accepts optional `id` prop and forwards it to the root div.
+- **`app/hooks/useLenis.ts`**: Deleted (hook was never called anywhere).
+- **`app/hooks/useTyped.ts`**: Deleted (hook was never called anywhere).
+
 ### UI: ResumeLens wordmark section (2026-05-23)
 
 - **`app/routes/landing.tsx`**: Added `ResumeLensWordmark` component — a Streamtime-style footer wordmark that spells out "RESUMELENS". Each letter is a large bold span with a slight per-letter rotation; below each letter sits a unique SVG decorative shape (starburst, ring, triangle, diamond, hexagon, cross, teardrop, rotated square, pill, 5-point star) in the brand accent colors (copper, phos-green, ember-red). Rendered just before the footer.

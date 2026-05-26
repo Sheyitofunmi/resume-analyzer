@@ -1184,7 +1184,6 @@ function FeaturesSection() {
             flexDirection: "column",
             alignItems: "center",
             gap: 14,
-            marginTop: 20,
           }}
         >
           {/* Mobile prev/next (hidden on desktop via CSS) */}
@@ -2299,104 +2298,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* svg */}
-
-      <div
-        style={{
-          background: "#ffffff",
-          overflow: "hidden",
-          margin: "0 0 0px",
-          width: "100%",
-        }}
-        data-aos="fade-up"
-        data-aos-duration="700"
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 1780 345"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="224.495"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 530.492 62.3984)"
-              fill="#E261E5"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="371.11"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 1328.45 62.3984)"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="762.008"
-              y="54.0938"
-              width="235.199"
-              height="236.908"
-              rx="117.599"
-              fill="#3A93FF"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1624.3"
-              y="86.7773"
-              width="154.917"
-              height="171.543"
-              rx="77.4584"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1346.21"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="0.789062"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="450.288"
-              height="236.907"
-              rx="118.454"
-              transform="matrix(-1 0 0 1 893.008 54.0938)"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="167.631"
-              height="236.907"
-              rx="83.8156"
-              transform="matrix(-1 0 0 1 1425.18 54.0938)"
-              fill="#E261E5"
-            />
-          </g>
-        </svg>
-      </div>
-
       {/* ── FAQ ──────────────────────────────────────────────────── */}
       <section
         id="faq"
@@ -2597,6 +2498,102 @@ export default function Landing() {
       </section>
 
       <ResumeLensWordmark />
+
+      <div
+        style={{
+          background: "#ffffff",
+          overflow: "hidden",
+          margin: "0 0 0px",
+          width: "100%",
+        }}
+        data-aos="fade-up"
+        data-aos-duration="700"
+      >
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1780 345"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="224.495"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 530.492 62.3984)"
+              fill="#E261E5"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="371.11"
+              height="220.02"
+              rx="110.01"
+              transform="matrix(-1 0 0 1 1328.45 62.3984)"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="762.008"
+              y="54.0938"
+              width="235.199"
+              height="236.908"
+              rx="117.599"
+              fill="#3A93FF"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1624.3"
+              y="86.7773"
+              width="154.917"
+              height="171.543"
+              rx="77.4584"
+              fill="#59E25D"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="1346.21"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              x="0.789062"
+              y="0.953125"
+              width="327.882"
+              height="343.195"
+              rx="163.941"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="450.288"
+              height="236.907"
+              rx="118.454"
+              transform="matrix(-1 0 0 1 893.008 54.0938)"
+              fill="#FFE228"
+            />
+          </g>
+          <g style={{ mixBlendMode: "multiply" }}>
+            <rect
+              width="167.631"
+              height="236.907"
+              rx="83.8156"
+              transform="matrix(-1 0 0 1 1425.18 54.0938)"
+              fill="#E261E5"
+            />
+          </g>
+        </svg>
+      </div>
 
       <Footer />
       <MobileBottomNav />
