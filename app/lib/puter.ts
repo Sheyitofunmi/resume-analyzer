@@ -78,6 +78,12 @@ interface PuterStore {
     feedback: (
       path: string,
       message: string,
+      onChunk?: (accumulated: string) => void,
+    ) => Promise<AIResponse | undefined>;
+    feedbackFromText: (
+      resumeText: string,
+      message: string,
+      onChunk?: (accumulated: string) => void,
     ) => Promise<AIResponse | undefined>;
     img2txt: (
       image: string | File | Blob,
@@ -338,7 +344,11 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     >;
   };
 
-  const feedback = async (imagePath: string, message: string) => {
+  const feedback = async (
+    imagePath: string,
+    message: string,
+    onChunk?: (accumulated: string) => void,
+  ) => {
     const puter = getPuter();
     if (!puter) {
       setError("Puter.js not available");
@@ -361,7 +371,62 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
       let text = "";
       for await (const part of stream) {
-        if (part?.text) text += part.text;
+        if (part?.text) {
+          text += part.text;
+          onChunk?.(text);
+        }
+      }
+
+      if (!text) {
+        set({ isUsingDemoFeedback: true });
+        return {
+          message: { content: JSON.stringify(demoFeedback) },
+        } as unknown as AIResponse;
+      }
+
+      set({ isUsingDemoFeedback: false });
+      return { message: { content: text } } as unknown as AIResponse;
+    } catch {
+      set({ isUsingDemoFeedback: true });
+      return {
+        message: { content: JSON.stringify(demoFeedback) },
+      } as unknown as AIResponse;
+    }
+  };
+
+  const feedbackFromText = async (
+    resumeText: string,
+    message: string,
+    onChunk?: (accumulated: string) => void,
+  ) => {
+    const puter = getPuter();
+    if (!puter) {
+      setError("Puter.js not available");
+      return;
+    }
+
+    try {
+      const stream = await (puter.ai.chat(
+        [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `RESUME TEXT:\n${resumeText}\n\n${message}`,
+              },
+            ],
+          },
+        ],
+        { model: "claude-sonnet-4-6", stream: true },
+      ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
+
+      let text = "";
+      for await (const part of stream) {
+        if (part?.text) {
+          text += part.text;
+          onChunk?.(text);
+        }
       }
 
       if (!text) {
@@ -531,7 +596,16 @@ Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...
         testMode?: boolean,
         options?: PuterChatOptions,
       ) => chat(prompt, imageURL, testMode, options),
-      feedback: (path: string, message: string) => feedback(path, message),
+      feedback: (
+        path: string,
+        message: string,
+        onChunk?: (accumulated: string) => void,
+      ) => feedback(path, message, onChunk),
+      feedbackFromText: (
+        resumeText: string,
+        message: string,
+        onChunk?: (accumulated: string) => void,
+      ) => feedbackFromText(resumeText, message, onChunk),
       img2txt: (image: string | File | Blob, testMode?: boolean) =>
         img2txt(image, testMode),
       interviewQuestions: (

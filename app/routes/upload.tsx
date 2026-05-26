@@ -6,8 +6,8 @@ import Footer from "~/components/Footer";
 import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
-import { convertPdfToImage } from "~/lib/pdf2img";
-import { convertDocxToImage } from "~/lib/docx2img";
+import { convertPdfToImage, extractPdfText } from "~/lib/pdf2img";
+import { convertDocxToImage, extractDocxText } from "~/lib/docx2img";
 import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 import { springs } from "~/lib/motion";
@@ -360,42 +360,91 @@ const Upload = () => {
     setIsProcessing(true);
     try {
       const uuid = generateUUID();
+      const isDocx = file.name.toLowerCase().endsWith(".docx");
+      const instructions = prepareInstructions({ jobTitle, jobDescription });
+
+      const onChunk = (acc: string) => {
+        if (acc.includes('"skills"')) setStatusText("Scoring skills…");
+        else if (acc.includes('"structure"'))
+          setStatusText("Scoring document structure…");
+        else if (acc.includes('"content"')) setStatusText("Scoring content…");
+        else if (acc.includes('"toneAndStyle"'))
+          setStatusText("Scoring tone & style…");
+        else if (acc.includes('"ATS"'))
+          setStatusText("Scoring ATS compatibility…");
+      };
+
+      // Try text extraction to skip the image-based vision call
+      let resumeText: string | null = null;
+      try {
+        const extracted = isDocx
+          ? await extractDocxText(file)
+          : await extractPdfText(file);
+        if (extracted.trim().length >= 100) resumeText = extracted;
+      } catch {
+        /* fall through to image path */
+      }
 
       setCurrentStep(0);
       setStatusText("Converting resume to image…");
-      const isDocx = file.name.toLowerCase().endsWith(".docx");
-      const imageFile = isDocx
+      const imageResult = isDocx
         ? await convertDocxToImage(file)
         : await convertPdfToImage(file);
-      if (!imageFile.file) {
-        setStatusText("Failed to convert PDF. Please try again.");
+      if (!imageResult.file) {
+        setStatusText("Failed to convert resume. Please try again.");
         setIsProcessing(false);
         setCurrentStep(-1);
         return;
       }
 
       setCurrentStep(1);
-      setStatusText("Uploading resume…");
-      const uploadedImage = await fs.write(
-        `resume-${uuid}.png`,
-        imageFile.file,
-      );
-      if (!uploadedImage) {
-        setStatusText("Upload failed. Please try again.");
-        setIsProcessing(false);
-        setCurrentStep(-1);
-        return;
+
+      let imagePath: string;
+      let feedback: Awaited<ReturnType<typeof ai.feedback>>;
+      let uploadedFile: Awaited<ReturnType<typeof fs.write>>;
+
+      if (resumeText) {
+        // Text path: image upload + AI analysis + file upload all run in parallel
+        setStatusText("Uploading & analyzing…");
+        const [uploadedImage, fb, uf] = await Promise.all([
+          fs.write(`resume-${uuid}.jpg`, imageResult.file),
+          ai.feedbackFromText(resumeText, instructions, onChunk),
+          fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
+        ]);
+        if (!uploadedImage) {
+          setStatusText("Upload failed. Please try again.");
+          setIsProcessing(false);
+          setCurrentStep(-1);
+          return;
+        }
+        imagePath = uploadedImage.path;
+        feedback = fb;
+        uploadedFile = uf;
+      } else {
+        // Image path: upload first, then analyze
+        setStatusText("Uploading resume…");
+        const uploadedImage = await fs.write(
+          `resume-${uuid}.jpg`,
+          imageResult.file,
+        );
+        if (!uploadedImage) {
+          setStatusText("Upload failed. Please try again.");
+          setIsProcessing(false);
+          setCurrentStep(-1);
+          return;
+        }
+        imagePath = uploadedImage.path;
+        setCurrentStep(2);
+        setStatusText("Analyzing resume…");
+        const [fb, uf] = await Promise.all([
+          ai.feedback(imagePath, instructions, onChunk),
+          fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
+        ]);
+        feedback = fb;
+        uploadedFile = uf;
       }
 
       setCurrentStep(2);
-      setStatusText("Analyzing resume against job description…");
-      const [feedback, uploadedFile] = await Promise.all([
-        ai.feedback(
-          uploadedImage.path,
-          prepareInstructions({ jobTitle, jobDescription }),
-        ),
-        fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
-      ]);
 
       if (!feedback) {
         setStatusText("Analysis failed — please try again.");
@@ -414,11 +463,12 @@ const Upload = () => {
       const data = {
         id: uuid,
         resumePath: uploadedFile?.path ?? "",
-        imagePath: uploadedImage.path,
+        imagePath,
+        resumeText: resumeText ?? undefined,
         companyName,
         jobTitle,
         jobDescription,
-        pageCount: imageFile.pageCount,
+        pageCount: imageResult.pageCount,
         feedback: JSON.parse(feedbackText),
       };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));

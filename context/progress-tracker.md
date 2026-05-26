@@ -12,6 +12,14 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Perf: faster AI analysis pipeline (2026-05-26)
+
+- **`app/lib/pdf2img.ts`**: Reduced render scale 1.5→1.0, switched output from PNG/1.0 to JPEG/0.85 — ~70% smaller image files.
+- **`app/lib/docx2img.ts`**: Same scale + quality reduction. Added `extractDocxText` export that strips HTML tags from mammoth output to get plain text.
+- **`app/lib/puter.ts`**: `feedback()` now accepts optional `onChunk` callback streamed during the response. Added `feedbackFromText()` — same analysis but sends resume as plain text instead of a Puter FS image path, skipping the vision model and running much faster.
+- **`app/routes/upload.tsx`**: Before converting to image, attempts text extraction (`extractPdfText` / `extractDocxText`). If text ≥ 100 chars, uses `feedbackFromText` and runs image upload + AI + file upload all in parallel. Falls back to image-based vision path for scanned/image-only files. `onChunk` updates status text with section-level progress.
+- **`app/routes/resume.tsx`**: Loads `resumeText` from KV and stores in state. Re-analyze uses `feedbackFromText` when text is available, otherwise falls back to image path. Same `onChunk` streaming status for re-analyze.
+
 ### Feature: DOCX upload support (2026-05-26)
 
 - **`app/lib/docx2img.ts`** _(new)_: Converts `.docx` files to PNG images for AI analysis — uses `mammoth` to render DOCX → HTML, then `html2canvas` to capture a 816px-wide canvas at 1.5x scale matching a standard letter page.

@@ -1,5 +1,15 @@
 import type { PdfConversionResult } from "./pdf2img";
 
+export async function extractDocxText(file: File): Promise<string> {
+  const mammoth = await import("mammoth");
+  const arrayBuffer = await file.arrayBuffer();
+  const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function convertDocxToImage(
   file: File,
 ): Promise<PdfConversionResult> {
@@ -28,7 +38,7 @@ export async function convertDocxToImage(
 
     const { default: html2canvas } = await import("html2canvas");
     const canvas = await html2canvas(container, {
-      scale: 1.5,
+      scale: 1.0,
       useCORS: true,
       backgroundColor: "#ffffff",
       width: 816,
@@ -45,8 +55,8 @@ export async function convertDocxToImage(
           if (blob) {
             resolve({
               imageUrl: URL.createObjectURL(blob),
-              file: new File([blob], `${originalName}.png`, {
-                type: "image/png",
+              file: new File([blob], `${originalName}.jpg`, {
+                type: "image/jpeg",
               }),
               pageCount: 1,
             });
@@ -59,8 +69,8 @@ export async function convertDocxToImage(
             });
           }
         },
-        "image/png",
-        1.0,
+        "image/jpeg",
+        0.85,
       );
     });
   } catch (err) {

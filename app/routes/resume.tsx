@@ -38,6 +38,7 @@ const Resume = () => {
   const [storedJobTitle, setStoredJobTitle] = useState("");
   const [storedCompanyName, setStoredCompanyName] = useState("");
   const [storedImagePath, setStoredImagePath] = useState("");
+  const [storedResumeText, setStoredResumeText] = useState<string | null>(null);
   const [scoreHistory, setScoreHistory] = useState<ScoreHistoryEntry[]>([]);
 
   const [showReanalyze, setShowReanalyze] = useState(false);
@@ -61,6 +62,7 @@ const Resume = () => {
     setStoredJobTitle("");
     setStoredCompanyName("");
     setStoredImagePath("");
+    setStoredResumeText(null);
     setShowReanalyze(false);
     setReanalyzeStatus("");
     setSuccessToast(false);
@@ -79,6 +81,7 @@ const Resume = () => {
         setStoredJobTitle(data.jobTitle ?? "");
         setStoredCompanyName(data.companyName ?? "");
         setStoredImagePath(data.imagePath ?? "");
+        setStoredResumeText(data.resumeText ?? null);
         setNewJobTitle(data.jobTitle ?? "");
         setNewJobDescription(data.jobDescription ?? "");
       }
@@ -113,14 +116,25 @@ const Resume = () => {
     setShowReanalyze(false);
     setSuccessToast(false);
     const trimmedDescription = newJobDescription.slice(0, MAX_JOB_DESC_CHARS);
+    const instructions = prepareInstructions({
+      jobTitle: newJobTitle,
+      jobDescription: trimmedDescription,
+    });
+    const onChunk = (acc: string) => {
+      if (acc.includes('"skills"')) setReanalyzeStatus("Scoring skills…");
+      else if (acc.includes('"structure"'))
+        setReanalyzeStatus("Scoring document structure…");
+      else if (acc.includes('"content"'))
+        setReanalyzeStatus("Scoring content…");
+      else if (acc.includes('"toneAndStyle"'))
+        setReanalyzeStatus("Scoring tone & style…");
+      else if (acc.includes('"ATS"'))
+        setReanalyzeStatus("Scoring ATS compatibility…");
+    };
     const runAnalysis = async () => {
-      const result = await ai.feedback(
-        storedImagePath,
-        prepareInstructions({
-          jobTitle: newJobTitle,
-          jobDescription: trimmedDescription,
-        }),
-      );
+      const result = storedResumeText
+        ? await ai.feedbackFromText(storedResumeText, instructions, onChunk)
+        : await ai.feedback(storedImagePath, instructions, onChunk);
       if (!result) throw new Error("No response from AI");
       const raw =
         typeof result.message.content === "string"
