@@ -12,6 +12,13 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Feature: DOCX upload support (2026-05-26)
+
+- **`app/lib/docx2img.ts`** _(new)_: Converts `.docx` files to PNG images for AI analysis — uses `mammoth` to render DOCX → HTML, then `html2canvas` to capture a 816px-wide canvas at 1.5x scale matching a standard letter page.
+- **`app/components/FileUploader.tsx`**: Added `.docx` MIME type to dropzone `accept`. Format label in file chip is now dynamic. Hint text updated to `// pdf · docx · max 20 MB`.
+- **`app/routes/upload.tsx`**: Detects `.docx` extension and routes through `convertDocxToImage`. Saved file uses correct extension. Label and validation message updated to mention both formats.
+- **`package.json`**: Added `mammoth` and `html2canvas` dependencies.
+
 ### UI: Hover + layout improvements across 4 components (2026-05-26)
 
 - **`app/components/PricingTiers.tsx`**: Cards now use `motion.div` with `whileHover` — scale 1.025 + colored top accent bar (copper/phos/copper-hi) slides in from left via `scaleX: 0 → 1` on hover. Tier name color transitions to accent color on hover. Added `accentColor` field to `Tier` type.

@@ -26,7 +26,11 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
     useDropzone({
       onDrop,
       multiple: false,
-      accept: { "application/pdf": [".pdf"] },
+      accept: {
+        "application/pdf": [".pdf"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+      },
       maxSize: maxFileSize,
       onDragEnter: () => setIsDragOver(true),
       onDragLeave: () => setIsDragOver(false),
@@ -163,7 +167,8 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                   marginTop: 2,
                 }}
               >
-                {formatSize(file.size)} · pdf
+                {formatSize(file.size)} ·{" "}
+                {file.name.endsWith(".docx") ? "docx" : "pdf"}
               </p>
             </div>
             <motion.button
@@ -261,7 +266,7 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                   color: "var(--fg-3)",
                 }}
               >
-                // pdf · max {formatSize(maxFileSize)}
+                // pdf · docx · max {formatSize(maxFileSize)}
               </p>
             </div>
           </motion.div>

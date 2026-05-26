@@ -7,12 +7,13 @@ import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
 import { convertPdfToImage } from "~/lib/pdf2img";
+import { convertDocxToImage } from "~/lib/docx2img";
 import { generateUUID } from "~/lib/utils";
 import { prepareInstructions } from "../../constants";
 import { springs } from "~/lib/motion";
 
 const STEPS = [
-  { label: "convert PDF to image", cmd: "pdf2img" },
+  { label: "convert resume to image", cmd: "doc2img" },
   { label: "upload resume", cmd: "fs.write" },
   { label: "analyze against job description", cmd: "ai.feedback" },
   { label: "save analysis", cmd: "kv.set" },
@@ -340,7 +341,7 @@ const Upload = () => {
       next.jobDescription = "job_description is required";
     else if (jobDescription.trim().length < 50)
       next.jobDescription = "paste the full job posting (min 50 chars)";
-    if (!file) next.file = "upload a resume PDF";
+    if (!file) next.file = "upload a resume (PDF or DOCX)";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -362,7 +363,10 @@ const Upload = () => {
 
       setCurrentStep(0);
       setStatusText("Converting resume to image…");
-      const imageFile = await convertPdfToImage(file);
+      const isDocx = file.name.toLowerCase().endsWith(".docx");
+      const imageFile = isDocx
+        ? await convertDocxToImage(file)
+        : await convertPdfToImage(file);
       if (!imageFile.file) {
         setStatusText("Failed to convert PDF. Please try again.");
         setIsProcessing(false);
@@ -390,7 +394,7 @@ const Upload = () => {
           uploadedImage.path,
           prepareInstructions({ jobTitle, jobDescription }),
         ),
-        fs.write(`resume-${uuid}.pdf`, file),
+        fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
       ]);
 
       if (!feedback) {
@@ -493,8 +497,8 @@ const Upload = () => {
                   overflow: "hidden",
                 }}
               >
-                Drop your PDF. Paste the JD. We score five dimensions and
-                surface every missing keyword in three seconds.
+                Drop your PDF or DOCX. Paste the JD. We score five dimensions
+                and surface every missing keyword in three seconds.
               </motion.p>
             )}
           </AnimatePresence>
@@ -610,7 +614,9 @@ const Upload = () => {
 
             {/* File uploader */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label htmlFor="uploader">// resume_pdf (max 20 MB)</label>
+              <label htmlFor="uploader">
+                // resume_pdf_or_docx (max 20 MB)
+              </label>
               <FileUploader onFileSelect={handleFileSelect} />
               {errors.file && (
                 <p
