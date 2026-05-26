@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Corners } from "~/components/atoms";
 
 type FeatureItem = string | { type: "inherit"; label: string };
 
@@ -32,7 +31,7 @@ export const TIERS: Tier[] = [
       "5-dimension scoring",
       "keyword diff",
       "basic rewrite suggestions",
-      "24h analysis history",
+      "7-day analysis history",
     ],
     cta: "$ start_free →",
     ctaTo: "/auth",
@@ -65,7 +64,7 @@ export const TIERS: Tier[] = [
     monthlyPrice: "$49",
     yearlyPrice: "$39",
     period: "/month",
-    tagline: "evaluate candidates in seconds",
+    tagline: "for hiring teams · evaluate candidates at scale",
     recommended: false,
     features: [
       { type: "inherit", label: "all of pro, plus:" },
@@ -116,9 +115,8 @@ export default function PricingTiers() {
               key={t.id}
               className={`rl-card rl-pricing-card${t.recommended ? " is-phos" : ""}`}
               aria-label={`${t.tier} plan${t.recommended ? " — recommended" : ""}`}
+              style={t.id === "recruiter" ? { opacity: 0.72 } : undefined}
             >
-              <Corners />
-
               {t.recommended && (
                 <div className="rl-pricing-badge" aria-hidden="true">
                   RECOMMENDED

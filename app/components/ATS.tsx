@@ -32,11 +32,6 @@ const ATS = ({ score, suggestions, keywords }: ATSProps) => {
 
   return (
     <div className="rl-card is-accent" style={{ position: "relative" }}>
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {/* Header */}
       <div
         style={{

@@ -5,13 +5,8 @@ import { useSpring, animated } from "@react-spring/web";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import PricingTiers from "~/components/PricingTiers";
-import {
-  Corners,
-  Cursor,
-  FadeInView,
-  FeatureChip,
-  ScoreBar,
-} from "~/components/atoms";
+import StatsStrip from "~/components/StatsStrip";
+import { Corners, Cursor, FadeInView } from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
 import { springs, staggerContainer, fadeUp } from "~/lib/motion";
 
@@ -168,13 +163,20 @@ function TerminalDemo() {
   );
 }
 
+type FeatureColor = { bg: string; text: string };
+
 // ── Feature cards ──────────────────────────────────────────────────────
-const FEATURES = [
+const FEATURES: {
+  tag: string;
+  title: string;
+  desc: string;
+  viz: (c: FeatureColor) => React.ReactNode;
+}[] = [
   {
     tag: "ATS",
     title: "Beat the bot, reach the human",
     desc: "We diff against the exact parser engines recruiters use. Know in seconds if your PDF even clears the first filter.",
-    viz: (
+    viz: (c) => (
       <div
         style={{
           display: "flex",
@@ -196,17 +198,17 @@ const FEATURES = [
                 marginBottom: 5,
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
-                color: "rgba(255,255,255,0.6)",
+                color: `${c.text}99`,
               }}
             >
               <span>{label}</span>
-              <span style={{ color: "#fff", fontWeight: 600 }}>{val}%</span>
+              <span style={{ color: c.text, fontWeight: 600 }}>{val}%</span>
             </div>
             <div
               style={{
                 height: 7,
                 borderRadius: 4,
-                background: "rgba(255,255,255,0.18)",
+                background: `${c.text}2e`,
               }}
             >
               <div
@@ -214,7 +216,7 @@ const FEATURES = [
                   width: `${val}%`,
                   height: "100%",
                   borderRadius: 4,
-                  background: "rgba(255,255,255,0.9)",
+                  background: `${c.text}e6`,
                 }}
               />
             </div>
@@ -225,10 +227,10 @@ const FEATURES = [
             style={{
               padding: "3px 10px",
               borderRadius: 20,
-              background: "rgba(255,255,255,0.2)",
+              background: `${c.text}33`,
               fontFamily: "var(--font-mono)",
               fontSize: 10,
-              color: "#fff",
+              color: c.text,
             }}
           >
             ✓ passes ATS
@@ -237,10 +239,10 @@ const FEATURES = [
             style={{
               padding: "3px 10px",
               borderRadius: 20,
-              background: "rgba(0,0,0,0.12)",
+              background: `${c.text}1a`,
               fontFamily: "var(--font-mono)",
               fontSize: 10,
-              color: "rgba(255,255,255,0.55)",
+              color: `${c.text}8c`,
             }}
           >
             87 / 100
@@ -253,7 +255,7 @@ const FEATURES = [
     tag: "KW",
     title: "Never miss a keyword again",
     desc: "Every signal in the JD ranked by frequency and placement. Copy-paste the missing ones directly into your draft.",
-    viz: (
+    viz: (c) => (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
         {[
           { label: "React", ok: true },
@@ -270,9 +272,9 @@ const FEATURES = [
               fontSize: 10,
               padding: "4px 10px",
               borderRadius: 20,
-              background: k.ok ? "rgba(5,46,22,0.18)" : "rgba(5,46,22,0.07)",
-              border: `1px solid ${k.ok ? "rgba(5,46,22,0.35)" : "rgba(5,46,22,0.15)"}`,
-              color: k.ok ? "#052e16" : "rgba(5,46,22,0.45)",
+              background: k.ok ? `${c.text}2e` : `${c.text}12`,
+              border: `1px solid ${k.ok ? `${c.text}59` : `${c.text}26`}`,
+              color: k.ok ? c.text : `${c.text}73`,
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
@@ -289,7 +291,7 @@ const FEATURES = [
     tag: "RW",
     title: "Rewrite every weak bullet instantly",
     desc: "Each vague line gets a stronger alternative — action verbs, numbers, impact. Approve or skip, one bullet at a time.",
-    viz: (
+    viz: (c) => (
       <div
         style={{
           display: "flex",
@@ -301,28 +303,22 @@ const FEATURES = [
         <div
           style={{
             padding: "9px 12px",
-            background: "rgba(0,0,0,0.15)",
+            background: `${c.text}26`,
             borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.12)",
+            border: `1px solid ${c.text}1f`,
             display: "flex",
             gap: 8,
             alignItems: "flex-start",
           }}
         >
-          <span
-            style={{
-              color: "rgba(255,130,130,0.9)",
-              flexShrink: 0,
-              fontSize: 11,
-            }}
-          >
+          <span style={{ color: `${c.text}cc`, flexShrink: 0, fontSize: 11 }}>
             ✕
           </span>
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 10,
-              color: "rgba(255,255,255,0.45)",
+              color: `${c.text}73`,
               textDecoration: "line-through",
               lineHeight: 1.5,
             }}
@@ -333,28 +329,20 @@ const FEATURES = [
         <div
           style={{
             padding: "9px 12px",
-            background: "rgba(255,255,255,0.2)",
+            background: `${c.text}33`,
             borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.35)",
+            border: `1px solid ${c.text}59`,
             display: "flex",
             gap: 8,
             alignItems: "flex-start",
           }}
         >
-          <span
-            style={{
-              color: "rgba(180,255,180,0.9)",
-              flexShrink: 0,
-              fontSize: 11,
-            }}
-          >
-            ✓
-          </span>
+          <span style={{ color: c.text, flexShrink: 0, fontSize: 11 }}>✓</span>
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 10,
-              color: "#fff",
+              color: c.text,
               lineHeight: 1.5,
             }}
           >
@@ -368,7 +356,7 @@ const FEATURES = [
     tag: "IV",
     title: "Walk into interviews fully prepared",
     desc: "Behavioral + technical questions tailored to the JD and your seniority. Each with a structured confidence rubric.",
-    viz: (
+    viz: (c) => (
       <div
         style={{
           display: "flex",
@@ -390,7 +378,7 @@ const FEATURES = [
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 9,
-                color: "rgba(28,20,0,0.3)",
+                color: `${c.text}4d`,
                 flexShrink: 0,
                 marginTop: 1,
                 fontWeight: 700,
@@ -403,7 +391,7 @@ const FEATURES = [
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
-                color: "rgba(28,20,0,0.72)",
+                color: `${c.text}b8`,
                 lineHeight: 1.5,
               }}
             >
@@ -418,7 +406,7 @@ const FEATURES = [
     tag: "TS",
     title: "Sound sharp, not safe",
     desc: "Action-verb density, hedging language, sentence variety — all scored and flagged with line-level fixes you can apply immediately.",
-    viz: (
+    viz: (c) => (
       <div
         style={{
           display: "flex",
@@ -440,7 +428,7 @@ const FEATURES = [
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
-                color: "rgba(255,255,255,0.6)",
+                color: `${c.text}99`,
                 width: 90,
                 flexShrink: 0,
               }}
@@ -452,7 +440,7 @@ const FEATURES = [
                 flex: 1,
                 height: 6,
                 borderRadius: 3,
-                background: "rgba(255,255,255,0.18)",
+                background: `${c.text}2e`,
               }}
             >
               <div
@@ -460,9 +448,7 @@ const FEATURES = [
                   width: `${pct}%`,
                   height: "100%",
                   borderRadius: 3,
-                  background: good
-                    ? "rgba(255,255,255,0.85)"
-                    : "rgba(255,200,200,0.65)",
+                  background: good ? `${c.text}d9` : `${c.text}59`,
                 }}
               />
             </div>
@@ -470,7 +456,7 @@ const FEATURES = [
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
-                color: good ? "#fff" : "rgba(255,220,220,0.85)",
+                color: good ? c.text : `${c.text}99`,
                 width: 28,
                 textAlign: "right",
                 fontVariantNumeric: "tabular-nums",
@@ -488,7 +474,7 @@ const FEATURES = [
     tag: "HX",
     title: "Track your score climbing over time",
     desc: "Every analysis is versioned. Watch the graph rise with each revision and diff any two versions side-by-side.",
-    viz: (
+    viz: (c) => (
       <div style={{ marginTop: 8 }}>
         <svg
           width="100%"
@@ -498,14 +484,14 @@ const FEATURES = [
         >
           <defs>
             <linearGradient id="hxGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(12,26,38,0.25)" />
-              <stop offset="100%" stopColor="rgba(12,26,38,0)" />
+              <stop offset="0%" stopColor={`${c.text}40`} />
+              <stop offset="100%" stopColor={`${c.text}00`} />
             </linearGradient>
           </defs>
           <path
             d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1"
             fill="none"
-            stroke="rgba(12,26,38,0.75)"
+            stroke={`${c.text}bf`}
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -521,14 +507,14 @@ const FEATURES = [
             { x: 220, y: 1, s: 91 },
           ].map(({ x, y, s }) => (
             <g key={x}>
-              <circle cx={x} cy={y} r={3.5} fill="rgba(12,26,38,0.85)" />
+              <circle cx={x} cy={y} r={3.5} fill={`${c.text}d9`} />
               <text
                 x={x}
                 y={y - 7}
                 textAnchor="middle"
                 fontFamily="var(--font-mono)"
                 fontSize={8}
-                fill="rgba(12,26,38,0.55)"
+                fill={`${c.text}8c`}
               >
                 {s}
               </text>
@@ -542,7 +528,7 @@ const FEATURES = [
             marginTop: 2,
             fontFamily: "var(--font-mono)",
             fontSize: 9,
-            color: "rgba(12,26,38,0.38)",
+            color: `${c.text}61`,
           }}
         >
           <span>v1</span>
@@ -740,7 +726,7 @@ function HeroBadge() {
       }}
     >
       <span className="rl-dot" style={{ width: 7, height: 7, flexShrink: 0 }} />
-      <span>v1.0 · now in public beta</span>
+      <span>✓ live · free to start</span>
     </span>
   );
 }
@@ -771,64 +757,6 @@ function AnimatedStat({ value }: { value: number }) {
 
   return (
     <animated.span ref={elRef}>{num.to((n) => Math.round(n))}</animated.span>
-  );
-}
-
-// ── VivusTrendLine — SVG path drawn in by Vivus ───────────────────────
-function VivusTrendLine() {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    const el = svgRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          obs.disconnect();
-          import("vivus").then(({ default: Vivus }) => {
-            new Vivus(el as unknown as HTMLElement, {
-              type: "delayed",
-              duration: 160,
-              animTimingFunction: Vivus.EASE_OUT,
-            });
-          });
-        }
-      },
-      { threshold: 0.5 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <svg
-      ref={svgRef}
-      width="100%"
-      height={52}
-      viewBox="0 0 200 52"
-      style={{ marginTop: 8, overflow: "visible" }}
-    >
-      <path
-        d="M 0,46 L 40,40 L 80,32 L 120,22 L 160,12 L 200,5"
-        fill="none"
-        stroke="var(--phos)"
-        strokeWidth={2.5}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <circle cx={200} cy={5} r={4} fill="var(--phos)" />
-      <circle
-        cx={200}
-        cy={5}
-        r={8}
-        fill="none"
-        stroke="var(--phos)"
-        strokeWidth={1}
-        opacity={0.35}
-      />
-    </svg>
   );
 }
 
@@ -892,7 +820,11 @@ function FeaturesSection() {
   return (
     <section
       id="features"
-      style={{ background: "#ffffff", width: "100%", boxSizing: "border-box" }}
+      style={{
+        background: "var(--parchment)",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
       className="rl-features-section"
     >
       <div className="rl-features-container">
@@ -909,7 +841,7 @@ function FeaturesSection() {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 11,
-              color: "#aaa",
+              color: "var(--parchment-fg-3)",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
             }}
@@ -919,13 +851,13 @@ function FeaturesSection() {
           <h2
             style={{
               fontSize: "clamp(26px, 5vw, 48px)",
-              color: "#0d0d0d",
+              color: "var(--parchment-fg-1)",
               fontWeight: 500,
               letterSpacing: "-1.5px",
               margin: 0,
             }}
           >
-            five signals that matter
+            six signals that matter
           </h2>
         </div>
 
@@ -1009,7 +941,7 @@ function FeaturesSection() {
                         transition: "opacity 200ms",
                       }}
                     >
-                      {f.viz}
+                      {f.viz(color)}
                     </div>
                   </div>
 
@@ -1109,7 +1041,7 @@ function FeaturesSection() {
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: 9,
-                        color: "#aaa",
+                        color: "var(--parchment-fg-3)",
                         letterSpacing: "0.1em",
                         display: "block",
                       }}
@@ -1120,7 +1052,9 @@ function FeaturesSection() {
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: 12,
-                        color: isNav ? "#0d0d0d" : "#666",
+                        color: isNav
+                          ? "var(--parchment-fg-1)"
+                          : "var(--parchment-fg-2)",
                         fontWeight: isNav ? 600 : 400,
                         transition: "color 200ms",
                         display: "block",
@@ -1160,14 +1094,14 @@ function FeaturesSection() {
                     width: 36,
                     height: 36,
                     borderRadius: 8,
-                    border: "1.5px solid #e8e8e8",
-                    background: "#fafafa",
+                    border: "1.5px solid var(--parchment-border)",
+                    background: "var(--parchment-2)",
                     cursor: "pointer",
                     fontSize: 16,
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#444",
+                    color: "var(--parchment-fg-2)",
                   }}
                 >
                   {lbl}
@@ -1200,20 +1134,33 @@ function FeaturesSection() {
                   width: 44,
                   height: 44,
                   borderRadius: 10,
-                  border: "1.5px solid #e8e8e8",
-                  background: "#fafafa",
+                  border: "1.5px solid var(--parchment-border)",
+                  background: "var(--parchment-2)",
                   cursor: "pointer",
                   fontSize: 18,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#444",
+                  color: "var(--parchment-fg-2)",
                 }}
               >
                 {lbl}
               </button>
             ))}
           </div>
+
+          {/* Interaction hint */}
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--parchment-fg-3)",
+              letterSpacing: "0.1em",
+              opacity: 0.6,
+            }}
+          >
+            click cards or use ← → to explore
+          </span>
 
           {/* Progress dots */}
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -1302,30 +1249,31 @@ function LandingNavbar() {
         className="rl-mobile-hide"
         style={{ display: "flex", gap: 28, alignItems: "center" }}
       >
-        {["features", "how_it_works", "before_after", "pricing", "faq"].map(
-          (item) => (
-            <a
-              key={item}
-              href={`#${item}`}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                color: "var(--fg-3)",
-                textDecoration: "none",
-                letterSpacing: "0.05em",
-                transition: "color var(--dur-fast)",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--fg-1)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--fg-3)")
-              }
-            >
-              {item}
-            </a>
-          ),
-        )}
+        {[
+          "features",
+          "how_it_works",
+          "before_after",
+          "testimonials",
+          "faq",
+          "pricing",
+        ].map((item) => (
+          <a
+            key={item}
+            href={`#${item}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--fg-3)",
+              textDecoration: "none",
+              letterSpacing: "0.05em",
+              transition: "color var(--dur-fast)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-3)")}
+          >
+            {item}
+          </a>
+        ))}
       </div>
 
       {/* Right CTAs */}
@@ -1361,228 +1309,8 @@ function LandingNavbar() {
   );
 }
 
-// ── ResumeLens wordmark ─────────────────────────────────────────────────
-const WORDMARK_LETTERS = [
-  { char: "R", rot: -8 },
-  { char: "E", rot: 5 },
-  { char: "S", rot: -3 },
-  { char: "U", rot: 7 },
-  { char: "M", rot: -5 },
-  { char: "E", rot: 4 },
-  { char: "L", rot: -2 },
-  { char: "E", rot: 6 },
-  { char: "N", rot: -4 },
-  { char: "S", rot: 3 },
-];
-
-const WORDMARK_SHAPES = [
-  // R – starburst (copper)
-  <svg
-    key="s0"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#c47b4a"
-    aria-hidden="true"
-  >
-    <path d="M40 5 L43 28 L62 15 L52 35 L75 38 L54 48 L64 68 L43 55 L40 75 L37 55 L16 68 L26 48 L5 38 L28 35 L18 15 L37 28 Z" />
-  </svg>,
-  // E – ring (phos)
-  <svg
-    key="s1"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#a8e6a3"
-    aria-hidden="true"
-  >
-    <circle cx="40" cy="40" r="28" />
-    <circle cx="40" cy="40" r="16" fill="#0b0b0a" />
-  </svg>,
-  // S – triangle (ember)
-  <svg
-    key="s2"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#e3534a"
-    aria-hidden="true"
-  >
-    <polygon points="40,8 72,68 8,68" />
-  </svg>,
-  // U – diamond (copper-hi)
-  <svg
-    key="s3"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#e69968"
-    aria-hidden="true"
-  >
-    <polygon points="40,6 74,40 40,74 6,40" />
-  </svg>,
-  // M – hexagon (phos)
-  <svg
-    key="s4"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#a8e6a3"
-    aria-hidden="true"
-  >
-    <polygon points="40,6 68,23 68,57 40,74 12,57 12,23" />
-  </svg>,
-  // E – cross (ember)
-  <svg
-    key="s5"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#e3534a"
-    aria-hidden="true"
-  >
-    <rect x="32" y="8" width="16" height="64" rx="5" />
-    <rect x="8" y="32" width="64" height="16" rx="5" />
-  </svg>,
-  // L – teardrop ring (copper)
-  <svg
-    key="s6"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#c47b4a"
-    aria-hidden="true"
-  >
-    <path d="M40 8 C62 8 72 24 72 40 C72 58 58 72 40 72 C22 72 8 58 8 40 C8 22 20 8 40 8 Z" />
-    <circle cx="40" cy="40" r="14" fill="#0b0b0a" />
-  </svg>,
-  // E – rotated square (phos-dim)
-  <svg
-    key="s7"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#5fa55c"
-    aria-hidden="true"
-  >
-    <rect
-      x="16"
-      y="16"
-      width="48"
-      height="48"
-      rx="4"
-      transform="rotate(15 40 40)"
-    />
-  </svg>,
-  // N – horizontal pill (ember-dim)
-  <svg
-    key="s8"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#a8332c"
-    aria-hidden="true"
-  >
-    <ellipse cx="40" cy="40" rx="33" ry="20" />
-  </svg>,
-  // S – 5-point star (copper-hi)
-  <svg
-    key="s9"
-    viewBox="0 0 80 80"
-    width="48"
-    height="48"
-    fill="#e69968"
-    aria-hidden="true"
-  >
-    <path d="M40 8 L45 28 L66 28 L49 41 L55 62 L40 50 L25 62 L31 41 L14 28 L35 28 Z" />
-  </svg>,
-];
-
-function ResumeLensWordmark() {
-  return (
-    <section
-      aria-label="ResumeLens wordmark"
-      style={{
-        padding: "80px 16px 56px",
-        overflow: "hidden",
-        background: "var(--bg)",
-        borderTop: "1px solid var(--border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          maxWidth: 1400,
-          margin: "0 auto",
-          gap: 0,
-        }}
-      >
-        {WORDMARK_LETTERS.map((l, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "0 clamp(2px, 0.5vw, 8px)",
-              userSelect: "none",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "clamp(3.5rem, 7.5vw, 8.5rem)",
-                fontWeight: 900,
-                lineHeight: 0.88,
-                color: "var(--fg-1)",
-                fontFamily:
-                  "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                display: "block",
-                transform: `rotate(${l.rot}deg)`,
-                letterSpacing: "-1px",
-              }}
-            >
-              {l.char}
-            </span>
-            <div
-              style={{
-                marginTop: 10,
-                transform: `rotate(${-(l.rot * 0.6)}deg)`,
-                opacity: 0.9,
-              }}
-            >
-              {WORDMARK_SHAPES[i]}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 // ── Landing page ───────────────────────────────────────────────────────
 export default function Landing() {
-  const trustRef = useRef<HTMLDivElement>(null);
-  const [trustVisible, setTrustVisible] = useState(false);
-
-  useEffect(() => {
-    const el = trustRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setTrustVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.2 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   return (
     <main className="rl-page" style={{ paddingBottom: 0 }}>
       <div className="rl-scroll-bar" />
@@ -1611,6 +1339,19 @@ export default function Landing() {
             <HeroBadge />
           </motion.div>
 
+          {/* Tagline */}
+          <motion.span
+            variants={fadeUp}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            // the resume reviewer you wish you knew
+          </motion.span>
+
           {/* Headline */}
           <motion.h1
             variants={fadeUp}
@@ -1623,9 +1364,9 @@ export default function Landing() {
               margin: 0,
             }}
           >
-            the resume reviewer
+            score your resume
             <br />
-            you wish you knew
+            against any job description
             <Cursor />
           </motion.h1>
 
@@ -1641,10 +1382,9 @@ export default function Landing() {
               maxWidth: 480,
             }}
           >
-            ResumeLens diffs your resume against any job description, scores
-            five dimensions, and tells you exactly what to rewrite. Three
-            seconds. No fluff. Built for engineers who'd rather read a
-            structured report than a vibe check.
+            Upload your PDF, paste the JD. Five AI dimensions in 3 seconds —
+            keyword gap, ATS pass/fail, tone, structure, and specific bullet
+            rewrites. No career coach needed.
           </motion.p>
 
           {/* CTAs */}
@@ -1681,10 +1421,9 @@ export default function Landing() {
             </Link>
             <motion.a
               href="#before_after"
-              className="rl-btn rl-btn-secondary rl-btn-lg"
+              className="rl-btn rl-btn-ghost rl-btn-lg"
               whileHover={{
                 y: -2,
-                borderColor: "var(--copper)",
                 color: "var(--copper-hi)",
               }}
               whileTap={{ y: 0, scale: 0.97 }}
@@ -1706,7 +1445,7 @@ export default function Landing() {
           >
             {[
               "✓ no signup to try",
-              "✓ pdf never leaves your puter cloud",
+              "✓ your PDF stays private — never our servers",
               "✓ 3 sec avg",
             ].map((t, i) => (
               <motion.span
@@ -1734,7 +1473,29 @@ export default function Landing() {
           transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1], delay: 0.25 }}
         >
           <TerminalDemo />
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--fg-4)",
+              textAlign: "right",
+              marginTop: 8,
+              letterSpacing: "0.08em",
+            }}
+          >
+            // web interface — no install required
+          </p>
         </motion.div>
+      </section>
+
+      {/* ── STATS ────────────────────────────────────────────────── */}
+      <section
+        className="rl-landing-section"
+        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+      >
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+          <StatsStrip />
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
@@ -1810,12 +1571,17 @@ export default function Landing() {
                 }}
                 transition={springs.smooth}
                 className="rl-card"
-                style={{ position: "relative", willChange: "transform" }}
+                style={{
+                  position: "relative",
+                  willChange: "transform",
+                  background: "var(--bg-3)",
+                  borderColor: "var(--border-hi)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+                }}
                 data-aos="fade-up"
                 data-aos-delay={i * 120}
                 data-aos-duration="650"
               >
-                <Corners />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 10 }}
                 >
@@ -1917,7 +1683,6 @@ export default function Landing() {
               watch a weak bullet
               <br />
               get an unfair edge
-              <Cursor />
             </h2>
           </FadeInView>
 
@@ -1925,7 +1690,6 @@ export default function Landing() {
             {/* Before */}
             <FadeInView delay={0.05}>
               <div className="rl-card" style={{ position: "relative" }}>
-                <Corners />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
@@ -2027,7 +1791,6 @@ export default function Landing() {
             {/* After */}
             <FadeInView delay={0.25}>
               <div className="rl-card is-phos" style={{ position: "relative" }}>
-                <Corners />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 12 }}
                 >
@@ -2094,12 +1857,31 @@ export default function Landing() {
               </div>
             </FadeInView>
           </div>
+
+          {/* CTA — peak intent right after the demo */}
+          <FadeInView
+            delay={0.3}
+            style={{
+              display: "flex",
+              gap: 12,
+              justifyContent: "center",
+              flexWrap: "wrap",
+              paddingTop: 8,
+            }}
+          >
+            <Link to="/auth" className="rl-btn rl-btn-primary">
+              $ try_it_on_my_resume →
+            </Link>
+            <a href="#how_it_works" className="rl-btn rl-btn-ghost">
+              see_how_scoring_works ↓
+            </a>
+          </FadeInView>
         </div>
       </section>
 
       {/* ── TESTIMONIALS MARQUEE ─────────────────────────────────── */}
       <section
-        id="signal_from_users"
+        id="testimonials"
         className="rl-testimonials-section"
         style={{
           width: "100%",
@@ -2132,8 +1914,18 @@ export default function Landing() {
             }}
           >
             from job-seeker to job-shipper
-            <Cursor />
           </h2>
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--fg-3)",
+              margin: 0,
+              letterSpacing: "0.04em",
+            }}
+          >
+            avg +23 pts on the first revision cycle
+          </p>
         </FadeInView>
 
         {/* Marquee track — duplicated for seamless loop */}
@@ -2151,7 +1943,6 @@ export default function Landing() {
                 }}
                 transition={springs.smooth}
               >
-                <Corners />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 16 }}
                 >
@@ -2232,69 +2023,44 @@ export default function Landing() {
                         </p>
                       </div>
                     </div>
-                    <span
+                    <div
                       style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--phos)",
                         display: "flex",
-                        alignItems: "center",
-                        gap: 4,
+                        flexDirection: "column",
+                        alignItems: "flex-end",
                         flexShrink: 0,
-                        textShadow: "0 0 10px var(--phos-glow)",
                       }}
                     >
-                      <span style={{ fontSize: 9 }}>▲</span> {t.lift}
-                    </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: "var(--phos)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          textShadow: "0 0 10px var(--phos-glow)",
+                        }}
+                      >
+                        <span style={{ fontSize: 9 }}>▲</span> {t.lift} pts
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 9,
+                          color: "var(--fg-4)",
+                          letterSpacing: "0.1em",
+                        }}
+                      >
+                        score lift
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section
-        id="pricing"
-        className="rl-landing-section"
-        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
-      >
-        <div
-          style={{
-            maxWidth: 1280,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 48,
-            alignItems: "center",
-          }}
-        >
-          <FadeInView
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
-            }}
-          >
-            <span className="rl-eyebrow">// pricing</span>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
-              }}
-            >
-              one tier away from your offer
-            </h2>
-          </FadeInView>
-          <FadeInView delay={0.1} style={{ width: "100%" }}>
-            <PricingTiers />
-          </FadeInView>
         </div>
       </section>
 
@@ -2340,7 +2106,6 @@ export default function Landing() {
               className="rl-card"
               style={{ position: "relative", padding: "0 24px" }}
             >
-              <Corners />
               {FAQS.map((f) => (
                 <FAQItem
                   key={f.q}
@@ -2350,6 +2115,49 @@ export default function Landing() {
                 />
               ))}
             </div>
+          </FadeInView>
+        </div>
+      </section>
+
+      {/* ── PRICING ──────────────────────────────────────────────── */}
+      <section
+        id="pricing"
+        className="rl-landing-section"
+        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+      >
+        <div
+          style={{
+            maxWidth: 1280,
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 48,
+            alignItems: "center",
+          }}
+        >
+          <FadeInView
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              textAlign: "center",
+            }}
+          >
+            <span className="rl-eyebrow">// pricing</span>
+            <h2
+              style={{
+                fontSize: "clamp(28px, 4vw, 48px)",
+                color: "var(--fg-1)",
+                fontWeight: 500,
+                letterSpacing: "-1.5px",
+              }}
+            >
+              start free. upgrade when you're ready.
+            </h2>
+          </FadeInView>
+          <FadeInView delay={0.1} style={{ width: "100%" }}>
+            <PricingTiers />
           </FadeInView>
         </div>
       </section>
@@ -2447,10 +2255,8 @@ export default function Landing() {
                 margin: 0,
               }}
             >
-              your next offer is one
-              <br />
-              analysis away
-              <Cursor />
+              your resume, scored in
+              <br />3 seconds. no coach needed.
             </h2>
           </FadeInView>
 
@@ -2496,104 +2302,6 @@ export default function Landing() {
           </FadeInView>
         </div>
       </section>
-
-      <ResumeLensWordmark />
-
-      <div
-        style={{
-          background: "#ffffff",
-          overflow: "hidden",
-          margin: "0 0 0px",
-          width: "100%",
-        }}
-        data-aos="fade-up"
-        data-aos-duration="700"
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 1780 345"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="224.495"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 530.492 62.3984)"
-              fill="#E261E5"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="371.11"
-              height="220.02"
-              rx="110.01"
-              transform="matrix(-1 0 0 1 1328.45 62.3984)"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="762.008"
-              y="54.0938"
-              width="235.199"
-              height="236.908"
-              rx="117.599"
-              fill="#3A93FF"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1624.3"
-              y="86.7773"
-              width="154.917"
-              height="171.543"
-              rx="77.4584"
-              fill="#59E25D"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="1346.21"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              x="0.789062"
-              y="0.953125"
-              width="327.882"
-              height="343.195"
-              rx="163.941"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="450.288"
-              height="236.907"
-              rx="118.454"
-              transform="matrix(-1 0 0 1 893.008 54.0938)"
-              fill="#FFE228"
-            />
-          </g>
-          <g style={{ mixBlendMode: "multiply" }}>
-            <rect
-              width="167.631"
-              height="236.907"
-              rx="83.8156"
-              transform="matrix(-1 0 0 1 1425.18 54.0938)"
-              fill="#E261E5"
-            />
-          </g>
-        </svg>
-      </div>
 
       <Footer />
       <MobileBottomNav />

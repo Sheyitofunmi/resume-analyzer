@@ -56,10 +56,6 @@ export function DimSparklineCard({
   const last = dimScores[dimScores.length - 1] ?? 0;
   return (
     <div className="rl-card" style={{ position: "relative" }}>
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div
           style={{

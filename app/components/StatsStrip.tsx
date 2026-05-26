@@ -113,11 +113,6 @@ const StatsStrip = ({ id }: { id?: string } = {}) => {
         position: "relative",
       }}
     >
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {STATS.map((s, i) => (
         <StatItem
           key={s.label}

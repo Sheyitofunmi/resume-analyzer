@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
-import { Corners, Cursor, Eyebrow, StatusPill } from "~/components/atoms";
+import { Cursor, Eyebrow, StatusPill } from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
 
 export const meta = () => [{ title: "ResumeLens | Settings" }];
@@ -110,7 +110,6 @@ function Section({
 }) {
   return (
     <div className="rl-card" style={{ position: "relative" }}>
-      <Corners />
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         <div
           style={{
@@ -188,7 +187,6 @@ export default function Settings() {
           <h1>
             your_
             <span style={{ color: "var(--copper-hi)" }}>preferences</span>
-            <Cursor />
           </h1>
         </div>
 

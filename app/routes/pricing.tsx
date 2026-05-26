@@ -27,10 +27,7 @@ export default function Pricing() {
           }}
         >
           <Eyebrow mode="comment">pricing</Eyebrow>
-          <h1 style={{ maxWidth: 640 }}>
-            one tier away from your offer
-            <Cursor />
-          </h1>
+          <h1 style={{ maxWidth: 640 }}>one tier away from your offer</h1>
         </div>
 
         <PricingTiers />

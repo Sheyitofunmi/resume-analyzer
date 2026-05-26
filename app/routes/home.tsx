@@ -513,7 +513,6 @@ export default function Home() {
           <motion.h1 variants={fadeUp} className="rl-h1">
             track_your_
             <span style={{ color: "var(--phos)" }}>applications</span>
-            <span className="rl-cursor" />
           </motion.h1>
           <AnimatePresence>
             {!loadingResumes && (
@@ -767,7 +766,6 @@ export default function Home() {
               <span className="rl-eyebrow">// resume_analysis</span>
               <h1 style={{ fontSize: "clamp(28px, 5vw, 40px)" }}>
                 Drop your first resume
-                <span className="rl-cursor" />
               </h1>
               <p
                 style={{

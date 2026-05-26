@@ -1,11 +1,11 @@
 const LINES: { key: keyof ScoreHistoryEntry; label: string; color: string }[] =
   [
-    { key: "overall", label: "Overall", color: "#6366f1" },
-    { key: "ats", label: "ATS", color: "#10b981" },
-    { key: "tone", label: "Tone", color: "#f59e0b" },
-    { key: "content", label: "Content", color: "#3b82f6" },
-    { key: "structure", label: "Structure", color: "#8b5cf6" },
-    { key: "skills", label: "Skills", color: "#ec4899" },
+    { key: "overall", label: "Overall", color: "var(--phos)" },
+    { key: "ats", label: "ATS", color: "var(--copper-hi)" },
+    { key: "tone", label: "Tone", color: "#a78bfa" },
+    { key: "content", label: "Content", color: "#60a5fa" },
+    { key: "structure", label: "Structure", color: "#f472b6" },
+    { key: "skills", label: "Skills", color: "var(--ember)" },
   ];
 
 const W = 500;
@@ -27,9 +27,9 @@ function formatDate(iso: string) {
 }
 
 function dotColor(score: number) {
-  if (score > 69) return "#10b981";
-  if (score > 49) return "#f59e0b";
-  return "#ef4444";
+  if (score > 69) return "var(--phos)";
+  if (score > 49) return "var(--copper-hi)";
+  return "var(--ember)";
 }
 
 const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
@@ -38,26 +38,82 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
   const n = history.length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md w-full overflow-hidden">
-      <div className="px-5 pt-4 pb-1 border-b border-gray-100">
-        <h3 className="text-base font-semibold text-gray-800">Score History</h3>
-        <p className="text-xs text-gray-400 mt-0.5">
+    <div
+      style={{
+        background: "var(--parchment)",
+        border: "1px solid var(--parchment-border)",
+        borderRadius: 12,
+        width: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 20px 10px",
+          borderBottom: "1px solid var(--parchment-border)",
+        }}
+      >
+        <h3
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--parchment-fg-1)",
+            margin: "0 0 2px",
+          }}
+        >
+          score_history
+        </h3>
+        <p
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--parchment-fg-3)",
+            margin: 0,
+          }}
+        >
           {n === 1
             ? "Re-analyze to track score improvements over time."
             : `${n} analyses — showing improvement over time.`}
         </p>
       </div>
 
-      <div className="px-4 pt-3 pb-4">
+      <div style={{ padding: "12px 16px 16px" }}>
         {n === 1 ? (
-          <div className="flex flex-col items-center gap-3 py-4">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+              padding: "16px 0",
+            }}
+          >
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white"
-              style={{ background: dotColor(history[0].overall) }}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 20,
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                color: "var(--parchment)",
+                background: dotColor(history[0].overall),
+              }}
             >
               {history[0].overall}
             </div>
-            <p className="text-xs text-gray-400">
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--parchment-fg-3)",
+                margin: 0,
+              }}
+            >
               First analysis on {formatDate(history[0].date)}
             </p>
           </div>
@@ -65,11 +121,10 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
           <>
             <svg
               viewBox={`0 0 ${W} ${H}`}
-              className="w-full"
+              style={{ width: "100%" }}
               aria-label="Score history chart"
               role="img"
             >
-              {/* Y-axis gridlines */}
               {[0, 25, 50, 75, 100].map((v) => (
                 <g key={v}>
                   <line
@@ -77,7 +132,7 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     x2={W - PAD.right}
                     y1={yOf(v)}
                     y2={yOf(v)}
-                    stroke="#f3f4f6"
+                    stroke="var(--parchment-border)"
                     strokeWidth={1}
                   />
                   <text
@@ -85,14 +140,13 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     y={yOf(v) + 4}
                     textAnchor="end"
                     fontSize={9}
-                    fill="#9ca3af"
+                    fill="var(--parchment-fg-3)"
                   >
                     {v}
                   </text>
                 </g>
               ))}
 
-              {/* X-axis date labels */}
               {history.map((entry, i) => (
                 <text
                   key={i}
@@ -100,13 +154,12 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                   y={H - 4}
                   textAnchor="middle"
                   fontSize={9}
-                  fill="#9ca3af"
+                  fill="var(--parchment-fg-3)"
                 >
                   {formatDate(entry.date)}
                 </text>
               ))}
 
-              {/* Score lines */}
               {LINES.map(({ key, color }) => {
                 const pts = history
                   .map((e, i) => `${xOf(i, n)},${yOf(e[key] as number)}`)
@@ -118,14 +171,13 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     fill="none"
                     stroke={color}
                     strokeWidth={key === "overall" ? 2.5 : 1.2}
-                    strokeOpacity={key === "overall" ? 1 : 0.55}
+                    strokeOpacity={key === "overall" ? 1 : 0.6}
                     strokeLinejoin="round"
                     strokeLinecap="round"
                   />
                 );
               })}
 
-              {/* Dots for overall score */}
               {history.map((entry, i) => (
                 <circle
                   key={i}
@@ -133,21 +185,44 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                   cy={yOf(entry.overall)}
                   r={4}
                   fill={dotColor(entry.overall)}
-                  stroke="white"
+                  stroke="var(--parchment)"
                   strokeWidth={1.5}
                 />
               ))}
             </svg>
 
-            {/* Legend */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 px-1">
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "4px 16px",
+                marginTop: 4,
+                paddingLeft: 4,
+              }}
+            >
               {LINES.map(({ key, label, color }) => (
-                <div key={key} className="flex items-center gap-1">
+                <div
+                  key={key}
+                  style={{ display: "flex", alignItems: "center", gap: 5 }}
+                >
                   <span
-                    className="inline-block w-3 h-0.5 rounded-full"
-                    style={{ background: color }}
+                    style={{
+                      display: "inline-block",
+                      width: 12,
+                      height: 2,
+                      borderRadius: 9999,
+                      background: color,
+                    }}
                   />
-                  <span className="text-[10px] text-gray-400">{label}</span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      color: "var(--parchment-fg-3)",
+                    }}
+                  >
+                    {label}
+                  </span>
                 </div>
               ))}
             </div>

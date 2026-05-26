@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { usePuterStore } from "~/lib/puter";
-import { Corners, Cursor, Eyebrow } from "~/components/atoms";
+import { Cursor, Eyebrow } from "~/components/atoms";
 
 export const meta = () => [{ title: "ResumeLens | Onboarding" }];
 
@@ -344,6 +344,8 @@ export default function Onboarding() {
         alignItems: "center",
         justifyContent: "center",
         padding: "var(--space-8)",
+        background:
+          "radial-gradient(ellipse 700px 500px at 50% 50%, rgba(196,123,74,0.07) 0%, transparent 100%)",
       }}
     >
       <div
@@ -430,7 +432,6 @@ export default function Onboarding() {
           style={{ position: "relative" }}
           key={step}
         >
-          <Corners />
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <div>
               <Eyebrow mode="prompt">step_0{step + 1} / 04</Eyebrow>

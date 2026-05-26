@@ -17,8 +17,8 @@
   /* Cream text */
   --fg-1: #ebe6d6;
   --fg-2: #a89f87;
-  --fg-3: #6b6354;
-  --fg-4: #423d33;
+  --fg-3: #8a8272;
+  --fg-4: #5c5549;
 
   /* Phosphor — positive / action / OK */
   --phos: #a8e6a3;
@@ -53,7 +53,7 @@
   /* Type scale */
   --text-xs: 11px;
   --text-sm: 13px;
-  --text-base: 14px;
+  --text-base: 15px;
   --text-md: 16px;
   --text-lg: 18px;
   --text-xl: 22px;
@@ -115,6 +115,14 @@
 
   /* Grid */
   --grid-size: 40px;
+
+  /* Warm parchment — light surfaces that harmonise with the dark palette */
+  --parchment: #f0ebe0;
+  --parchment-2: #e6e0d0;
+  --parchment-border: #d5cfc0;
+  --parchment-fg-1: #1c1814;
+  --parchment-fg-2: #5a5040;
+  --parchment-fg-3: #8a7d68;
 }
 
 /* ── Document defaults ────────────────────────────────────────────── */
@@ -125,7 +133,7 @@ body {
   background: var(--bg);
   color: var(--fg-1);
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: 1.6;
   font-feature-settings: "ss01", "calt";
   -webkit-font-smoothing: antialiased;
@@ -163,7 +171,7 @@ h2 {
   font-family: var(--font-mono);
   font-size: clamp(var(--text-lg), 2.5vw, var(--text-xl));
   font-weight: 500;
-  color: var(--fg-2);
+  color: var(--fg-1);
   letter-spacing: -0.5px;
   margin: 0;
 }
@@ -404,9 +412,10 @@ label {
   border-top-width: 2px;
 }
 .rl-card.is-phos {
-  border-top-color: var(--phos);
-  border-top-width: 2px;
-  box-shadow: 0 0 32px var(--phos-glow);
+  border-color: var(--phos);
+  box-shadow:
+    0 0 32px var(--phos-glow),
+    0 0 0 1px rgba(168, 230, 163, 0.12);
 }
 
 /* ── Pricing component ────────────────────────────────────────────── */
@@ -528,7 +537,7 @@ label {
 
 .rl-pricing-feature {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: var(--fg-2);
   display: flex;
   gap: var(--space-2);
@@ -567,7 +576,7 @@ label {
   white-space: nowrap;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .rl-pricing-grid {
     gap: var(--space-4);
   }
@@ -639,6 +648,21 @@ label {
   color: var(--fg-2);
   border-color: var(--border-hi);
   background: var(--surface-2);
+}
+
+/* ── Body / prose copy (Inter for readability) ───────────────────── */
+.rl-body-text {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--fg-2);
+  line-height: 1.75;
+}
+
+.rl-lead {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  color: var(--fg-2);
+  line-height: 1.7;
 }
 
 /* ── Eyebrow / prompt ─────────────────────────────────────────────── */
@@ -997,7 +1021,7 @@ label {
   width: 320px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .rl-marquee-card {
     width: 280px;
   }
@@ -1185,14 +1209,19 @@ label {
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  color: var(--fg-4);
+  font-size: 12px;
+  color: var(--fg-3);
   flex-wrap: wrap;
   gap: 8px;
 }
 
 /* ── Tablet breakpoint: 768px ─────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Keep hero headline readable without pushing CTA off-screen */
+  .rl-hero-section h1 {
+    font-size: clamp(32px, 8vw, 52px) !important;
+  }
+
   .rl-hero-grid {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -1325,7 +1354,7 @@ label {
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .rl-section {
     padding: 24px 16px 80px;
   }
@@ -1469,6 +1498,12 @@ label {
 
 /* ── Very small screens (320px phones) ───────────────────────────── */
 @media (max-width: 480px) {
+  /* Constrain hero headline so CTA stays above fold */
+  .rl-hero-section h1 {
+    font-size: clamp(28px, 9vw, 42px) !important;
+    letter-spacing: -1px;
+  }
+
   .rl-section {
     padding: 16px 12px 80px;
   }
@@ -1778,11 +1813,15 @@ label {
 .rl-features-section {
   /* padding: clamp(48px, 8vw, 96px) 0; */
   padding: clamp(30px, 8vw, 30px) 0;
-
-  
+  /* Isolate stacking context so page grid doesn't bleed through parchment bg */
+  position: relative;
+  isolation: isolate;
+  z-index: 2;
+  border-top: 2px solid var(--copper);
+  border-bottom: 2px solid var(--copper);
 }
 
-.rl-features-row{
+.rl-features-row {
   margin-left: -1.5rem;
 }
 
@@ -1829,8 +1868,8 @@ label {
   gap: 10px;
 }
 
-/* ── Tablet & mobile (≤ 860px) ─────────────────────────────────────── */
-@media (max-width: 860px) {
+/* ── Tablet & mobile (≤ 768px) ─────────────────────────────────────── */
+@media (max-width: 768px) {
   .rl-features-row {
     flex-direction: column;
     gap: 24px;
@@ -1851,9 +1890,9 @@ label {
   }
 }
 
-/* ── Small phones (≤ 420px) ─────────────────────────────────────────── */
-@media (max-width: 420px) {
+/* ── Small phones (≤ 480px) ─────────────────────────────────────────── */
+@media (max-width: 480px) {
   .rl-features-deck {
-    width: 92vw;
+    width: 80vw;
   }
 }

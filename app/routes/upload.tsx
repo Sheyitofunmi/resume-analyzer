@@ -475,7 +475,6 @@ const Upload = () => {
             <br />
             for_your_
             <span style={{ color: "var(--phos)" }}>dream_job</span>
-            <span className="rl-cursor" />
           </h1>
           <AnimatePresence>
             {!isProcessing && (

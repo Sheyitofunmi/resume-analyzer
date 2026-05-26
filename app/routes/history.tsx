@@ -3,13 +3,7 @@ import { useNavigate } from "react-router";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
-import {
-  Corners,
-  Cursor,
-  Eyebrow,
-  ScoreBar,
-  StatusPill,
-} from "~/components/atoms";
+import { Cursor, Eyebrow, ScoreBar, StatusPill } from "~/components/atoms";
 import {
   DIMS,
   DimSparklineCard,
@@ -79,7 +73,6 @@ export default function History() {
           <h1>
             your_score
             <span style={{ color: "var(--phos)" }}>_timeline</span>
-            <Cursor />
           </h1>
         </div>
 
@@ -112,7 +105,6 @@ export default function History() {
               padding: "48px 32px",
             }}
           >
-            <Corners />
             <p
               style={{
                 fontFamily: "var(--font-mono)",
@@ -140,7 +132,6 @@ export default function History() {
                   className="rl-card"
                   style={{ position: "relative" }}
                 >
-                  <Corners />
                   <div
                     style={{ display: "flex", flexDirection: "column", gap: 4 }}
                   >
@@ -178,7 +169,6 @@ export default function History() {
 
             {/* Line chart */}
             <div className="rl-card" style={{ position: "relative" }}>
-              <Corners />
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
               >
@@ -233,7 +223,6 @@ export default function History() {
               className="rl-card"
               style={{ position: "relative", padding: 0 }}
             >
-              <Corners />
               <div
                 style={{
                   padding: "14px 20px",

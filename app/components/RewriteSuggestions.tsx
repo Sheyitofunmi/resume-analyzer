@@ -39,11 +39,6 @@ const RewriteSuggestions = ({
       className="rl-card"
       style={{ position: "relative", padding: 0, overflow: "hidden" }}
     >
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {/* Header */}
       <div
         style={{

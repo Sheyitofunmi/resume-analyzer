@@ -41,18 +41,79 @@ const WipeApp = () => {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-4 border-[#e5e5e5] border-t-[#0a0a0a] animate-spin" />
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg)",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            border: "3px solid var(--border)",
+            borderTopColor: "var(--phos)",
+            animation: "spin 0.7s linear infinite",
+          }}
+        />
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center flex flex-col gap-4">
-          <p className="text-red-600 font-medium">{error}</p>
-          <button onClick={clearError} className="primary-button w-fit mx-auto">
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg)",
+          padding: 16,
+        }}
+      >
+        <div
+          style={{
+            background: "var(--parchment)",
+            border: "1px solid var(--parchment-border)",
+            borderRadius: 12,
+            padding: 32,
+            maxWidth: 420,
+            width: "100%",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "var(--ember)",
+              margin: 0,
+            }}
+          >
+            {error}
+          </p>
+          <button
+            onClick={clearError}
+            style={{
+              alignSelf: "center",
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              padding: "8px 20px",
+              border: "1px solid var(--parchment-border)",
+              borderRadius: 6,
+              background: "var(--parchment-2)",
+              color: "var(--parchment-fg-1)",
+              cursor: "pointer",
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -61,43 +122,147 @@ const WipeApp = () => {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md flex flex-col gap-6">
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg)",
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: "var(--parchment)",
+          border: "1px solid var(--parchment-border)",
+          borderRadius: 12,
+          padding: 32,
+          width: "100%",
+          maxWidth: 440,
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+        }}
+      >
         <div>
-          <h1 className="!text-2xl !font-bold text-red-600 mb-1">
-            Wipe All Data
+          <h1
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 22,
+              fontWeight: 700,
+              color: "var(--ember)",
+              margin: "0 0 4px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            wipe_all_data
           </h1>
-          <p className="text-sm text-gray-500">
-            Signed in as{" "}
-            <span className="font-semibold text-gray-700">
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--parchment-fg-3)",
+              margin: 0,
+            }}
+          >
+            signed in as{" "}
+            <span style={{ color: "var(--parchment-fg-1)", fontWeight: 600 }}>
               {auth.user?.username}
             </span>
           </p>
         </div>
 
         {done ? (
-          <div className="flex flex-col gap-4 items-center text-center">
-            <p className="text-green-700 font-semibold">
-              All data wiped successfully.
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 13,
+                color: "var(--phos-dim)",
+                margin: 0,
+              }}
+            >
+              // all data wiped successfully
             </p>
-            <a href="/" className="primary-button w-fit px-6">
-              Go to Dashboard
+            <a
+              href="/"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                padding: "9px 20px",
+                border: "1px solid var(--parchment-border)",
+                borderRadius: 6,
+                background: "var(--parchment-2)",
+                color: "var(--parchment-fg-1)",
+                textDecoration: "none",
+              }}
+            >
+              → go to dashboard
             </a>
           </div>
         ) : (
           <>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">
-                Files ({files.length})
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--parchment-fg-2)",
+                  margin: "0 0 8px",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                FILES ({files.length})
               </p>
               {files.length === 0 ? (
-                <p className="text-sm text-gray-400">No files found.</p>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    color: "var(--parchment-fg-3)",
+                    margin: 0,
+                  }}
+                >
+                  // no files found
+                </p>
               ) : (
-                <ul className="flex flex-col gap-1 max-h-48 overflow-y-auto text-sm text-gray-600">
+                <ul
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                    maxHeight: 160,
+                    overflowY: "auto",
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                  }}
+                >
                   {files.map((f) => (
                     <li
                       key={f.id}
-                      className="px-3 py-1.5 bg-gray-50 rounded-lg truncate"
+                      style={{
+                        padding: "6px 10px",
+                        background: "var(--parchment-2)",
+                        border: "1px solid var(--parchment-border)",
+                        borderRadius: 4,
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 11,
+                        color: "var(--parchment-fg-2)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       {f.name}
                     </li>
@@ -106,13 +271,38 @@ const WipeApp = () => {
               )}
             </div>
 
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex flex-col gap-3">
-              <p className="text-sm text-red-700">
+            <div
+              style={{
+                background: "rgba(227,83,74,0.06)",
+                border: "1px solid var(--ember-dim)",
+                borderRadius: 8,
+                padding: 16,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  color: "var(--parchment-fg-2)",
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              >
                 This will permanently delete all uploaded resumes and analysis
                 data. Type{" "}
-                <strong className="font-mono tracking-wider">
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontWeight: 700,
+                    letterSpacing: "0.12em",
+                    color: "var(--ember)",
+                  }}
+                >
                   {CONFIRM_WORD}
-                </strong>{" "}
+                </span>{" "}
                 to confirm.
               </p>
               <input
@@ -120,15 +310,47 @@ const WipeApp = () => {
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
                 placeholder={CONFIRM_WORD}
-                className="font-mono text-sm text-red-800 border border-red-200 bg-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
                 aria-label="Type DELETE to confirm"
+                style={{
+                  background: "var(--parchment)",
+                  border: "1px solid var(--ember-dim)",
+                  borderRadius: 4,
+                  padding: "8px 12px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--ember)",
+                  outline: "none",
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
               />
               <button
                 onClick={handleDelete}
                 disabled={confirmText !== CONFIRM_WORD || wiping}
-                className="bg-red-600 text-white rounded-full px-6 py-2 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
+                style={{
+                  background:
+                    confirmText === CONFIRM_WORD && !wiping
+                      ? "var(--ember)"
+                      : "transparent",
+                  border: "1px solid var(--ember-dim)",
+                  borderRadius: 6,
+                  padding: "9px 20px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color:
+                    confirmText === CONFIRM_WORD && !wiping
+                      ? "var(--parchment)"
+                      : "var(--ember-dim)",
+                  cursor:
+                    confirmText !== CONFIRM_WORD || wiping
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: confirmText !== CONFIRM_WORD || wiping ? 0.5 : 1,
+                  transition: "all 150ms",
+                }}
               >
-                {wiping ? "Wiping…" : "Wipe All Data"}
+                {wiping ? "wiping…" : "wipe_all_data"}
               </button>
             </div>
           </>

@@ -73,11 +73,6 @@ const HowItWorks = ({ compact = false }: { compact?: boolean }) => {
               transition: `opacity 400ms ${i * 100}ms, transform 400ms ${i * 100}ms`,
             }}
           >
-            <span className="rl-corner tl" />
-            <span className="rl-corner tr" />
-            <span className="rl-corner bl" />
-            <span className="rl-corner br" />
-
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span
                 style={{

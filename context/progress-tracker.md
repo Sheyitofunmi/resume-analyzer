@@ -12,6 +12,46 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Landing page content + UX review fixes (2026-05-26)
+
+- **`app/routes/landing.tsx`**: Promoted hero H1 to functional copy ("score your resume against any job description"); old tagline demoted to monospace comment above it.
+- **`app/routes/landing.tsx`**: Fixed factual error — features section header "five signals" → "six signals".
+- **`app/routes/landing.tsx`**: Replaced "pdf never leaves your puter cloud" → "your PDF stays private — never our servers" in trust indicators.
+- **`app/routes/landing.tsx`**: HeroBadge text changed from "v1.0 · now in public beta" → "✓ live · free to start".
+- **`app/routes/landing.tsx`**: Added `// web interface — no install required` caption below the animated terminal demo.
+- **`app/routes/landing.tsx`**: Added `<StatsStrip />` section between Hero and How It Works for credibility anchoring.
+- **`app/routes/landing.tsx`**: Added "click cards or use ← → to explore" hint in the features deck.
+- **`app/routes/landing.tsx`**: Added mid-page CTA after the Before/After demo at peak user intent.
+- **`app/routes/landing.tsx`**: Added "avg +23 pts on the first revision cycle" sub-headline to testimonials section.
+- **`app/routes/landing.tsx`**: Testimonial lift numbers now show "+X pts" with "score lift" label for clarity.
+- **`app/routes/landing.tsx`**: Added "testimonials" to nav; reordered nav to match section order; moved FAQ before Pricing.
+- **`app/routes/landing.tsx`**: Pricing H2 → "start free. upgrade when you're ready."; final CTA H2 → "your resume, scored in 3 seconds."
+- **`app/routes/landing.tsx`**: Removed `ResumeLensWordmark`, `VivusTrendLine`, and unused dead code.
+- **`app/components/PricingTiers.tsx`**: Free tier "24h" → "7-day" history; Recruiter tier tagline clarified + opacity de-emphasised.
+
+### Design polish: 3 remaining fixes — pricing size, Pro border, onboarding glow (2026-05-26)
+
+- **`app/app.css`**: `.rl-pricing-feature` font-size changed from hardcoded `13px` → `var(--text-sm)`.
+- **`app/app.css`**: `.rl-card.is-phos` (Pro pricing card) changed from `border-color: var(--phos-dim)` with top-only `var(--phos)` → uniform `border-color: var(--phos)` all around.
+- **`app/routes/onboarding.tsx`**: Added copper radial-gradient ambient glow (`rgba(196,123,74,0.07)`) centered behind the onboarding card on desktop via `background` on the main element.
+
+### Design polish: parchment light surfaces (2026-05-26)
+
+- **`app/app.css`**: Added `--parchment` token set (`--parchment`, `--parchment-2`, `--parchment-border`, `--parchment-fg-1/2/3`) — warm `#f0ebe0` palette that echoes `--fg-1` and harmonises with the copper/amber dark theme.
+- **`app/routes/landing.tsx`** (features section): Replaced `#ffffff` → `var(--parchment)`, fixed all hardcoded `#aaa`, `#0d0d0d`, `#666`, `#e8e8e8`, `#fafafa` → parchment tokens.
+- **`app/components/ScoreHistory.tsx`**: Full retheme from Tailwind `bg-white`/`text-gray-*` to parchment tokens. Chart line colors mapped to design tokens (phos, copper-hi, ember + kept accent colors for non-semantic lines).
+- **`app/routes/wipe.tsx`**: Full retheme — dark `var(--bg)` page, parchment card, ember red danger section using `var(--ember)`/`var(--ember-dim)`.
+
+### Design polish: 7 fixes across visual hierarchy, tokens, and breakpoints (2026-05-26)
+
+- **Blob SVG** (`app/routes/landing.tsx`): Removed white background; recolored blobs to brand palette (copper/phos/ember) with `mix-blend-mode: screen` at 0.10–0.20 opacity so they read on the dark background.
+- **Contrast** (`app/app.css`): Raised `--fg-3` from `#6b6354` → `#8a8272` and `--fg-4` from `#423d33` → `#5c5549` for WCAG AA compliance.
+- **Inter font** (`app/app.css`): Added `.rl-body-text` and `.rl-lead` utility classes using `var(--font-body)`.
+- **Feature card tokens** (`app/routes/landing.tsx`): Changed `FEATURES[].viz` from static JSX to render functions `(c: FeatureColor) => ReactNode`; replaced all hardcoded `rgba(255,255,255,...)` and `#052e16` values with `${c.text}` + hex opacity suffixes.
+- **Cursor cleanup**: Removed `<span className="rl-cursor" />` from non-animated headings in `upload.tsx`, `pricing.tsx`, `settings.tsx`, `history.tsx`, and 3 section headings in `landing.tsx` (kept only hero headline cursor).
+- **Corner crosshairs pruned**: Removed `<Corners />` from `ATS.tsx`, `ScoreCharts.tsx`, `RewriteSuggestions.tsx`, `Summary.tsx`, `ResumeChecklist.tsx`, `HowItWorks.tsx`, `PricingTiers.tsx`, `settings.tsx`, `history.tsx`, `onboarding.tsx`, and 5 locations in `landing.tsx` (terminal demo Corners at line 88 kept). Cleaned up dead imports.
+- **Breakpoints consolidated** (`app/app.css`): Reduced from 5 breakpoint values (420/480/720/768/860px) to 3 — all 720px → 768px, 860px → 768px, 420px → 480px. Resume split-panel pair (767px/min-width 768px) preserved.
+
 ### Feature: Driver.js product tour + dependency cleanup (2026-05-26)
 
 - **`package.json`**: Added `driver.js@^1.4.0`. Removed 5 unused packages: `scrollmagic`, `scrollreveal`, `lottie-web`, `lenis`, `typed.js` (+ their `@types/` entries).
