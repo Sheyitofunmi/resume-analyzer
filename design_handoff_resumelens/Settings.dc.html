@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#FDFDFB}</style>
+</helmet>
+
+<div data-screen-label="Settings" style="min-height:100vh;background:#FDFDFB;color:#0B0B0B;font-family:'Schibsted Grotesk',sans-serif">
+
+  <!-- APP NAV -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1.5px solid #0B0B0B;background:#fff;position:sticky;top:0;z-index:50">
+    <div style="display:flex;align-items:center;gap:32px">
+      <div style="display:flex;align-items:center;gap:9px;font-weight:900;font-size:16px">
+        <svg width="19" height="19" viewBox="0 0 20 20"><rect x="0" y="0" width="6" height="6" fill="#0B0B0B"></rect><rect x="7" y="0" width="6" height="6" fill="#0B0B0B"></rect><rect x="0" y="7" width="6" height="6" fill="#0B0B0B"></rect><rect x="14" y="7" width="6" height="6" fill="#0B0B0B"></rect><rect x="7" y="14" width="6" height="6" fill="#0B0B0B"></rect><rect x="14" y="14" width="6" height="6" fill="#0B0B0B"></rect></svg>
+        ResumeLens
+      </div>
+      <div style="display:flex;gap:4px;font-size:13px;font-weight:800">
+        <a href="Home.dc.html" style="color:#0B0B0B;text-decoration:none;padding:8px 14px;border-radius:8px" style-hover="background:#F0F2F0">Home</a>
+        <a href="Upload.dc.html" style="color:#0B0B0B;text-decoration:none;padding:8px 14px;border-radius:8px" style-hover="background:#F0F2F0">Upload</a>
+        <a href="History.dc.html" style="color:#0B0B0B;text-decoration:none;padding:8px 14px;border-radius:8px" style-hover="background:#F0F2F0">History</a>
+        <a href="Settings.dc.html" style="color:#0B0B0B;text-decoration:none;padding:8px 14px;border-radius:8px;background:#6FD6E3;border:1.5px solid #0B0B0B">Settings</a>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <a href="Pricing.dc.html" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;background:#C6F24E;border:1.5px solid #0B0B0B;border-radius:999px;padding:6px 12px;font-weight:600;color:#0B0B0B;text-decoration:none">FREE PLAN · 1 SCAN LEFT</a>
+      <span style="width:34px;height:34px;border-radius:50%;background:#8B5CF6;border:1.5px solid #0B0B0B;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px">M</span>
+    </div>
+  </div>
+
+  <div style="max-width:860px;margin:0 auto;padding:44px 32px 80px">
+    <h1 style="font-weight:900;font-size:40px;letter-spacing:-0.03em;margin:0 0 36px">Settings</h1>
+
+    <!-- ACCOUNT -->
+    <div style="border:1.5px solid #0B0B0B;border-radius:16px;background:#fff;margin-bottom:18px;overflow:hidden">
+      <div style="padding:16px 26px;border-bottom:1.5px solid #0B0B0B;background:#F5F7F5;font-weight:900;font-size:15px">Account</div>
+      <div style="padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div>
+          <div style="font-size:12px;font-weight:800;margin-bottom:6px">Full name</div>
+          <input type="text" value="Maya Chen" style="width:100%;box-sizing:border-box;border:1.5px solid #0B0B0B;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Schibsted Grotesk',sans-serif;font-weight:600;background:#fff;outline:none" style-focus="box-shadow:3px 3px 0 #6FD6E3">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:800;margin-bottom:6px">Email</div>
+          <input type="email" value="maya@chen.co" style="width:100%;box-sizing:border-box;border:1.5px solid #0B0B0B;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Schibsted Grotesk',sans-serif;font-weight:600;background:#fff;outline:none" style-focus="box-shadow:3px 3px 0 #6FD6E3">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:800;margin-bottom:6px">Target role</div>
+          <input type="text" value="Product Manager · Senior" style="width:100%;box-sizing:border-box;border:1.5px solid #0B0B0B;border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Schibsted Grotesk',sans-serif;font-weight:600;background:#fff;outline:none" style-focus="box-shadow:3px 3px 0 #6FD6E3">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <span style="background:#0B0B0B;color:#fff;padding:12px 24px;border-radius:10px;font-weight:800;font-size:13.5px;cursor:pointer" style-hover="box-shadow:4px 4px 0 #6FD6E3">Save changes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div style="border:1.5px solid #0B0B0B;border-radius:16px;background:#fff;margin-bottom:18px;overflow:hidden">
+      <div style="padding:16px 26px;border-bottom:1.5px solid #0B0B0B;background:#F5F7F5;font-weight:900;font-size:15px">Notifications</div>
+      <div style="padding:10px 26px">
+        <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1.5px solid #EDEFEC">
+            <div>
+              <div style="font-weight:800;font-size:14.5px;margin-bottom:3px">{{ t.name }}</div>
+              <div style="font-size:12.5px;color:#5F6368;font-weight:600">{{ t.desc }}</div>
+            </div>
+            <span onClick="{{ t.flip }}" style="width:52px;height:28px;border:1.5px solid #0B0B0B;border-radius:999px;background:{{ t.bg }};position:relative;cursor:pointer;display:inline-block;transition:background .15s ease">
+              <span style="position:absolute;top:2px;left:{{ t.knobL }};width:20px;height:20px;border-radius:50%;background:#fff;border:1.5px solid #0B0B0B;transition:left .15s ease;box-sizing:border-box"></span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- PLAN -->
+    <div style="border:1.5px solid #0B0B0B;border-radius:16px;background:#C6F24E;margin-bottom:18px;padding:26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;margin-bottom:8px">CURRENT PLAN</div>
+        <div style="font-weight:900;font-size:24px;letter-spacing:-0.02em;margin-bottom:4px">Free</div>
+        <div style="font-size:13.5px;font-weight:700">1 scan/month · 3 rewrites per scan · 1 scan left this month</div>
+      </div>
+      <a href="Pricing.dc.html" style="background:#0B0B0B;color:#C6F24E;padding:14px 28px;border-radius:10px;font-weight:900;font-size:14px;text-decoration:none" style-hover="box-shadow:4px 4px 0 rgba(11,11,11,.3)">Upgrade to Pro ▸</a>
+    </div>
+
+    <!-- DANGER -->
+    <div style="border:1.5px solid #D93025;border-radius:16px;background:#fff;padding:26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:900;font-size:15px;color:#D93025;margin-bottom:4px">Delete account &amp; data</div>
+        <div style="font-size:13px;color:#5F6368;font-weight:600">Removes every resume, version, and score. Cannot be undone.</div>
+      </div>
+      <span style="border:1.5px solid #D93025;color:#D93025;padding:11px 22px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer" style-hover="background:#D93025;color:#fff">Delete everything</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { scanDone: true, weeklyDigest: true, keywordAlerts: false };
+  defs = [
+    { key: 'scanDone', name: 'Scan complete', desc: 'Email me when a scan finishes with the new score.' },
+    { key: 'weeklyDigest', name: 'Weekly digest', desc: 'Score trend and new keyword opportunities, every Monday.' },
+    { key: 'keywordAlerts', name: 'Keyword alerts', desc: 'Alert me when target-role specs shift toward new keywords.' }
+  ];
+  renderVals() {
+    return {
+      toggles: this.defs.map(d => {
+        const on = this.state[d.key];
+        return {
+          name: d.name, desc: d.desc,
+          bg: on ? '#C6F24E' : '#EDEFEC',
+          knobL: on ? '26px' : '2px',
+          flip: () => this.setState(s => ({ [d.key]: !s[d.key] }))
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

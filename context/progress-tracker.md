@@ -12,6 +12,39 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### PRD prompt for full design-system replacement (2026-07-02)
+
+- Added `context/design-system-redesign-prd.md` — a self-contained prompt/PRD to hand to Claude for replacing the entire CIPHER dark-terminal design system with a brand-new **light-only** system across the **entire app**.
+- Decisions captured from user: aesthetic + brand/typography left to Claude's proposal (2–3 directions, pick one before building); light mode only; full route/component inventory in scope; preserve all Puter/data/AI logic and component APIs.
+- No app code changed yet — this is planning only; the redesign itself is pending user sign-off on a direction.
+
+### Landing hero redesign — Convix video hero (2026-06-25)
+
+- Replaced the dark terminal-style hero in `app/routes/landing.tsx` with a light, full-viewport video-background hero adapted from the "Convix Software" spec, re-themed for ResumeLens.
+- New `ConvixHero` + reusable `Gauge` components added in `landing.tsx`. Uses Tailwind utilities, `Instrument Serif` (added to the Google Fonts import in `app/app.css`), and `lucide-react` icons (`ChevronDown`, `ChevronRight`, `TrendingDown`, `TrendingUp`, `X`).
+- Dashboard preview cards re-themed to resume metrics: ATS Score (gauge 92%), analysis settings form, Keyword Match (gauge 68%).
+- Scope: hero section only — existing `LandingNavbar` kept; the Convix pill-nav was intentionally omitted to avoid a duplicate navbar.
+- Left now-unused in `landing.tsx`: `HeroBadge`, `TerminalDemo`, `Cursor`, `staggerContainer`, `fadeUp` imports/components (pending cleanup decision).
+
+### Landing simplification — removed sections (2026-06-25)
+
+- Removed the **Stats strip**, **Before/After**, and **Final CTA (ship_it)** sections from the landing render in `app/routes/landing.tsx`.
+- Dropped the now-unused `StatsStrip` import and the `before_after` entry from the navbar links array.
+- Page order is now: Hero → How It Works → Features → Testimonials → FAQ → Pricing → Footer.
+- `StatsStrip` component file still exists in `~/components` but is no longer imported anywhere on landing.
+
+### Landing design cohesion pass — light/dark mix made intentional (2026-06-25)
+
+User chose to KEEP the light hero + dark body mix (not unify), so the goal was to make the zebra read as one system via shared constants. All changes are **scoped to `.rl-landing`** (added to the landing `<main>`) so no other route is affected.
+
+- **One accent (orange):** added a `.rl-landing` block in `app/app.css` that re-scopes the `--copper*` tokens to orange `#ef4d23` and overrides `.rl-landing .rl-btn-primary` to orange. Dark sections now share the hero's orange accent. Phosphor green retained as success/score semantic only.
+- **One heading typeface:** `.rl-landing h2 { font-family: var(--font-body) }` — section headings now use Inter to match the hero; eyebrows/labels/commands stay mono (terminal flavor kept).
+- **CTA consistency:** nav primary CTA `$ try_free →` → `$ analyze_resume →` to share the hero's "analyze" verb.
+- **Honest social proof (#5):** removed the fabricated per-card "+NN pts score lift" badges; testimonials eyebrow `// user_results` → `// early_access`; aggregate subcopy → "illustrative feedback from early testers". `lift` field left on TESTIMONIALS data (unused, harmless).
+- **Less competing motion (#6):** removed the gsap 3D mouse-tilt effect from `FeaturesSection`, dropping gsap from the landing runtime. Card-deck framer-motion spring transitions retained.
+- **Above-the-fold (#7):** verified — CTA renders above the dashboard preview which is clipped by the fixed-height `overflow-hidden` hero container; no change needed.
+- Skipped by user request: #1 (forced full light/dark unification).
+
 ### Perf: faster AI analysis pipeline (2026-05-26)
 
 - **`app/lib/pdf2img.ts`**: Reduced render scale 1.5→1.0, switched output from PNG/1.0 to JPEG/0.85 — ~70% smaller image files.

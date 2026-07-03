@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import {
+  ChevronDown,
+  ChevronRight,
+  TrendingDown,
+  TrendingUp,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSpring, animated } from "@react-spring/web";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import PricingTiers from "~/components/PricingTiers";
-import StatsStrip from "~/components/StatsStrip";
 import { Corners, Cursor, FadeInView } from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
 import {
@@ -783,46 +789,6 @@ function FeaturesSection() {
   const reduced = useReducedMotion();
   const total = FEATURES.length;
 
-  useEffect(() => {
-    let cleanup: (() => void) | undefined;
-    import("gsap").then(({ gsap }) => {
-      const card = cardRefs.current[active];
-      if (!card) return;
-      const onMove = (e: MouseEvent) => {
-        const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        gsap.to(card, {
-          rotateX: -y * 10,
-          rotateY: x * 10,
-          scale: 1.02,
-          duration: 0.25,
-          ease: "power2.out",
-          transformPerspective: 900,
-          overwrite: "auto",
-        });
-      };
-      const onLeave = () => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          scale: 1,
-          duration: 0.5,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-      };
-      card.addEventListener("mousemove", onMove);
-      card.addEventListener("mouseleave", onLeave);
-      cleanup = () => {
-        card.removeEventListener("mousemove", onMove);
-        card.removeEventListener("mouseleave", onLeave);
-        gsap.set(card, { rotateX: 0, rotateY: 0, scale: 1 });
-      };
-    });
-    return () => cleanup?.();
-  }, [active]);
-
   return (
     <section
       id="features"
@@ -1255,31 +1221,30 @@ function LandingNavbar() {
         className="rl-mobile-hide"
         style={{ display: "flex", gap: 28, alignItems: "center" }}
       >
-        {[
-          "features",
-          "how_it_works",
-          "before_after",
-          "testimonials",
-          "faq",
-          "pricing",
-        ].map((item) => (
-          <a
-            key={item}
-            href={`#${item}`}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-3)",
-              textDecoration: "none",
-              letterSpacing: "0.05em",
-              transition: "color var(--dur-fast)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-3)")}
-          >
-            {item}
-          </a>
-        ))}
+        {["features", "how_it_works", "testimonials", "faq", "pricing"].map(
+          (item) => (
+            <a
+              key={item}
+              href={`#${item}`}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                color: "var(--fg-3)",
+                textDecoration: "none",
+                letterSpacing: "0.05em",
+                transition: "color var(--dur-fast)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--fg-1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--fg-3)")
+              }
+            >
+              {item}
+            </a>
+          ),
+        )}
       </div>
 
       {/* Right CTAs */}
@@ -1306,7 +1271,7 @@ function LandingNavbar() {
               className="rl-btn rl-btn-primary"
               style={{ fontSize: 12 }}
             >
-              $ try_free →
+              $ analyze_resume →
             </Link>
           </>
         )}
@@ -1315,194 +1280,296 @@ function LandingNavbar() {
   );
 }
 
+// ── Gauge (reusable semicircular tick gauge) ─────────────────────────
+function Gauge({
+  value,
+  color = "#ef4d23",
+  showLabels = false,
+  min,
+  max,
+}: {
+  value: number;
+  color?: string;
+  showLabels?: boolean;
+  min?: string;
+  max?: string;
+}) {
+  const TICKS = 40;
+  const active = Math.round((value / 100) * TICKS);
+  const cx = 100;
+  const cy = 100;
+  const rOuter = 80;
+  const rInner = rOuter - 10;
+
+  return (
+    <div className="w-full max-w-[260px] mx-auto">
+      <svg viewBox="0 0 200 120" className="w-full">
+        {Array.from({ length: TICKS }).map((_, i) => {
+          // sweep across a 180° arc from π → 2π (left → right, over the top)
+          const angle = Math.PI + (i / (TICKS - 1)) * Math.PI;
+          const x1 = cx + rInner * Math.cos(angle);
+          const y1 = cy + rInner * Math.sin(angle);
+          const x2 = cx + rOuter * Math.cos(angle);
+          const y2 = cy + rOuter * Math.sin(angle);
+          const isActive = i < active;
+          return (
+            <line
+              key={i}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={isActive ? color : "#d4d4d8"}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+            />
+          );
+        })}
+        <text
+          x={cx}
+          y={105}
+          textAnchor="middle"
+          fontSize={22}
+          fontWeight={600}
+          fill="#0b0f1a"
+        >
+          {value}%
+        </text>
+      </svg>
+      {showLabels && (
+        <div className="flex justify-between text-[11px] text-neutral-500 px-1">
+          <span>{min}</span>
+          <span>{max}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ConvixHero — full-viewport video hero (adapted for resumelens) ────
+function ConvixHero() {
+  const { auth } = usePuterStore();
+  const ctaTo = auth.isAuthenticated ? "/" : "/auth";
+
+  return (
+    <section
+      className="min-h-screen w-full bg-[#ededed] p-3 sm:p-4"
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+    >
+      <div className="relative w-full h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] overflow-hidden bg-[#d9d9d9] rounded-2xl sm:rounded-3xl">
+        {/* Background video */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          disableRemotePlayback
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
+        >
+          <source
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
+            type="video/mp4"
+          />
+        </video>
+        {/* Lighten overlay */}
+        <div className="absolute inset-0 bg-white/10" />
+
+        {/* Foreground */}
+        <div className="relative z-10 flex flex-col items-center px-4 pt-10 sm:pt-16 pb-8 sm:pb-12 text-center">
+          {/* Badge */}
+          <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm text-[13px] text-neutral-800">
+            <span className="w-2 h-2 rounded-full bg-[#ef4d23]" />
+            ResumeLens
+          </span>
+
+          {/* Headline */}
+          <h1
+            className="mt-5 sm:mt-6 max-w-4xl text-[#0b0f1a]"
+            style={{
+              fontSize: "clamp(36px, 8vw, 72px)",
+              lineHeight: 1.05,
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Scoring{" "}
+            <span
+              style={{
+                fontFamily: "'Instrument Serif', serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+              }}
+            >
+              Resumes
+            </span>
+            <br />
+            that get hired
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            className="mt-4 sm:mt-6 text-neutral-700 px-2 max-w-xl"
+            style={{ fontSize: "clamp(13px, 3.5vw, 16px)" }}
+          >
+            The AI-powered resume reviewer that scores you against any job
+            description — in seconds.
+          </p>
+
+          {/* CTA */}
+          <Link
+            to={ctaTo}
+            className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-[#0b0f1a] text-white rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 text-[14px] hover:bg-black transition-colors"
+          >
+            Analyze my resume
+            <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/15 inline-flex items-center justify-center">
+              <ChevronRight className="w-4 h-4" />
+            </span>
+          </Link>
+
+          {/* Dashboard preview */}
+          <div className="px-3 sm:px-4 w-full mt-10 sm:mt-14">
+            <div className="bg-[#f5f2ee] rounded-3xl p-4 sm:p-6 w-full max-w-[880px] mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-left">
+                {/* Card 1 — ATS Score */}
+                <div className="bg-white rounded-2xl p-5">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-[#ef4d23] font-medium">
+                      ATS Score
+                    </span>
+                    <span className="text-neutral-500">This resume</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[28px] font-semibold text-[#0b0f1a] leading-none">
+                      87
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-green-50 text-green-600 rounded-full px-2 py-0.5 text-[11px]">
+                      <TrendingUp className="w-3 h-3" />
+                      +12 (16%)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    Compared to last version
+                  </p>
+                  <p className="text-center text-[12px] text-neutral-600 mt-4 mb-1">
+                    Target score reached
+                  </p>
+                  <Gauge value={92} showLabels min="48" max="100" />
+                  <div className="bg-neutral-100 rounded-full p-1 flex mt-4 text-[12px]">
+                    <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1.5">
+                      ATS
+                    </span>
+                    <span className="flex-1 text-center text-neutral-500 py-1.5">
+                      Keywords
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card 2 — Analysis settings */}
+                <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
+                  <div>
+                    <label className="text-[12px] text-neutral-700">
+                      Score against
+                    </label>
+                    <button className="mt-1 w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
+                      Latest version
+                      <ChevronDown className="w-4 h-4 text-neutral-400" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-700">
+                      Compare role by
+                    </label>
+                    <button className="mt-1 w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
+                      Job description (JD)
+                      <ChevronDown className="w-4 h-4 text-neutral-400" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-700">
+                      Target score
+                    </label>
+                    <div className="mt-1 flex items-center border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
+                      <span className="text-neutral-400 mr-1">#</span>90
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[12px] text-neutral-700">
+                      Keywords to match
+                    </label>
+                    <div className="mt-1 flex items-center border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
+                      <span className="text-neutral-400 mr-1">#</span>24
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-1">
+                    <button className="bg-[#ef4d23] text-white rounded-lg px-5 py-2 text-[13px]">
+                      Save
+                    </button>
+                    <button className="text-[13px] text-neutral-600 underline">
+                      Cancel
+                    </button>
+                    <button
+                      className="ml-auto text-neutral-400"
+                      aria-label="Close"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card 3 — Keyword Match */}
+                <div className="bg-white rounded-2xl p-5">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-[#ef4d23] font-medium">
+                      Keyword Match
+                    </span>
+                    <span className="text-neutral-500">today</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[28px] font-semibold text-[#0b0f1a] leading-none">
+                      18
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-neutral-100 text-neutral-600 rounded-full px-2 py-0.5 text-[11px]">
+                      <TrendingDown className="w-3 h-3" />6
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    Compared to last version
+                  </p>
+                  <p className="text-center text-[12px] text-neutral-600 mt-4 mb-1">
+                    Matched vs. job description
+                  </p>
+                  <Gauge value={68} color="#9ca3af" />
+                  <div className="bg-neutral-100 rounded-full p-1 flex mt-4 text-[12px]">
+                    <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1.5">
+                      Matched
+                    </span>
+                    <span className="flex-1 text-center text-neutral-500 py-1.5">
+                      Missing
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Landing page ───────────────────────────────────────────────────────
 export default function Landing() {
   return (
-    <main className="rl-page" style={{ paddingBottom: 0 }}>
+    <main className="rl-page rl-landing" style={{ paddingBottom: 0 }}>
       <div className="rl-scroll-bar" />
       <LandingNavbar />
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section
-        className="rl-hero-grid rl-hero-section"
-        style={{
-          width: "100%",
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "80px 32px 64px",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* Left column — staggered entrance */}
-        <motion.div
-          variants={staggerContainer(0.09, 0.1)}
-          initial="hidden"
-          animate="visible"
-          style={{ display: "flex", flexDirection: "column", gap: 24 }}
-        >
-          {/* Badge */}
-          <motion.div variants={fadeUp} style={{ display: "inline-flex" }}>
-            <HeroBadge />
-          </motion.div>
-
-          {/* Tagline */}
-          <motion.span
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              color: "var(--fg-3)",
-              letterSpacing: "0.04em",
-            }}
-          >
-            // the resume reviewer you wish you knew
-          </motion.span>
-
-          {/* Headline */}
-          <motion.h1
-            variants={fadeUp}
-            style={{
-              fontSize: "clamp(40px, 6vw, 72px)",
-              fontWeight: 500,
-              lineHeight: 1.02,
-              letterSpacing: "-2px",
-              color: "var(--fg-1)",
-              margin: 0,
-            }}
-          >
-            score your resume
-            <br />
-            against any job description
-            <Cursor />
-          </motion.h1>
-
-          {/* Body */}
-          <motion.p
-            variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 16,
-              color: "var(--fg-2)",
-              lineHeight: 1.75,
-              margin: 0,
-              maxWidth: 480,
-            }}
-          >
-            Upload your PDF, paste the JD. Five AI dimensions in 3 seconds —
-            keyword gap, ATS pass/fail, tone, structure, and specific bullet
-            rewrites. No career coach needed.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            variants={fadeUp}
-            style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
-          >
-            <Link to="/auth">
-              <motion.span
-                className="rl-btn rl-btn-primary rl-btn-lg"
-                style={{
-                  display: "inline-flex",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                whileHover={{ y: -3, scale: 1.03 }}
-                whileTap={{ y: 0, scale: 0.97 }}
-                transition={springs.snappy}
-              >
-                $ analyze_my_resume →{/* Shimmer on hover */}
-                <motion.span
-                  initial={{ x: "-100%", opacity: 0 }}
-                  whileHover={{ x: "100%", opacity: 0.15 }}
-                  transition={{ duration: 0.5 }}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(90deg, transparent, white, transparent)",
-                    pointerEvents: "none",
-                  }}
-                />
-              </motion.span>
-            </Link>
-            <motion.a
-              href="#before_after"
-              className="rl-btn rl-btn-ghost rl-btn-lg"
-              whileHover={{
-                y: -2,
-                color: "var(--copper-hi)",
-              }}
-              whileTap={{ y: 0, scale: 0.97 }}
-              transition={springs.snappy}
-            >
-              see_sample_report
-            </motion.a>
-          </motion.div>
-
-          {/* Trust indicators */}
-          <motion.div
-            variants={fadeUp}
-            style={{
-              display: "flex",
-              gap: 20,
-              flexWrap: "wrap",
-              paddingTop: 4,
-            }}
-          >
-            {[
-              "✓ no signup to try",
-              "✓ your PDF stays private — never our servers",
-              "✓ 3 sec avg",
-            ].map((t, i) => (
-              <motion.span
-                key={t}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 + i * 0.08, duration: 0.5 }}
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  color: "var(--fg-3)",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                {t}
-              </motion.span>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* Terminal demo — slides in from right */}
-        <motion.div
-          initial={{ opacity: 0, x: 40, filter: "blur(8px)" }}
-          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1], delay: 0.25 }}
-        >
-          <TerminalDemo />
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--fg-4)",
-              textAlign: "right",
-              marginTop: 8,
-              letterSpacing: "0.08em",
-            }}
-          >
-            // web interface — no install required
-          </p>
-        </motion.div>
-      </section>
-
-      {/* ── STATS ────────────────────────────────────────────────── */}
-      <section
-        className="rl-landing-section"
-        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
-      >
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <StatsStrip />
-        </div>
-      </section>
+      <ConvixHero />
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section
@@ -1652,264 +1719,6 @@ export default function Landing() {
       {/* ── FEATURES ─────────────────────────────────────────────── */}
       <FeaturesSection />
 
-      {/* ── BEFORE / AFTER ───────────────────────────────────────── */}
-      <section
-        id="before_after"
-        className="rl-landing-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1280,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 48,
-          }}
-        >
-          <FadeInView
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
-            }}
-          >
-            <span className="rl-eyebrow">// before_after</span>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
-              }}
-            >
-              watch a weak bullet
-              <br />
-              get an unfair edge
-            </h2>
-          </FadeInView>
-
-          <div className="rl-ba-grid">
-            {/* Before */}
-            <FadeInView delay={0.05}>
-              <motion.div
-                className="rl-card"
-                style={{ position: "relative" }}
-                whileHover={{
-                  rotate: -2,
-                  y: -6,
-                  borderColor: "var(--ember)",
-                  transition: springs.snappy,
-                }}
-              >
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--fg-3)",
-                        letterSpacing: "0.15em",
-                      }}
-                    >
-                      BEFORE
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: "var(--ember)",
-                        letterSpacing: "-1px",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      48
-                      <span style={{ fontSize: 14, color: "var(--fg-4)" }}>
-                        /100
-                      </span>
-                    </span>
-                  </div>
-                  {[
-                    "Helped improve the website.",
-                    "Worked with the team on new features.",
-                    "Used React.",
-                    "Was responsible for code reviews.",
-                  ].map((b) => (
-                    <div
-                      key={b}
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--fg-3)",
-                      }}
-                    >
-                      <span style={{ color: "var(--fg-4)" }}>-</span> {b}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </FadeInView>
-
-            {/* Rewrite button */}
-            <FadeInView
-              delay={0.15}
-              className="rl-ba-mid"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingTop: 48,
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.08, transition: springs.snappy }}
-                whileTap={{ scale: 0.96, transition: springs.snappy }}
-                animate={{
-                  boxShadow: [
-                    "var(--glow-copper)",
-                    "0 0 28px rgba(196,123,74,0.5)",
-                    "var(--glow-copper)",
-                  ],
-                }}
-                transition={{
-                  duration: 2.4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                style={{
-                  background: "var(--copper)",
-                  color: "var(--bg)",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  padding: "10px 18px",
-                  borderRadius: "var(--radius-md)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                $ rewrite
-              </motion.div>
-            </FadeInView>
-
-            {/* After */}
-            <FadeInView delay={0.25}>
-              <motion.div
-                className="rl-card is-phos"
-                style={{ position: "relative" }}
-                whileHover={{
-                  rotate: 2,
-                  y: -6,
-                  boxShadow:
-                    "0 0 56px rgba(168,230,163,0.38), 0 0 0 1px rgba(168,230,163,0.3), 0 16px 40px rgba(0,0,0,0.5)",
-                  transition: springs.snappy,
-                }}
-              >
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--fg-3)",
-                        letterSpacing: "0.15em",
-                      }}
-                    >
-                      AFTER
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: "var(--phos)",
-                        letterSpacing: "-1px",
-                        fontVariantNumeric: "tabular-nums",
-                        textShadow: "0 0 14px var(--phos-glow)",
-                      }}
-                    >
-                      89
-                      <span style={{ fontSize: 14, color: "var(--fg-3)" }}>
-                        /100
-                      </span>
-                    </span>
-                  </div>
-                  {[
-                    "Cut page-load p95 by 200 ms, lifting conversion 8%.",
-                    "Shipped 4 major features end-to-end with 3 engineers; 0 rollbacks.",
-                    "Migrated app to React + TypeScript; reduced bundle 38%.",
-                    "Reviewed 200+ PRs; mentored 3 juniors, 2 promoted in a year.",
-                  ].map((b, i) => (
-                    <motion.div
-                      key={b}
-                      variants={revealLeft}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true, amount: 0.5 }}
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--fg-1)",
-                        transitionDelay: `${400 + i * 70}ms`,
-                      }}
-                    >
-                      <span style={{ color: "var(--phos)", flexShrink: 0 }}>
-                        +
-                      </span>{" "}
-                      {b}
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </FadeInView>
-          </div>
-
-          {/* CTA — peak intent right after the demo */}
-          <FadeInView
-            delay={0.3}
-            style={{
-              display: "flex",
-              gap: 12,
-              justifyContent: "center",
-              flexWrap: "wrap",
-              paddingTop: 8,
-            }}
-          >
-            <Link to="/auth" className="rl-btn rl-btn-primary">
-              $ try_it_on_my_resume →
-            </Link>
-            <a href="#how_it_works" className="rl-btn rl-btn-ghost">
-              see_how_scoring_works ↓
-            </a>
-          </FadeInView>
-        </div>
-      </section>
-
       {/* ── TESTIMONIALS MARQUEE ─────────────────────────────────── */}
       <section
         id="testimonials"
@@ -1935,7 +1744,7 @@ export default function Landing() {
             padding: "0 32px",
           }}
         >
-          <span className="rl-eyebrow">// user_results</span>
+          <span className="rl-eyebrow">// early_access</span>
           <h2
             style={{
               fontSize: "clamp(28px, 4vw, 48px)",
@@ -1955,7 +1764,7 @@ export default function Landing() {
               letterSpacing: "0.04em",
             }}
           >
-            avg +23 pts on the first revision cycle
+            illustrative feedback from early testers
           </p>
         </FadeInView>
 
@@ -2053,39 +1862,6 @@ export default function Landing() {
                           {t.target}
                         </p>
                       </div>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-end",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 16,
-                          fontWeight: 700,
-                          color: "var(--phos)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                          textShadow: "0 0 10px var(--phos-glow)",
-                        }}
-                      >
-                        <span style={{ fontSize: 9 }}>▲</span> {t.lift} pts
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 9,
-                          color: "var(--fg-4)",
-                          letterSpacing: "0.1em",
-                        }}
-                      >
-                        score lift
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -2192,148 +1968,6 @@ export default function Landing() {
           </FadeInView>
         </div>
       </section>
-
-      {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <section
-        id="ship_it"
-        className="rl-landing-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-          position: "relative",
-          textAlign: "center",
-          overflow: "hidden",
-        }}
-      >
-        {/* Ambient pulsing glow */}
-        <motion.div
-          animate={{ opacity: [0.04, 0.1, 0.04] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(800px 500px at 50% 100%, rgba(168,230,163,0.18), transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 32,
-            position: "relative",
-          }}
-        >
-          {/* Animated big stat */}
-          <FadeInView
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
-              whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
-              animate={{
-                textShadow: [
-                  "0 0 24px rgba(168,230,163,0.3)",
-                  "0 0 56px rgba(168,230,163,0.6)",
-                  "0 0 24px rgba(168,230,163,0.3)",
-                ],
-              }}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "clamp(64px, 10vw, 96px)",
-                fontWeight: 700,
-                color: "var(--phos)",
-                letterSpacing: "-4px",
-                lineHeight: 1,
-                fontVariantNumeric: "tabular-nums",
-                display: "inline-block",
-              }}
-            >
-              <AnimatedStat value={87} />
-            </motion.span>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                color: "var(--fg-3)",
-                letterSpacing: "0.2em",
-              }}
-            >
-              avg score after first revision
-            </span>
-          </FadeInView>
-
-          <FadeInView delay={0.1}>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
-                lineHeight: 1.1,
-                margin: 0,
-              }}
-            >
-              your resume, scored in
-              <br />3 seconds. no coach needed.
-            </h2>
-          </FadeInView>
-
-          <FadeInView delay={0.2}>
-            <Link to="/auth">
-              <motion.span
-                className="rl-btn rl-btn-primary rl-btn-lg"
-                style={{
-                  fontSize: 16,
-                  padding: "16px 32px",
-                  display: "inline-flex",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                whileHover={{ y: -3, scale: 1.04 }}
-                whileTap={{ y: 0, scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                animate={{
-                  boxShadow: [
-                    "0 0 18px rgba(168,230,163,0.25), inset 0 -3px 0 rgba(95,165,92,1)",
-                    "0 0 36px rgba(168,230,163,0.5), inset 0 -3px 0 rgba(95,165,92,1)",
-                    "0 0 18px rgba(168,230,163,0.25), inset 0 -3px 0 rgba(95,165,92,1)",
-                  ],
-                }}
-              >
-                $ analyze_my_resume →
-              </motion.span>
-            </Link>
-          </FadeInView>
-
-          <FadeInView delay={0.3}>
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--fg-4)",
-                margin: 0,
-                letterSpacing: "0.08em",
-              }}
-            >
-              no signup · no credit card · pdf stays private
-            </p>
-          </FadeInView>
-        </div>
-      </section>
-
       <Footer />
       <MobileBottomNav />
     </main>

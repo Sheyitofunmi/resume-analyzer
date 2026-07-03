@@ -27,75 +27,47 @@ function PuterLoadingScreen() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 20,
-        background: "var(--bg)",
-        fontFamily: "var(--font-mono)",
+        gap: 22,
+        background: "var(--page)",
       }}
     >
-      {/* Animated scan line */}
-      <div
-        style={{
-          position: "relative",
-          width: 48,
-          height: 48,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 48 48"
-          style={{ transform: "rotate(-90deg)" }}
-        >
-          <circle
-            cx="24"
-            cy="24"
-            r="20"
-            fill="none"
-            stroke="var(--border-hi)"
-            strokeWidth="2"
+      <svg width="40" height="40" viewBox="0 0 20 20" aria-hidden="true">
+        <rect x="0" y="0" width="6" height="6" fill="var(--ink)" />
+        <rect x="7" y="0" width="6" height="6" fill="var(--cyan)">
+          <animate
+            attributeName="opacity"
+            values="1;0.2;1"
+            dur="1.2s"
+            repeatCount="indefinite"
           />
-          <circle
-            cx="24"
-            cy="24"
-            r="20"
-            fill="none"
-            stroke="var(--phos)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeDasharray="125.6"
-            strokeDashoffset="94"
-            style={{
-              filter: "drop-shadow(0 0 6px var(--phos-glow))",
-              animation: "rl-spin 1.2s linear infinite",
-            }}
+        </rect>
+        <rect x="0" y="7" width="6" height="6" fill="var(--ink)" />
+        <rect x="14" y="7" width="6" height="6" fill="var(--lime)">
+          <animate
+            attributeName="opacity"
+            values="0.2;1;0.2"
+            dur="1.2s"
+            repeatCount="indefinite"
           />
-        </svg>
-        <span
-          style={{
-            position: "absolute",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            fontWeight: 700,
-            color: "var(--phos)",
-          }}
-        >
-          R
-        </span>
-      </div>
+        </rect>
+        <rect x="7" y="14" width="6" height="6" fill="var(--ink)" />
+        <rect x="14" y="14" width="6" height="6" fill="var(--violet)">
+          <animate
+            attributeName="opacity"
+            values="1;0.2;1"
+            dur="1.6s"
+            repeatCount="indefinite"
+          />
+        </rect>
+      </svg>
       <p
+        className="eyebrow"
         style={{
-          fontSize: "var(--text-xs)",
-          color: "var(--fg-3)",
-          letterSpacing: "0.2em",
           margin: 0,
         }}
       >
-        connecting…
+        Getting things ready…
       </p>
-      <style>{`@keyframes rl-spin { to { stroke-dashoffset: 0; } }`}</style>
     </div>
   );
 }
@@ -127,7 +99,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap",
   },
 ];
 
@@ -191,11 +163,42 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        padding: 24,
+        background: "var(--page)",
+        textAlign: "center",
+      }}
+    >
+      <span className="eyebrow">Something went wrong</span>
+      <h1 style={{ fontSize: "var(--text-5xl)" }}>{message}</h1>
+      <p style={{ color: "var(--fg-2)", fontWeight: 600, maxWidth: 480 }}>
+        {details}
+      </p>
+      <a href="/" className="btn btn--primary" style={{ marginTop: 8 }}>
+        Back to home
+      </a>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre
+          style={{
+            width: "100%",
+            maxWidth: 720,
+            textAlign: "left",
+            overflowX: "auto",
+            background: "var(--dark-bg)",
+            color: "var(--dark-fg)",
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: "var(--r-card)",
+            padding: 20,
+            fontSize: 12,
+          }}
+        >
           <code>{stack}</code>
         </pre>
       )}
