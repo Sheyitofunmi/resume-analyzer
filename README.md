@@ -1,5 +1,9 @@
 # ResumeLens
 
+![ResumeLens](public/resumelens-img.png)
+
+**Live demo:** [resume-analyzer-beta-mauve.vercel.app](https://resume-analyzer-beta-mauve.vercel.app/)
+
 Score any resume against a specific job posting. Upload a PDF or DOCX, paste the
 job description, and get an AI analysis across five dimensions — ATS
 compatibility, tone & style, content, structure, and skills — plus keyword gaps,
