@@ -40,6 +40,7 @@ const Resume = () => {
   const [storedCompanyName, setStoredCompanyName] = useState("");
   const [storedImagePath, setStoredImagePath] = useState("");
   const [storedResumeText, setStoredResumeText] = useState<string | null>(null);
+  const [storedIsDemo, setStoredIsDemo] = useState(false);
   const [scoreHistory, setScoreHistory] = useState<ScoreHistoryEntry[]>([]);
 
   const [showReanalyze, setShowReanalyze] = useState(false);
@@ -64,6 +65,7 @@ const Resume = () => {
     setStoredCompanyName("");
     setStoredImagePath("");
     setStoredResumeText(null);
+    setStoredIsDemo(false);
     setShowReanalyze(false);
     setReanalyzeStatus("");
     setSuccessToast(false);
@@ -83,6 +85,7 @@ const Resume = () => {
         setStoredCompanyName(data.companyName ?? "");
         setStoredImagePath(data.imagePath ?? "");
         setStoredResumeText(data.resumeText ?? null);
+        setStoredIsDemo(Boolean(data.isDemo));
         setNewJobTitle(data.jobTitle ?? "");
         setNewJobDescription(data.jobDescription ?? "");
       }
@@ -157,8 +160,11 @@ const Resume = () => {
         data.feedback = newFeedback;
         data.jobTitle = newJobTitle;
         data.jobDescription = newJobDescription;
+        data.isDemo = usePuterStore.getState().isUsingDemoFeedback;
         await kv.set(`resume:${id}`, JSON.stringify(data));
       }
+      const reDemo = usePuterStore.getState().isUsingDemoFeedback;
+      setStoredIsDemo(reDemo);
       setFeedback(newFeedback);
       setStoredJobTitle(newJobTitle);
       const newEntry: ScoreHistoryEntry = {
@@ -203,7 +209,7 @@ const Resume = () => {
       </div>
 
       {/* Demo feedback notice */}
-      {isUsingDemoFeedback && (
+      {(isUsingDemoFeedback || storedIsDemo) && (
         <div
           role="alert"
           className="print:hidden"

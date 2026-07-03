@@ -12,6 +12,24 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Codebase audit cleanup + puter.ts dedup (2026-07-03)
+
+Full-project review pass. Removed dead code, unused assets, and refactored the Puter store. Typecheck + production build both pass.
+
+**Deletions (dead code / assets):**
+
+- Deleted unused components `app/components/Accordion.tsx` and `app/components/ScoreGauge.tsx` (never imported).
+- Removed 12 unused exports from `atoms.tsx`: `AnimatedScoreCircle`, `AnimatedScoreNumber`, `Comment`, `Dot`, `Eyebrow`, `FeatureChip`, `KeywordRow`, `Label`, `MagneticButton`, `ScoreBars`, `ScoreNumber`, `Textarea` (plus the local `DIMS` helper and now-unused `useRef`/`useReducedMotion`/`useCountUp`/`springs` imports).
+- Removed 8 unused exports from `motion.ts`: `buttonPress`, `cardHover`, `fadeIn`, `heroSequence`, `popIn`, `revealLeft`, `scaleIn`, `slideRight`.
+- Deleted `public/images/`, `public/icons/`, `public/readme/` — all leftover tutorial assets, referenced nowhere in code or CSS. Kept `favicon.ico` + `pdf.worker.min.mjs`.
+- `git rm --cached .idea` (was tracked despite being gitignored).
+- Rewrote `README.md` (was still the default React Router template).
+
+**Fixes / refactors:**
+
+- **Demo-feedback persistence bug:** the AI failure fallback (`demoFeedback`) was persisted to KV as if real, and the "sample data" banner only showed in the live session. Now `isDemo` is stored on the resume record (in both `upload.tsx` and the re-analyze path in `resume.tsx`) and the banner reads it on reload via `storedIsDemo`.
+- **`puter.ts` dedup (~150 lines removed):** merged `feedback`/`feedbackFromText` into a shared `streamFeedback(content, onChunk)`; added a `withPuter(fn)` helper collapsing the repeated `getPuter()` guard across all fs/kv/ai wrappers; replaced the manual auth-function re-copying in every `set()` with a `patchAuth()` functional-spread helper.
+
 ### Full design-system replacement — "Pixel Grotesk" (2026-07-03)
 
 Replaced the entire CIPHER dark-terminal design system with a brand-new **light-only, neo-brutalist** system, implemented pixel-faithfully from the `design_handoff_resumelens/` hi-fi HTML bundle (imported into the repo). Product logic, routes, data flow, and Puter/AI integration untouched.

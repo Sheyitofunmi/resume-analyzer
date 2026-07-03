@@ -1,87 +1,72 @@
-# Welcome to React Router!
+# ResumeLens
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Score any resume against a specific job posting. Upload a PDF or DOCX, paste the
+job description, and get an AI analysis across five dimensions — ATS
+compatibility, tone & style, content, structure, and skills — plus keyword gaps,
+concrete rewrite suggestions, and likely interview questions.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Built with React Router 7 (SSR), Zustand, and framer-motion, on top of
+[Puter](https://puter.com) for auth, file storage, key-value storage, and the
+Claude-powered AI calls (no backend of your own to run).
 
-## Features
+## How it works
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+1. **Upload** — drop a PDF/DOCX and describe the target role (`/upload`).
+2. **Analyze** — text is extracted client-side so a resume can be scored without
+   the slower vision model; if extraction fails it falls back to converting the
+   document to an image. Results stream in dimension by dimension.
+3. **Report** — a full breakdown at `/resume/:id`, saved to your Puter storage.
+   Re-analyze against a different job posting any time; every run is tracked in
+   your score history (`/history`).
 
-## Getting Started
+## Tech stack
 
-### Installation
+- **React Router 7** — routing + server-side rendering
+- **Zustand** — single store wrapping the Puter SDK (`app/lib/puter.ts`)
+- **framer-motion** — page transitions and reveals
+- **pdfjs-dist** / **mammoth** — PDF & DOCX text extraction
+- **Tailwind CSS 4** + a custom "Pixel Grotesk" design system (`app/app.css`)
+- **Puter** — auth, `fs`, `kv`, and `ai.chat` (Claude Sonnet)
 
-Install the dependencies:
+## Development
 
 ```bash
 npm install
+npm run dev        # http://localhost:5173
 ```
 
-### Development
+Puter loads from `https://js.puter.com/v2/` at runtime (see `app/root.tsx`), so
+no API keys are required for local development.
 
-Start the development server with HMR:
+## Scripts
 
-```bash
-npm run dev
-```
+| Command             | Description                        |
+| ------------------- | ---------------------------------- |
+| `npm run dev`       | Start the dev server with HMR      |
+| `npm run build`     | Production build                   |
+| `npm run start`     | Serve the production build         |
+| `npm run typecheck` | Generate route types and run `tsc` |
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
+## Building for production
 
 ```bash
 npm run build
+npm run start
 ```
 
-## Deployment
+A `Dockerfile` is included for container deployment (Fly.io, Cloud Run, Railway,
+etc.); the built-in server serves `./build/server/index.js`.
 
-### Docker Deployment
+## Routes
 
-To build and run using Docker:
+| Path          | Purpose                                  |
+| ------------- | ---------------------------------------- |
+| `/`           | Home (marketing landing when signed out) |
+| `/upload`     | Upload a resume + job description        |
+| `/resume/:id` | Full analysis report                     |
+| `/history`    | Score history across analyses            |
+| `/settings`   | Account settings                         |
+| `/pricing`    | Pricing tiers                            |
+| `/wipe`       | Delete all stored files + KV data        |
 
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+</content>

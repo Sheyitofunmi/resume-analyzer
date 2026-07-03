@@ -118,20 +118,13 @@ const getPuter = (): typeof window.puter | null =>
   typeof window !== "undefined" && window.puter ? window.puter : null;
 
 export const usePuterStore = create<PuterStore>((set, get) => {
+  // Merge a partial auth patch, preserving the stable action references.
+  const patchAuth = (patch: Partial<PuterStore["auth"]>) =>
+    set((s) => ({ auth: { ...s.auth, ...patch } }));
+
   const setError = (msg: string) => {
-    set({
-      error: msg,
-      isLoading: false,
-      auth: {
-        user: null,
-        isAuthenticated: false,
-        signIn: get().auth.signIn,
-        signOut: get().auth.signOut,
-        refreshUser: get().auth.refreshUser,
-        checkAuthStatus: get().auth.checkAuthStatus,
-        getUser: get().auth.getUser,
-      },
-    });
+    set({ error: msg, isLoading: false });
+    patchAuth({ user: null, isAuthenticated: false, getUser: () => null });
   };
 
   const checkAuthStatus = async (): Promise<boolean> => {
@@ -147,32 +140,12 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       const isSignedIn = await puter.auth.isSignedIn();
       if (isSignedIn) {
         const user = await puter.auth.getUser();
-        set({
-          auth: {
-            user,
-            isAuthenticated: true,
-            signIn: get().auth.signIn,
-            signOut: get().auth.signOut,
-            refreshUser: get().auth.refreshUser,
-            checkAuthStatus: get().auth.checkAuthStatus,
-            getUser: () => user,
-          },
-          isLoading: false,
-        });
+        patchAuth({ user, isAuthenticated: true, getUser: () => user });
+        set({ isLoading: false });
         return true;
       } else {
-        set({
-          auth: {
-            user: null,
-            isAuthenticated: false,
-            signIn: get().auth.signIn,
-            signOut: get().auth.signOut,
-            refreshUser: get().auth.refreshUser,
-            checkAuthStatus: get().auth.checkAuthStatus,
-            getUser: () => null,
-          },
-          isLoading: false,
-        });
+        patchAuth({ user: null, isAuthenticated: false, getUser: () => null });
+        set({ isLoading: false });
         return false;
       }
     } catch (err) {
@@ -212,18 +185,8 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
     try {
       await puter.auth.signOut();
-      set({
-        auth: {
-          user: null,
-          isAuthenticated: false,
-          signIn: get().auth.signIn,
-          signOut: get().auth.signOut,
-          refreshUser: get().auth.refreshUser,
-          checkAuthStatus: get().auth.checkAuthStatus,
-          getUser: () => null,
-        },
-        isLoading: false,
-      });
+      patchAuth({ user: null, isAuthenticated: false, getUser: () => null });
+      set({ isLoading: false });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign out failed";
       setError(msg);
@@ -241,18 +204,8 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
     try {
       const user = await puter.auth.getUser();
-      set({
-        auth: {
-          user,
-          isAuthenticated: true,
-          signIn: get().auth.signIn,
-          signOut: get().auth.signOut,
-          refreshUser: get().auth.refreshUser,
-          checkAuthStatus: get().auth.checkAuthStatus,
-          getUser: () => user,
-        },
-        isLoading: false,
-      });
+      patchAuth({ user, isAuthenticated: true, getUser: () => user });
+      set({ isLoading: false });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to refresh user";
       setError(msg);
@@ -282,66 +235,87 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     }, 100);
   };
 
-  const write = async (path: string, data: string | File | Blob) => {
+  // Run `fn` with the loaded Puter instance, or set an error and return
+  // undefined if it isn't available. Collapses the repeated guard clause.
+  const withPuter = <T>(
+    fn: (puter: NonNullable<ReturnType<typeof getPuter>>) => T,
+  ): T | undefined => {
     const puter = getPuter();
     if (!puter) {
       setError("Puter.js not available");
-      return;
+      return undefined;
     }
-    return puter.fs.write(path, data);
+    return fn(puter);
   };
 
-  const readDir = async (path: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.fs.readdir(path);
-  };
+  const write = async (path: string, data: string | File | Blob) =>
+    withPuter((p) => p.fs.write(path, data));
 
-  const readFile = async (path: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.fs.read(path);
-  };
+  const readDir = async (path: string) => withPuter((p) => p.fs.readdir(path));
 
-  const upload = async (files: File[] | Blob[]) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.fs.upload(files);
-  };
+  const readFile = async (path: string) => withPuter((p) => p.fs.read(path));
 
-  const deleteFile = async (path: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.fs.delete(path);
-  };
+  const upload = async (files: File[] | Blob[]) =>
+    withPuter((p) => p.fs.upload(files));
+
+  const deleteFile = async (path: string) =>
+    withPuter((p) => p.fs.delete(path));
 
   const chat = async (
     prompt: string | ChatMessage[],
     imageURL?: string | PuterChatOptions,
     testMode?: boolean,
     options?: PuterChatOptions,
-  ) => {
+  ) =>
+    withPuter(
+      (p) =>
+        p.ai.chat(prompt, imageURL, testMode, options) as Promise<
+          AIResponse | undefined
+        >,
+    );
+
+  // Shared streaming analysis: takes the message `content` payload (image+text
+  // or text-only), streams the AI response, and falls back to demo feedback if
+  // the model returns nothing or errors.
+  const demoResponse = () =>
+    ({
+      message: { content: JSON.stringify(demoFeedback) },
+    }) as unknown as AIResponse;
+
+  const streamFeedback = async (
+    content: ChatMessageContent[],
+    onChunk?: (accumulated: string) => void,
+  ): Promise<AIResponse> => {
     const puter = getPuter();
     if (!puter) {
-      setError("Puter.js not available");
-      return;
+      set({ isUsingDemoFeedback: true });
+      return demoResponse();
     }
-    // return puter.ai.chat(prompt, imageURL, testMode, options);
-    return puter.ai.chat(prompt, imageURL, testMode, options) as Promise<
-      AIResponse | undefined
-    >;
+    try {
+      const stream = await (puter.ai.chat([{ role: "user", content }], {
+        model: "claude-sonnet-4-6",
+        stream: true,
+      }) as unknown as Promise<AsyncIterable<{ text?: string }>>);
+
+      let text = "";
+      for await (const part of stream) {
+        if (part?.text) {
+          text += part.text;
+          onChunk?.(text);
+        }
+      }
+
+      if (!text) {
+        set({ isUsingDemoFeedback: true });
+        return demoResponse();
+      }
+
+      set({ isUsingDemoFeedback: false });
+      return { message: { content: text } } as unknown as AIResponse;
+    } catch {
+      set({ isUsingDemoFeedback: true });
+      return demoResponse();
+    }
   };
 
   const feedback = async (
@@ -349,49 +323,17 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     message: string,
     onChunk?: (accumulated: string) => void,
   ) => {
-    const puter = getPuter();
-    if (!puter) {
+    if (!getPuter()) {
       setError("Puter.js not available");
       return;
     }
-
-    try {
-      const stream = await (puter.ai.chat(
-        [
-          {
-            role: "user",
-            content: [
-              { type: "file", puter_path: imagePath },
-              { type: "text", text: message },
-            ],
-          },
-        ],
-        { model: "claude-sonnet-4-6", stream: true },
-      ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
-
-      let text = "";
-      for await (const part of stream) {
-        if (part?.text) {
-          text += part.text;
-          onChunk?.(text);
-        }
-      }
-
-      if (!text) {
-        set({ isUsingDemoFeedback: true });
-        return {
-          message: { content: JSON.stringify(demoFeedback) },
-        } as unknown as AIResponse;
-      }
-
-      set({ isUsingDemoFeedback: false });
-      return { message: { content: text } } as unknown as AIResponse;
-    } catch {
-      set({ isUsingDemoFeedback: true });
-      return {
-        message: { content: JSON.stringify(demoFeedback) },
-      } as unknown as AIResponse;
-    }
+    return streamFeedback(
+      [
+        { type: "file", puter_path: imagePath },
+        { type: "text", text: message },
+      ],
+      onChunk,
+    );
   };
 
   const feedbackFromText = async (
@@ -399,51 +341,14 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     message: string,
     onChunk?: (accumulated: string) => void,
   ) => {
-    const puter = getPuter();
-    if (!puter) {
+    if (!getPuter()) {
       setError("Puter.js not available");
       return;
     }
-
-    try {
-      const stream = await (puter.ai.chat(
-        [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `RESUME TEXT:\n${resumeText}\n\n${message}`,
-              },
-            ],
-          },
-        ],
-        { model: "claude-sonnet-4-6", stream: true },
-      ) as unknown as Promise<AsyncIterable<{ text?: string }>>);
-
-      let text = "";
-      for await (const part of stream) {
-        if (part?.text) {
-          text += part.text;
-          onChunk?.(text);
-        }
-      }
-
-      if (!text) {
-        set({ isUsingDemoFeedback: true });
-        return {
-          message: { content: JSON.stringify(demoFeedback) },
-        } as unknown as AIResponse;
-      }
-
-      set({ isUsingDemoFeedback: false });
-      return { message: { content: text } } as unknown as AIResponse;
-    } catch {
-      set({ isUsingDemoFeedback: true });
-      return {
-        message: { content: JSON.stringify(demoFeedback) },
-      } as unknown as AIResponse;
-    }
+    return streamFeedback(
+      [{ type: "text", text: `RESUME TEXT:\n${resumeText}\n\n${message}` }],
+      onChunk,
+    );
   };
 
   const interviewQuestions = async (
@@ -511,62 +416,20 @@ Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...
     }
   };
 
-  const img2txt = async (image: string | File | Blob, testMode?: boolean) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.ai.img2txt(image, testMode);
-  };
+  const img2txt = async (image: string | File | Blob, testMode?: boolean) =>
+    withPuter((p) => p.ai.img2txt(image, testMode));
 
-  const getKV = async (key: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.kv.get(key);
-  };
+  const getKV = async (key: string) => withPuter((p) => p.kv.get(key));
 
-  const setKV = async (key: string, value: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.kv.set(key, value);
-  };
+  const setKV = async (key: string, value: string) =>
+    withPuter((p) => p.kv.set(key, value));
 
-  const deleteKV = async (key: string) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.kv.del(key);
-  };
+  const deleteKV = async (key: string) => withPuter((p) => p.kv.del(key));
 
-  const listKV = async (pattern: string, returnValues?: boolean) => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    if (returnValues === undefined) {
-      returnValues = false;
-    }
-    return puter.kv.list(pattern, returnValues);
-  };
+  const listKV = async (pattern: string, returnValues = false) =>
+    withPuter((p) => p.kv.list(pattern, returnValues));
 
-  const flushKV = async () => {
-    const puter = getPuter();
-    if (!puter) {
-      setError("Puter.js not available");
-      return;
-    }
-    return puter.kv.flush();
-  };
+  const flushKV = async () => withPuter((p) => p.kv.flush());
 
   return {
     isLoading: true,

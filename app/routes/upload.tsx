@@ -305,6 +305,9 @@ const Upload = () => {
         jobTitle,
         jobDescription,
         pageCount: imageResult.pageCount,
+        // Persist whether these scores are the demo fallback (AI returned
+        // nothing / errored) so the report can flag it on later reloads.
+        isDemo: usePuterStore.getState().isUsingDemoFeedback,
         feedback: JSON.parse(feedbackText),
       };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
