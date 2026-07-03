@@ -426,9 +426,6 @@ export default function Home() {
         ].filter(Boolean) as Resume[])
       : null;
 
-  // Show landing page for unauthenticated users
-  if (!isLoading && !auth.isAuthenticated) return <Landing />;
-
   useEffect(() => {
     if (isLoading || !auth.isAuthenticated) return;
     const loadResumes = async () => {
@@ -441,6 +438,9 @@ export default function Home() {
     };
     loadResumes();
   }, [isLoading, auth.isAuthenticated]);
+
+  // Show landing page for unauthenticated users
+  if (!isLoading && !auth.isAuthenticated) return <Landing />;
 
   const handleDelete = (resume: Resume) => {
     setResumes((prev) => {
