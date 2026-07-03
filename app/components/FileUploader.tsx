@@ -1,11 +1,65 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { formatSize } from "../lib/utils";
 import { springs } from "~/lib/motion";
 
 interface FileUploaderProps {
   onFileSelect?: (file: File | null) => void;
+}
+
+function DocSprite() {
+  return (
+    <svg
+      width="120"
+      height="90"
+      viewBox="0 0 120 90"
+      aria-hidden="true"
+      className="pix-float"
+      style={{ marginBottom: 16 }}
+    >
+      <rect
+        x="34"
+        y="6"
+        width="52"
+        height="68"
+        rx="5"
+        fill="#fff"
+        stroke="var(--ink)"
+        strokeWidth="2.5"
+      />
+      <rect x="42" y="18" width="26" height="5" rx="2.5" fill="var(--ink)" />
+      <rect x="42" y="30" width="36" height="4" rx="2" fill="#D8DDD8" />
+      <rect x="42" y="39" width="32" height="4" rx="2" fill="#D8DDD8" />
+      <rect x="42" y="48" width="36" height="4" rx="2" fill="#D8DDD8" />
+      <rect
+        x="0"
+        y="58"
+        width="13"
+        height="13"
+        fill="var(--lime)"
+        className="pix-blink"
+      />
+      <rect x="15" y="43" width="13" height="13" fill="var(--lime)" />
+      <rect
+        x="104"
+        y="43"
+        width="13"
+        height="13"
+        fill="var(--violet)"
+        className="pix-blink"
+        style={{ animationDelay: "0.5s" }}
+      />
+      <rect x="92" y="58" width="13" height="13" fill="var(--cyan)" />
+      <path
+        d="M60 88 L60 76 M54 82 L60 76 L66 82"
+        stroke="var(--ink)"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
@@ -40,74 +94,28 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
   const active = isDragActive || isDragOver;
 
   return (
-    <motion.div
+    <div
       {...(getRootProps() as object)}
-      animate={
-        reduced
-          ? {}
-          : {
-              borderColor: active ? "var(--phos)" : "var(--border-hi)",
-              background: active ? "rgba(168,230,163,0.06)" : "var(--surface)",
-              scale: active ? 1.015 : 1,
-              boxShadow: active
-                ? "0 0 0 1px var(--phos-dim), 0 0 32px rgba(168,230,163,0.15)"
-                : "none",
-            }
-      }
-      whileHover={
-        reduced || file
-          ? {}
-          : { borderColor: "var(--border-acc)", scale: 1.005 }
-      }
-      transition={springs.smooth}
       style={{
         position: "relative",
-        padding: "var(--space-8)",
+        padding: file ? 20 : "48px 32px",
         textAlign: "center",
         cursor: "pointer",
-        border: "1px dashed var(--border-hi)",
-        borderRadius: "var(--radius-md)",
-        minHeight: 200,
+        border: "2.5px dashed var(--ink)",
+        borderRadius: 18,
+        background: active ? "#F2FBFD" : "var(--surface)",
+        boxShadow: active ? "6px 6px 0 var(--cyan)" : "none",
+        transform: active ? "translate(-2px,-2px)" : "none",
+        minHeight: file ? undefined : 220,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        transition:
+          "background var(--dur-fast) ease, box-shadow var(--dur-fast) ease, transform var(--dur-fast) ease",
       }}
     >
       <input {...getInputProps()} />
-
-      {/* Animated corner crosshairs that glow when active */}
-      {(["tl", "tr", "bl", "br"] as const).map((pos) => (
-        <motion.span
-          key={pos}
-          className={`rl-corner ${pos}`}
-          animate={
-            reduced
-              ? {}
-              : { borderColor: active ? "var(--phos)" : "var(--copper)" }
-          }
-          transition={{ duration: 0.2 }}
-        />
-      ))}
-
-      {/* Scanning line on drag-over */}
-      {active && !reduced && (
-        <motion.div
-          initial={{ y: "-100%", opacity: 0 }}
-          animate={{ y: "150%", opacity: [0, 0.7, 0.7, 0] }}
-          transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity }}
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            height: 2,
-            background:
-              "linear-gradient(90deg, transparent 0%, var(--phos-dim) 20%, var(--phos) 50%, var(--phos-dim) 80%, transparent 100%)",
-            boxShadow: "0 0 12px var(--phos-glow)",
-            pointerEvents: "none",
-          }}
-        />
-      )}
 
       <AnimatePresence mode="wait">
         {file ? (
@@ -121,36 +129,40 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              background: "var(--bg-3)",
-              border: "1px solid var(--phos-dim)",
-              borderRadius: "var(--radius-md)",
+              background: "var(--surface)",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 12,
               padding: "12px 16px",
               width: "100%",
               gap: 12,
-              boxShadow: "0 0 16px rgba(168,230,163,0.1)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <motion.span
-              initial={reduced ? {} : { scale: 0, rotate: -90 }}
-              animate={reduced ? {} : { scale: 1, rotate: 0 }}
-              transition={{ ...springs.elastic, delay: 0.1 }}
+            <span
+              aria-hidden="true"
               style={{
-                color: "var(--phos)",
-                fontSize: 20,
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                background: "var(--lime)",
+                border: "var(--bw) solid var(--ink)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 900,
+                fontSize: 13,
                 flexShrink: 0,
-                display: "inline-block",
               }}
             >
               ✓
-            </motion.span>
+            </span>
             <div style={{ flex: 1, textAlign: "left", minWidth: 0 }}>
               <p
                 style={{
                   margin: 0,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  color: "var(--fg-1)",
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: "var(--ink)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -162,38 +174,46 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                 style={{
                   margin: 0,
                   fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  color: "var(--fg-3)",
+                  fontSize: 10.5,
+                  color: "var(--fg-2)",
                   marginTop: 2,
+                  letterSpacing: "0.06em",
                 }}
               >
-                {formatSize(file.size)} ·{" "}
-                {file.name.endsWith(".docx") ? "docx" : "pdf"}
+                {formatSize(file.size).toUpperCase()} ·{" "}
+                {file.name.endsWith(".docx") ? "DOCX" : "PDF"}
               </p>
             </div>
-            <motion.button
-              whileHover={
-                reduced
-                  ? {}
-                  : { color: "var(--ember)", borderColor: "var(--ember-dim)" }
-              }
-              whileTap={reduced ? {} : { scale: 0.95 }}
-              transition={springs.snappy}
+            <button
+              type="button"
               style={{
-                background: "none",
-                border: "1px solid var(--border)",
-                color: "var(--fg-3)",
+                background: "var(--surface)",
+                border: "var(--bw) solid var(--ink)",
+                color: "var(--ink)",
                 cursor: "pointer",
-                padding: "4px 8px",
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                borderRadius: "var(--radius-sm)",
+                padding: "6px 12px",
+                fontFamily: "var(--font-sans)",
+                fontWeight: 800,
+                fontSize: 12,
+                borderRadius: 8,
                 flexShrink: 0,
+                transition:
+                  "background var(--dur-fast) ease, color var(--dur-fast) ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--red)";
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.borderColor = "var(--red)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--surface)";
+                e.currentTarget.style.color = "var(--ink)";
+                e.currentTarget.style.borderColor = "var(--ink)";
               }}
               onClick={() => onFileSelect?.(null)}
             >
-              ✕ remove
-            </motion.button>
+              ✕ Remove
+            </button>
           </motion.div>
         ) : (
           <motion.div
@@ -206,73 +226,46 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 12,
             }}
           >
-            <motion.span
-              animate={
-                reduced
-                  ? {}
-                  : {
-                      color: active ? "var(--phos)" : "var(--fg-4)",
-                      y: active ? [0, -6, 0] : 0,
-                    }
-              }
-              transition={
-                active
-                  ? { duration: 0.6, repeat: Infinity, ease: "easeInOut" }
-                  : { duration: 0.2 }
-              }
+            <DocSprite />
+            <div
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 32,
-                lineHeight: 1,
-                display: "inline-block",
+                fontWeight: 900,
+                fontSize: 20,
+                letterSpacing: "-0.01em",
+                marginBottom: 6,
               }}
             >
-              ↓
-            </motion.span>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  color: "var(--fg-2)",
-                }}
-              >
-                {active ? (
-                  <motion.span
-                    initial={reduced ? {} : { opacity: 0, scale: 0.9 }}
-                    animate={reduced ? {} : { opacity: 1, scale: 1 }}
-                    style={{ color: "var(--phos)" }}
-                  >
-                    drop_resume_here
-                  </motion.span>
-                ) : (
-                  <>
-                    <span style={{ color: "var(--fg-1)" }}>
-                      click_to_upload
-                    </span>{" "}
-                    or drag and drop
-                  </>
-                )}
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  color: "var(--fg-3)",
-                }}
-              >
-                // pdf · docx · max {formatSize(maxFileSize)}
-              </p>
+              {active ? "Drop it right here" : "Drop your resume here"}
             </div>
+            <div
+              style={{
+                fontSize: 13.5,
+                color: "var(--fg-2)",
+                fontWeight: 600,
+                marginBottom: 18,
+              }}
+            >
+              PDF or DOCX, up to {formatSize(maxFileSize)} — or click to browse
+            </div>
+            <span
+              style={{
+                display: "inline-block",
+                background: "var(--ink)",
+                color: "#fff",
+                padding: "12px 26px",
+                borderRadius: 8,
+                fontWeight: 800,
+                fontSize: 13.5,
+              }}
+            >
+              Choose file
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 

@@ -7,7 +7,7 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
   const percentage = score / 100;
 
   const strokeColor =
-    score > 69 ? "#22c55e" : score > 49 ? "#eab308" : "#ef4444";
+    score > 69 ? "var(--lime)" : score > 49 ? "var(--amber)" : "var(--red)";
 
   useEffect(() => {
     if (pathRef.current) {
@@ -23,9 +23,8 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
           <path
             d="M10,50 A40,40 0 0,1 90,50"
             fill="none"
-            stroke="#e5e7eb"
+            stroke="rgba(11,11,11,0.12)"
             strokeWidth="10"
-            strokeLinecap="round"
           />
 
           {/* Foreground arc — color reflects score tier */}
@@ -35,14 +34,22 @@ const ScoreGauge = ({ score = 75 }: { score: number }) => {
             fill="none"
             stroke={strokeColor}
             strokeWidth="10"
-            strokeLinecap="round"
             strokeDasharray={pathLength}
             strokeDashoffset={pathLength * (1 - percentage)}
           />
         </svg>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
-          <div className="text-xl font-semibold pt-4">{score}/100</div>
+          <div
+            className="pt-4"
+            style={{
+              fontWeight: 900,
+              fontSize: 20,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {score}/100
+          </div>
         </div>
       </div>
     </div>

@@ -29,9 +29,9 @@ export function useToast() {
 }
 
 const TIER_COLOR: Record<ToastTier, string> = {
-  good: "var(--phos-dim)",
-  warn: "var(--copper-deep)",
-  bad: "var(--ember-dim)",
+  good: "var(--lime)",
+  warn: "var(--amber)",
+  bad: "var(--red)",
 };
 
 function ToastEntry({
@@ -56,23 +56,46 @@ function ToastEntry({
     <AnimatePresence>
       {alive && (
         <motion.div
-          className="rl-toast"
+          role="status"
           initial={{ opacity: 0, x: 40, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 40, scale: 0.96 }}
           transition={{ ...springs.snappy }}
-          style={{ borderLeftColor: TIER_COLOR[item.tier] }}
+          style={{
+            position: "fixed",
+            right: 20,
+            bottom: 20,
+            zIndex: 90,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: "var(--surface)",
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: "var(--r-btn)",
+            boxShadow: "var(--pop-sm)",
+            padding: "12px 16px",
+            fontSize: 13.5,
+            fontWeight: 700,
+            color: "var(--ink)",
+            maxWidth: 360,
+          }}
           layout
         >
           <span
+            aria-hidden="true"
             style={{
-              color:
-                item.tier === "good"
-                  ? "var(--phos)"
-                  : item.tier === "warn"
-                    ? "var(--copper-hi)"
-                    : "var(--ember)",
-              fontWeight: 700,
+              width: 18,
+              height: 18,
+              borderRadius: 4,
+              flexShrink: 0,
+              background: TIER_COLOR[item.tier],
+              border: "var(--bw) solid var(--ink)",
+              color: item.tier === "bad" ? "#fff" : "var(--ink)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontWeight: 900,
             }}
           >
             {item.tier === "good" ? "✓" : item.tier === "warn" ? "!" : "✕"}

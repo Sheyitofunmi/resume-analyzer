@@ -1,20 +1,22 @@
 import { Link, useLocation } from "react-router";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { springs } from "~/lib/motion";
+import { Home, Upload, History, Tag, Settings } from "lucide-react";
 
 const SLOTS = [
-  { label: "home", icon: "⌂", to: "/" },
-  { label: "upload", icon: "↑", to: "/upload" },
-  { label: "history", icon: "◈", to: "/history" },
-  { label: "pricing", icon: "$", to: "/pricing" },
-  { label: "settings", icon: "⚙", to: "/settings" },
+  { label: "Home", Icon: Home, to: "/" },
+  { label: "Upload", Icon: Upload, to: "/upload" },
+  { label: "History", Icon: History, to: "/history" },
+  { label: "Pricing", Icon: Tag, to: "/pricing" },
+  { label: "Settings", Icon: Settings, to: "/settings" },
 ];
 
 const MobileBottomNav = () => {
   const location = useLocation();
+  const reduced = useReducedMotion();
 
   return (
-    <nav className="rl-bottom-nav">
+    <nav className="rl-bottom-nav" aria-label="Primary">
       <div
         style={{
           display: "flex",
@@ -23,20 +25,28 @@ const MobileBottomNav = () => {
           padding: "0 8px",
         }}
       >
-        {SLOTS.map((slot) => {
+        {SLOTS.map(({ label, Icon, to }) => {
           const active =
-            slot.to === "/"
+            to === "/"
               ? location.pathname === "/"
-              : location.pathname.startsWith(slot.to);
+              : location.pathname.startsWith(to);
           return (
             <Link
-              key={slot.to}
-              to={slot.to}
-              className={`rl-bottom-nav-link${active ? " is-active" : ""}`}
+              key={to}
+              to={to}
+              aria-current={active ? "page" : undefined}
               style={{
                 position: "relative",
-                color: active ? "var(--phos)" : "var(--fg-3)",
-                filter: active ? "drop-shadow(0 0 6px var(--phos))" : "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 3,
+                padding: "10px 10px 12px",
+                textDecoration: "none",
+                color: "var(--ink)",
+                fontSize: 10,
+                fontWeight: 800,
+                zIndex: 0,
               }}
             >
               {active && (
@@ -44,16 +54,17 @@ const MobileBottomNav = () => {
                   layoutId="mobile-nav-active"
                   style={{
                     position: "absolute",
-                    inset: "-4px -8px",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--surface-2)",
+                    inset: "6px 2px 8px",
+                    borderRadius: 10,
+                    background: "var(--cyan)",
+                    border: "var(--bw) solid var(--ink)",
                     zIndex: -1,
                   }}
-                  transition={springs.smooth}
+                  transition={reduced ? { duration: 0 } : springs.smooth}
                 />
               )}
-              <span style={{ fontSize: 18, lineHeight: 1 }}>{slot.icon}</span>
-              <span>{slot.label}</span>
+              <Icon size={17} strokeWidth={2.4} aria-hidden="true" />
+              <span>{label}</span>
             </Link>
           );
         })}

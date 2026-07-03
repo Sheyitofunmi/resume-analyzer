@@ -9,15 +9,15 @@ export function useProductTour() {
     const driverObj = driver({
       showProgress: true,
       showButtons: ["next", "previous", "close"],
-      nextBtnText: "next →",
-      prevBtnText: "← prev",
-      doneBtnText: "done ✓",
+      nextBtnText: "Next →",
+      prevBtnText: "← Back",
+      doneBtnText: "Done ✓",
       progressText: "{{current}} / {{total}}",
       popoverClass: "rl-driver-popover",
       steps: [
         {
           popover: {
-            title: "welcome to resumelens",
+            title: "Welcome to ResumeLens",
             description:
               "Let's take a quick tour so you know exactly what this tool can do for you.",
             side: "over",
@@ -27,9 +27,9 @@ export function useProductTour() {
         {
           element: "#nav-upload-btn",
           popover: {
-            title: "upload a resume",
+            title: "Your plan",
             description:
-              "Start here — upload a PDF resume and paste a job description to get AI-powered feedback.",
+              "You're on the free plan — tap here anytime to see what upgrading unlocks.",
             side: "bottom",
             align: "center",
           },
@@ -37,9 +37,9 @@ export function useProductTour() {
         {
           element: "#nav-links",
           popover: {
-            title: "navigate the app",
+            title: "Get around the app",
             description:
-              "Dashboard shows your past resumes. History tracks score changes over time. Pricing shows plan options.",
+              "Home shows your resumes. Upload starts a new scan. History tracks score changes over time.",
             side: "bottom",
             align: "center",
           },
@@ -47,9 +47,9 @@ export function useProductTour() {
         {
           element: "#resume-grid",
           popover: {
-            title: "your resume library",
+            title: "Your resume library",
             description:
-              "All your uploaded resumes appear here. Click any card to view the full AI feedback report.",
+              "All your uploaded resumes live here. Click any card to open its full AI feedback report.",
             side: "top",
             align: "center",
           },
@@ -57,7 +57,7 @@ export function useProductTour() {
         {
           element: "#compare-btn",
           popover: {
-            title: "compare resumes",
+            title: "Compare resumes",
             description:
               "Select two resumes to compare them side-by-side — scores, keyword gaps, and section breakdowns.",
             side: "bottom",
@@ -67,9 +67,9 @@ export function useProductTour() {
         {
           element: "#stats-strip",
           popover: {
-            title: "your stats at a glance",
+            title: "Your stats at a glance",
             description:
-              "See how many resumes you've analyzed and your average score across all submissions.",
+              "See how many dimensions we score and how fast the analysis runs.",
             side: "bottom",
             align: "center",
           },

@@ -96,27 +96,9 @@ function deriveChecklist(feedback: Feedback): CheckItem[] {
 }
 
 const STATUS = {
-  good: {
-    icon: "✓",
-    color: "var(--phos)",
-    bg: "rgba(168,230,163,0.05)",
-    border: "var(--phos-dim)",
-    pillClass: "rl-pill rl-pill-good",
-  },
-  warn: {
-    icon: "!",
-    color: "var(--copper-hi)",
-    bg: "rgba(230,153,104,0.06)",
-    border: "var(--copper-deep)",
-    pillClass: "rl-pill rl-pill-warn",
-  },
-  critical: {
-    icon: "✕",
-    color: "var(--ember)",
-    bg: "rgba(227,83,74,0.06)",
-    border: "var(--ember-dim)",
-    pillClass: "rl-pill rl-pill-bad",
-  },
+  good: { icon: "✓", bg: "var(--lime)", fg: "var(--ink)" },
+  warn: { icon: "!", bg: "var(--amber)", fg: "var(--ink)" },
+  critical: { icon: "✕", bg: "var(--red)", fg: "#fff" },
 };
 
 const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
@@ -126,7 +108,7 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
   const goodCount = items.filter((i) => i.status === "good").length;
 
   return (
-    <div className="rl-card" style={{ position: "relative" }}>
+    <div className="card" style={{ position: "relative" }}>
       {/* Header */}
       <div
         style={{
@@ -134,24 +116,37 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 16,
+          gap: 10,
+          flexWrap: "wrap",
         }}
       >
-        <span className="rl-comment" style={{ fontSize: 11 }}>
-          resume_checklist
-        </span>
+        <span className="eyebrow">{"// RESUME CHECKLIST"}</span>
         <div style={{ display: "flex", gap: 6 }}>
           {criticalCount > 0 && (
-            <span className="rl-pill rl-pill-bad" style={{ fontSize: 10 }}>
+            <span
+              className="chip"
+              style={{
+                background: "var(--red)",
+                color: "#fff",
+                fontSize: 10.5,
+              }}
+            >
               {criticalCount} critical
             </span>
           )}
           {warnCount > 0 && (
-            <span className="rl-pill rl-pill-warn" style={{ fontSize: 10 }}>
-              {warnCount} warn
+            <span
+              className="chip"
+              style={{ background: "var(--amber)", fontSize: 10.5 }}
+            >
+              {warnCount} polish
             </span>
           )}
           {goodCount > 0 && (
-            <span className="rl-pill rl-pill-good" style={{ fontSize: 10 }}>
+            <span
+              className="chip"
+              style={{ background: "var(--lime)", fontSize: 10.5 }}
+            >
               {goodCount} pass
             </span>
           )}
@@ -159,7 +154,7 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
       </div>
 
       {/* Items */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {items.map((item, i) => {
           const cfg = STATUS[item.status];
           return (
@@ -168,19 +163,27 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
               style={{
                 display: "flex",
                 gap: 10,
-                padding: "10px 12px",
-                background: cfg.bg,
-                border: `1px solid ${cfg.border}`,
-                borderRadius: "var(--radius-md)",
+                padding: "12px 14px",
+                background: "var(--fill-1)",
+                border: "1px solid var(--line)",
+                borderRadius: 12,
               }}
             >
               <span
+                aria-hidden="true"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 12,
-                  color: cfg.color,
+                  width: 18,
+                  height: 18,
+                  borderRadius: 5,
+                  border: "var(--bw) solid var(--ink)",
+                  background: cfg.bg,
+                  color: cfg.fg,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 900,
                   flexShrink: 0,
-                  width: 14,
                   marginTop: 1,
                 }}
               >
@@ -189,19 +192,18 @@ const ResumeChecklist = ({ feedback }: { feedback: Feedback }) => {
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <span
                   style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 12,
-                    color: "var(--fg-1)",
-                    fontWeight: 500,
+                    fontSize: 13.5,
+                    fontWeight: 800,
+                    color: "var(--ink)",
                   }}
                 >
                   {item.label}
                 </span>
                 <span
                   style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    color: "var(--fg-3)",
+                    fontSize: 12.5,
+                    fontWeight: 500,
+                    color: "var(--fg-2)",
                   }}
                 >
                   {item.detail}

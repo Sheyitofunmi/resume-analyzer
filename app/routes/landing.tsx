@@ -1,1975 +1,1981 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import {
-  ChevronDown,
-  ChevronRight,
-  TrendingDown,
-  TrendingUp,
-  X,
-} from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useSpring, animated } from "@react-spring/web";
-import Footer from "~/components/Footer";
-import MobileBottomNav from "~/components/MobileBottomNav";
-import PricingTiers from "~/components/PricingTiers";
-import { Corners, Cursor, FadeInView } from "~/components/atoms";
+import { useReducedMotion } from "framer-motion";
 import { usePuterStore } from "~/lib/puter";
-import {
-  springs,
-  staggerContainer,
-  fadeUp,
-  revealUp,
-  revealLeft,
-} from "~/lib/motion";
+import { LogoMark, FadeInView } from "~/components/atoms";
+import { useCountUp } from "~/hooks/useCountUp";
 
-// ── Animated terminal demo ─────────────────────────────────────────────
-const TERMINAL_LINES = [
+// ═══ Rewrite Lab samples ═══
+const RW_SAMPLES = [
   {
-    text: "$ resumelens analyze --pdf=resume.pdf --jd=frontend-eng",
-    delay: 0,
-    type: "cmd",
-  },
-  { text: "> parsing pdf…", delay: 800, type: "step" },
-  { text: "done", delay: 1400, type: "done" },
-  { text: "> diffing against jd…", delay: 1800, type: "step" },
-  { text: "running", delay: 2400, type: "running" },
-  { text: "> scoring 5 dimensions…", delay: 3200, type: "step" },
-  { text: "done", delay: 3800, type: "done" },
-  { text: "> overall_score: 87  status: PASS", delay: 4400, type: "result" },
-];
-
-const LOOP_PAUSE_MS = 2000;
-
-function TerminalDemo() {
-  const [visible, setVisible] = useState<number[]>([]);
-  const [paused, setPaused] = useState(false);
-  const [cycle, setCycle] = useState(0);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    setVisible([]);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    TERMINAL_LINES.forEach((line, i) => {
-      timers.push(
-        setTimeout(() => {
-          if (!pausedRef.current) setVisible((v) => [...v, i]);
-        }, line.delay),
-      );
-    });
-
-    // Loop back after last line + pause
-    const loopTimer = setTimeout(
-      () => {
-        if (!pausedRef.current) setCycle((c) => c + 1);
-      },
-      TERMINAL_LINES[TERMINAL_LINES.length - 1].delay + LOOP_PAUSE_MS,
-    );
-    timers.push(loopTimer);
-
-    return () => timers.forEach(clearTimeout);
-  }, [cycle]);
-
-  const togglePause = () => {
-    const next = !paused;
-    pausedRef.current = next;
-    setPaused(next);
-    // resuming: restart the cycle from scratch
-    if (!next) setCycle((c) => c + 1);
-  };
-
-  const running = visible.length < TERMINAL_LINES.length;
-
-  return (
-    <div
-      style={{
-        background: "var(--bg-2)",
-        border: "1px solid var(--border-hi)",
-        borderRadius: "var(--radius-md)",
-        overflow: "hidden",
-        fontFamily: "var(--font-mono)",
-        fontSize: 13,
-        position: "relative",
-      }}
-    >
-      <Corners />
-      {/* Window chrome */}
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: "1px solid var(--border)",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          background: "var(--bg-3)",
-        }}
-      >
-        {["var(--ember)", "var(--copper)", "var(--phos)"].map((c, i) => (
-          <span
-            key={i}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: c,
-              opacity: 0.7,
-            }}
-          />
-        ))}
-        <span
-          style={{
-            marginLeft: 10,
-            fontSize: 11,
-            color: "var(--fg-3)",
-            flex: 1,
-          }}
-        >
-          resumelens · live_demo
-        </span>
-        <button
-          type="button"
-          onClick={togglePause}
-          className="rl-btn-terminal"
-          style={{ color: paused ? "var(--copper)" : "var(--fg-3)" }}
-        >
-          {paused ? "▶ resume" : "⏸ pause"}
-        </button>
-      </div>
-
-      {/* Lines */}
-      <div
-        style={{
-          padding: "16px 18px",
-          minHeight: 160,
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
-        {TERMINAL_LINES.map((line, i) => {
-          if (!visible.includes(i)) return null;
-          const color =
-            line.type === "cmd"
-              ? "var(--fg-1)"
-              : line.type === "done"
-                ? "var(--phos)"
-                : line.type === "running"
-                  ? "var(--copper)"
-                  : line.type === "result"
-                    ? "var(--phos)"
-                    : "var(--fg-2)";
-          return (
-            <div key={i} style={{ color, display: "flex", gap: 8 }}>
-              {line.type === "step" && (
-                <span style={{ color: "var(--fg-4)" }}>{">"}</span>
-              )}
-              <span>{line.text}</span>
-            </div>
-          );
-        })}
-        {!paused && running && (
-          <span className="rl-cursor" style={{ background: "var(--phos)" }} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-type FeatureColor = { bg: string; text: string };
-
-// ── Feature cards ──────────────────────────────────────────────────────
-const FEATURES: {
-  tag: string;
-  title: string;
-  desc: string;
-  viz: (c: FeatureColor) => React.ReactNode;
-}[] = [
-  {
-    tag: "ATS",
-    title: "Beat the bot, reach the human",
-    desc: "We diff against the exact parser engines recruiters use. Know in seconds if your PDF even clears the first filter.",
-    viz: (c) => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          marginTop: 8,
-        }}
-      >
-        {[
-          { label: "keyword density", val: 82 },
-          { label: "format score", val: 71 },
-          { label: "section match", val: 55 },
-        ].map(({ label, val }) => (
-          <div key={label}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 5,
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                color: `${c.text}99`,
-              }}
-            >
-              <span>{label}</span>
-              <span style={{ color: c.text, fontWeight: 600 }}>{val}%</span>
-            </div>
-            <div
-              style={{
-                height: 7,
-                borderRadius: 4,
-                background: `${c.text}2e`,
-              }}
-            >
-              <div
-                style={{
-                  width: `${val}%`,
-                  height: "100%",
-                  borderRadius: 4,
-                  background: `${c.text}e6`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-        <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-          <span
-            style={{
-              padding: "3px 10px",
-              borderRadius: 20,
-              background: `${c.text}33`,
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: c.text,
-            }}
-          >
-            ✓ passes ATS
-          </span>
-          <span
-            style={{
-              padding: "3px 10px",
-              borderRadius: 20,
-              background: `${c.text}1a`,
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: `${c.text}8c`,
-            }}
-          >
-            87 / 100
-          </span>
-        </div>
-      </div>
-    ),
+    before: "Responsible for managing social media accounts.",
+    after:
+      "Grew 4 social channels to 120K followers, driving 30% of inbound leads.",
+    gain: "+9 IMPACT",
+    score: 86,
   },
   {
-    tag: "KW",
-    title: "Never miss a keyword again",
-    desc: "Every signal in the JD ranked by frequency and placement. Copy-paste the missing ones directly into your draft.",
-    viz: (c) => (
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-        {[
-          { label: "React", ok: true },
-          { label: "TypeScript", ok: true },
-          { label: "Docker", ok: true },
-          { label: "GraphQL", ok: false },
-          { label: "Postgres", ok: false },
-          { label: "K8s", ok: false },
-        ].map((k) => (
-          <span
-            key={k.label}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              padding: "4px 10px",
-              borderRadius: 20,
-              background: k.ok ? `${c.text}2e` : `${c.text}12`,
-              border: `1px solid ${k.ok ? `${c.text}59` : `${c.text}26`}`,
-              color: k.ok ? c.text : `${c.text}73`,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <span style={{ fontSize: 8 }}>{k.ok ? "✓" : "+"}</span>
-            {k.label}
-          </span>
-        ))}
-      </div>
-    ),
+    before: "Managed a team and helped with projects.",
+    after:
+      "Led 6 engineers to ship 3 releases, cutting churn 14% year over year.",
+    gain: "+11 IMPACT",
+    score: 91,
   },
   {
-    tag: "RW",
-    title: "Rewrite every weak bullet instantly",
-    desc: "Each vague line gets a stronger alternative — action verbs, numbers, impact. Approve or skip, one bullet at a time.",
-    viz: (c) => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          marginTop: 8,
-        }}
-      >
-        <div
-          style={{
-            padding: "9px 12px",
-            background: `${c.text}26`,
-            borderRadius: 8,
-            border: `1px solid ${c.text}1f`,
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-start",
-          }}
-        >
-          <span style={{ color: `${c.text}cc`, flexShrink: 0, fontSize: 11 }}>
-            ✕
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: `${c.text}73`,
-              textDecoration: "line-through",
-              lineHeight: 1.5,
-            }}
-          >
-            Helped improve the website performance.
-          </span>
-        </div>
-        <div
-          style={{
-            padding: "9px 12px",
-            background: `${c.text}33`,
-            borderRadius: 8,
-            border: `1px solid ${c.text}59`,
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-start",
-          }}
-        >
-          <span style={{ color: c.text, flexShrink: 0, fontSize: 11 }}>✓</span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: c.text,
-              lineHeight: 1.5,
-            }}
-          >
-            Cut page-load p95 by 200 ms, lifting conversion 8%.
-          </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    tag: "IV",
-    title: "Walk into interviews fully prepared",
-    desc: "Behavioral + technical questions tailored to the JD and your seniority. Each with a structured confidence rubric.",
-    viz: (c) => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          marginTop: 8,
-        }}
-      >
-        {[
-          "Tell me about a high-stakes migration you led.",
-          "Walk me through your system design approach.",
-          "What was your most ambiguous project?",
-        ].map((q, i) => (
-          <div
-            key={i}
-            style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9,
-                color: `${c.text}4d`,
-                flexShrink: 0,
-                marginTop: 1,
-                fontWeight: 700,
-                letterSpacing: "0.05em",
-              }}
-            >
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                color: `${c.text}b8`,
-                lineHeight: 1.5,
-              }}
-            >
-              {q}
-            </span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    tag: "TS",
-    title: "Sound sharp, not safe",
-    desc: "Action-verb density, hedging language, sentence variety — all scored and flagged with line-level fixes you can apply immediately.",
-    viz: (c) => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          marginTop: 8,
-        }}
-      >
-        {[
-          { label: "action verbs", pct: 72, good: true },
-          { label: "hedging words", pct: 38, good: false },
-          { label: "sent. variety", pct: 65, good: true },
-        ].map(({ label, pct, good }) => (
-          <div
-            key={label}
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                color: `${c.text}99`,
-                width: 90,
-                flexShrink: 0,
-              }}
-            >
-              {label}
-            </span>
-            <div
-              style={{
-                flex: 1,
-                height: 6,
-                borderRadius: 3,
-                background: `${c.text}2e`,
-              }}
-            >
-              <div
-                style={{
-                  width: `${pct}%`,
-                  height: "100%",
-                  borderRadius: 3,
-                  background: good ? `${c.text}d9` : `${c.text}59`,
-                }}
-              />
-            </div>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                color: good ? c.text : `${c.text}99`,
-                width: 28,
-                textAlign: "right",
-                fontVariantNumeric: "tabular-nums",
-                fontWeight: 600,
-              }}
-            >
-              {pct}%
-            </span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    tag: "HX",
-    title: "Track your score climbing over time",
-    desc: "Every analysis is versioned. Watch the graph rise with each revision and diff any two versions side-by-side.",
-    viz: (c) => (
-      <div style={{ marginTop: 8 }}>
-        <svg
-          width="100%"
-          height={56}
-          viewBox="0 0 220 56"
-          style={{ overflow: "visible" }}
-        >
-          <defs>
-            <linearGradient id="hxGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={`${c.text}40`} />
-              <stop offset="100%" stopColor={`${c.text}00`} />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1"
-            fill="none"
-            stroke={`${c.text}bf`}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M0,50 C30,48 50,42 80,34 C110,26 130,18 160,10 C185,4 200,2 220,1 L220,56 L0,56 Z"
-            fill="url(#hxGrad)"
-          />
-          {[
-            { x: 0, y: 50, s: 48 },
-            { x: 80, y: 34, s: 67 },
-            { x: 160, y: 10, s: 84 },
-            { x: 220, y: 1, s: 91 },
-          ].map(({ x, y, s }) => (
-            <g key={x}>
-              <circle cx={x} cy={y} r={3.5} fill={`${c.text}d9`} />
-              <text
-                x={x}
-                y={y - 7}
-                textAnchor="middle"
-                fontFamily="var(--font-mono)"
-                fontSize={8}
-                fill={`${c.text}8c`}
-              >
-                {s}
-              </text>
-            </g>
-          ))}
-        </svg>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 2,
-            fontFamily: "var(--font-mono)",
-            fontSize: 9,
-            color: `${c.text}61`,
-          }}
-        >
-          <span>v1</span>
-          <span>v2</span>
-          <span>v3</span>
-          <span>v4 →</span>
-        </div>
-      </div>
-    ),
+    before: "Handled customer support tickets daily.",
+    after:
+      "Resolved 40+ tickets/day at 96% CSAT, cutting avg response time 38%.",
+    gain: "+8 IMPACT",
+    score: 84,
   },
 ];
 
-// ── Testimonials ───────────────────────────────────────────────────────
-const TESTIMONIALS = [
-  {
-    quote:
-      "I ran my resume through three ATS filters without a single rejection. Keyword diff is genuinely that good.",
-    name: "J. Okafor",
-    role: "Senior Frontend Engineer",
-    target: "targeting FAANG roles",
-    lift: "+19",
-    avatar: "JO",
-  },
-  {
-    quote:
-      "Added two missing terms the keyword analysis flagged. Went from buried in the pile to first-round callback.",
-    name: "A. Mehta",
-    role: "Product Designer",
-    target: "switching to fintech",
-    lift: "+24",
-    avatar: "AM",
-  },
-  {
-    quote:
-      "Three seconds. Five scores. Specific rewrites. Fastest signal I've found on whether a resume will actually land.",
-    name: "D. Rivera",
-    role: "Staff Engineer",
-    target: "returning from career break",
-    lift: "+31",
-    avatar: "DR",
-  },
-  {
-    quote:
-      "The tone analysis caught hedging language I'd never noticed. My bullets went from passive to punchy in one pass.",
-    name: "K. Nwosu",
-    role: "Backend Engineer",
-    target: "first job post-bootcamp",
-    lift: "+22",
-    avatar: "KN",
-  },
-  {
-    quote:
-      "Interview prep questions matched almost word-for-word what the panel actually asked. That is not a coincidence.",
-    name: "S. Park",
-    role: "Engineering Manager",
-    target: "moving from IC to leadership",
-    lift: "+17",
-    avatar: "SP",
-  },
-  {
-    quote:
-      "Score history showing my resume going from 54 to 91 over four iterations is the most satisfying diff I've ever seen.",
-    name: "T. Osei",
-    role: "Full-Stack Developer",
-    target: "relocating internationally",
-    lift: "+37",
-    avatar: "TO",
-  },
-];
-
-// ── FAQ ────────────────────────────────────────────────────────────────
-const FAQS = [
-  {
-    q: "is my resume sent to a third party?",
-    a: "No. Your PDF is processed locally via Puter — it never touches our servers or any third-party model provider directly. The AI analysis uses the Claude API through Puter's secure pipeline.",
-  },
-  {
-    q: "what AI model do you use?",
-    a: "Claude (Anthropic) for scoring and rewrites. We are model-agnostic at the architecture level; if a better model ships, we will use it.",
-  },
-  {
-    q: "how is the ATS score calculated?",
-    a: "We extract structured data from your resume and diff it against keyword signals in the job description, weighted by frequency and placement. The score reflects how well you'd parse in common ATS engines.",
-  },
-  {
-    q: "can I compare two resumes?",
-    a: "Yes — from the dashboard, enable compare mode and select any two resumes. You'll get a side-by-side diff of every dimension plus keyword overlap.",
-  },
-  {
-    q: "do you store my data?",
-    a: "All data is stored in your Puter account — encrypted, private, and only accessible to you. We have no database of user resumes.",
-  },
-];
-
-function FAQItem({
-  q,
-  a,
-  defaultOpen = false,
-}: {
-  q: string;
-  a: string;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  const reduced = useReducedMotion();
-
-  return (
-    <div style={{ borderBottom: "1px dashed var(--border)" }}>
-      <motion.button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        whileHover={reduced ? {} : { x: 2 }}
-        transition={springs.snappy}
-        style={{
-          width: "100%",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "16px 0",
-          textAlign: "left",
-        }}
-      >
-        <motion.span
-          animate={{
-            rotate: open ? 45 : 0,
-            color: open ? "var(--phos)" : "var(--fg-3)",
-          }}
-          transition={reduced ? { duration: 0 } : springs.snappy}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 18,
-            flexShrink: 0,
-            width: 16,
-            lineHeight: 1,
-            display: "inline-block",
-            transformOrigin: "center",
-          }}
-        >
-          +
-        </motion.span>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            color: open ? "var(--fg-1)" : "var(--fg-2)",
-            transition: "color 150ms",
-          }}
-        >
-          {q}
-        </span>
-      </motion.button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="answer"
-            initial={reduced ? {} : { height: 0, opacity: 0 }}
-            animate={reduced ? {} : { height: "auto", opacity: 1 }}
-            exit={reduced ? {} : { height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: "hidden" }}
-          >
-            <div
-              style={{
-                paddingBottom: 16,
-                paddingLeft: 28,
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--fg-2)",
-                lineHeight: 1.75,
-              }}
-            >
-              {a}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ── HeroBadge ─────────────────────────────────────────────────────────
-function HeroBadge() {
-  return (
+const MARQUEE_LOGOS = (
+  <>
+    <span style={{ fontWeight: 900, fontSize: 18 }}>NORTHWIND</span>
     <span
-      className="rl-pill rl-pill-good"
       style={{
-        display: "inline-flex",
-        gap: 8,
-        whiteSpace: "nowrap",
-        alignItems: "center",
+        fontFamily: "var(--font-serif)",
+        fontSize: 20,
+        fontStyle: "italic",
       }}
     >
-      <span className="rl-dot" style={{ width: 7, height: 7, flexShrink: 0 }} />
-      <span>✓ live · free to start</span>
+      Globex
     </span>
-  );
-}
-
-// ── AnimatedStat — react-spring count-up on viewport entry ───────────
-function AnimatedStat({ value }: { value: number }) {
-  const elRef = useRef<HTMLSpanElement>(null);
-  const [{ num }, api] = useSpring(() => ({ num: 0 }));
-
-  useEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          api.start({
-            num: value,
-            config: { mass: 1, tension: 35, friction: 18 },
-          });
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.5 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [value, api]);
-
-  return (
-    <animated.span ref={elRef}>{num.to((n) => Math.round(n))}</animated.span>
-  );
-}
-
-// ── Feature card palette — vibrant editorial ─────────────────────────
-const FEATURE_COLORS: { bg: string; text: string }[] = [
-  { bg: "#FF8C61", text: "#ffffff" }, // orange  – ATS
-  { bg: "#34D399", text: "#052e16" }, // emerald – Keywords
-  { bg: "#A78BFA", text: "#ffffff" }, // violet  – AI rewrite
-  { bg: "#FBBF24", text: "#1c1400" }, // amber   – Interview
-  { bg: "#F472B6", text: "#ffffff" }, // rose    – Tone
-  { bg: "#38BDF8", text: "#0c1a26" }, // sky     – History
-];
-
-// ── FeaturesSection — Streamtime-style Z-stack, fully responsive ──────
-function FeaturesSection() {
-  const [active, setActive] = useState(0);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const reduced = useReducedMotion();
-  const total = FEATURES.length;
-
-  return (
-    <section
-      id="features"
-      style={{
-        background: "var(--parchment)",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-      className="rl-features-section"
+    <span
+      style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 16 }}
     >
-      <div className="rl-features-container">
-        {/* Header */}
-        <div
-          style={{
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--parchment-fg-3)",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-            }}
-          >
-            // features
-          </span>
-          <h2
-            style={{
-              fontSize: "clamp(26px, 5vw, 48px)",
-              color: "var(--parchment-fg-1)",
-              fontWeight: 500,
-              letterSpacing: "-1.5px",
-              margin: 0,
-            }}
-          >
-            six signals that matter
-          </h2>
-        </div>
+      initech_
+    </span>
+    <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: "0.14em" }}>
+      HOOLI
+    </span>
+    <span style={{ fontWeight: 800, fontSize: 18 }}>◆ Vandelay</span>
+    <span style={{ fontWeight: 700, fontSize: 18 }}>wonka.co</span>
+  </>
+);
 
-        {/* Main row: card deck + desktop nav */}
-        <div className="rl-features-row">
-          {/* Z-stack card deck */}
-          <div className="rl-features-deck">
-            {FEATURES.map((f, i) => {
-              const pos = (((i - active) % total) + total) % total;
-              if (pos >= 4) return null;
-              const isActive = pos === 0;
-              const color = FEATURE_COLORS[i];
-              return (
-                <motion.div
-                  key={f.tag}
-                  ref={(el) => {
-                    cardRefs.current[i] = el;
-                  }}
-                  animate={{
-                    scale: isActive ? 1 : 1 - pos * 0.05,
-                    x: isActive ? 0 : pos * 14,
-                    y: isActive ? 0 : pos * 8,
-                    rotate: isActive ? 0 : pos * 2,
-                    opacity: isActive ? 1 : Math.max(0, 1 - pos * 0.25),
-                  }}
-                  transition={
-                    reduced
-                      ? { duration: 0 }
-                      : { type: "spring", stiffness: 280, damping: 28 }
-                  }
-                  onClick={() => !isActive && setActive(i)}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: color.bg,
-                    borderRadius: 20,
-                    cursor: isActive ? "default" : "pointer",
-                    overflow: "hidden",
-                    zIndex: total - pos,
-                    boxShadow: isActive
-                      ? "0 20px 56px rgba(0,0,0,0.16), 0 4px 16px rgba(0,0,0,0.08)"
-                      : "0 4px 16px rgba(0,0,0,0.06)",
-                    transformOrigin: "bottom center",
-                    willChange: "transform",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  {/* Viz area — flex:1 so it takes remaining height */}
-                  <div
-                    style={{
-                      flex: 1,
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: "absolute",
-                        bottom: -16,
-                        right: -4,
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "clamp(64px, 14vw, 118px)",
-                        fontWeight: 800,
-                        color: color.text + "0e",
-                        lineHeight: 1,
-                        userSelect: "none",
-                        pointerEvents: "none",
-                        letterSpacing: "-4px",
-                      }}
-                    >
-                      {f.tag}
-                    </span>
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        padding: "clamp(14px, 3vw, 24px)",
-                        paddingBottom: 0,
-                        opacity: isActive ? 1 : 0,
-                        transition: "opacity 200ms",
-                      }}
-                    >
-                      {f.viz(color)}
-                    </div>
-                  </div>
-
-                  {/* Text bottom */}
-                  <div
-                    style={{
-                      padding:
-                        "clamp(10px, 2vw, 16px) clamp(14px, 3vw, 22px) clamp(14px, 3vw, 22px)",
-                      borderTop: `1px solid ${color.text}12`,
-                      color: color.text,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 9,
-                        letterSpacing: "0.14em",
-                        opacity: 0.4,
-                        display: "block",
-                        marginBottom: 3,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      [{f.tag}]
-                    </span>
-                    <h3
-                      style={{
-                        margin: "0 0 4px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "clamp(13px, 2.2vw, 17px)",
-                        fontWeight: 600,
-                        lineHeight: 1.2,
-                        color: color.text,
-                      }}
-                    >
-                      {f.title}
-                    </h3>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontFamily: "var(--font-body)",
-                        fontSize: "clamp(11px, 1.6vw, 13px)",
-                        lineHeight: 1.6,
-                        color: color.text,
-                        opacity: 0.65,
-                      }}
-                    >
-                      {f.desc}
-                    </p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Desktop-only nav sidebar */}
-          <nav className="rl-features-nav" aria-label="Feature navigation">
-            {FEATURES.map((f, i) => {
-              const isNav = i === active;
-              return (
-                <button
-                  key={f.tag}
-                  type="button"
-                  onClick={() => setActive(i)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    background: isNav
-                      ? FEATURE_COLORS[i].bg + "22"
-                      : "transparent",
-                    border: "none",
-                    borderRadius: 10,
-                    padding: "9px 12px",
-                    cursor: "pointer",
-                    transition: "background 220ms",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: FEATURE_COLORS[i].bg,
-                      flexShrink: 0,
-                      border: "2px solid rgba(0,0,0,0.07)",
-                      boxShadow: isNav
-                        ? `0 0 12px ${FEATURE_COLORS[i].bg}`
-                        : "none",
-                      transition: "box-shadow 220ms",
-                    }}
-                  />
-                  <div style={{ minWidth: 0 }}>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 9,
-                        color: "var(--parchment-fg-3)",
-                        letterSpacing: "0.1em",
-                        display: "block",
-                      }}
-                    >
-                      [{f.tag}]
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: isNav
-                          ? "var(--parchment-fg-1)"
-                          : "var(--parchment-fg-2)",
-                        fontWeight: isNav ? 600 : 400,
-                        transition: "color 200ms",
-                        display: "block",
-                        marginTop: 1,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {f.title}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-            {/* Prev/Next — desktop */}
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                marginTop: 14,
-                paddingLeft: 12,
-              }}
-            >
-              {[
-                {
-                  lbl: "←",
-                  fn: () => setActive((v) => (v - 1 + total) % total),
-                },
-                { lbl: "→", fn: () => setActive((v) => (v + 1) % total) },
-              ].map(({ lbl, fn }) => (
-                <button
-                  key={lbl}
-                  type="button"
-                  onClick={fn}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    border: "1.5px solid var(--parchment-border)",
-                    background: "var(--parchment-2)",
-                    cursor: "pointer",
-                    fontSize: 16,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "var(--parchment-fg-2)",
-                  }}
-                >
-                  {lbl}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </div>
-
-        {/* Bottom controls — progress dots + mobile prev/next */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
-          {/* Mobile prev/next (hidden on desktop via CSS) */}
-          <div className="rl-features-mobile-arrows">
-            {[
-              { lbl: "←", fn: () => setActive((v) => (v - 1 + total) % total) },
-              { lbl: "→", fn: () => setActive((v) => (v + 1) % total) },
-            ].map(({ lbl, fn }) => (
-              <button
-                key={lbl}
-                type="button"
-                onClick={fn}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  border: "1.5px solid var(--parchment-border)",
-                  background: "var(--parchment-2)",
-                  cursor: "pointer",
-                  fontSize: 18,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "var(--parchment-fg-2)",
-                }}
-              >
-                {lbl}
-              </button>
-            ))}
-          </div>
-
-          {/* Interaction hint */}
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--parchment-fg-3)",
-              letterSpacing: "0.1em",
-              opacity: 0.6,
-            }}
-          >
-            click cards or use ← → to explore
-          </span>
-
-          {/* Progress dots */}
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {FEATURES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setActive(i)}
-                style={{
-                  width: i === active ? 26 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  background: i === active ? FEATURE_COLORS[i].bg : "#e0e0e0",
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 320ms ease",
-                  padding: 0,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── LandingNavbar ──────────────────────────────────────────────────────
-function LandingNavbar() {
+// ═══ Public nav (landing + pricing) ═══
+export function PublicNav({ active }: { active?: "pricing" }) {
   const { auth } = usePuterStore();
+  const authed = auth.isAuthenticated;
 
   return (
     <nav
-      className="rl-landing-nav"
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        borderBottom: "1px solid var(--border)",
-        background: "rgba(11,11,10,0.88)",
-        backdropFilter: "blur(8px)",
         position: "sticky",
         top: 0,
         zIndex: 50,
+        background: "rgba(111,214,227,.9)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px var(--gutter)",
+        borderBottom: "var(--bw) solid var(--ink)",
         gap: 16,
       }}
     >
-      {/* Logo */}
       <Link
-        to={auth.isAuthenticated ? "/" : "/landing"}
-        style={{ textDecoration: "none" }}
+        to="/landing"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
+          fontWeight: 900,
+          fontSize: 17,
+          letterSpacing: "-0.02em",
+          color: "var(--ink)",
+          textDecoration: "none",
+        }}
       >
-        <span
+        <LogoMark size={20} />
+        ResumeLens
+      </Link>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 22,
+          fontSize: 13.5,
+          fontWeight: 700,
+        }}
+      >
+        <Link
+          to="/landing"
+          className="mobile-hide"
+          style={{ color: "var(--ink)", textDecoration: "none" }}
+        >
+          Product
+        </Link>
+        <Link
+          to="/pricing"
+          className="mobile-hide"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 10,
-            fontFamily: "var(--font-mono)",
-            fontSize: 16,
-            fontWeight: 500,
-            color: "var(--fg-1)",
+            color: "var(--ink)",
+            textDecoration: active === "pricing" ? "underline" : "none",
+            textUnderlineOffset: 4,
           }}
         >
-          <span
-            style={{
-              width: 22,
-              height: 22,
-              background: "var(--phos)",
-              color: "var(--bg)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 12,
-              fontWeight: 700,
-              boxShadow: "0 0 12px var(--phos-glow)",
-            }}
-          >
-            R
-          </span>
-          resumelens<span style={{ color: "var(--phos)" }}>_</span>
-        </span>
-      </Link>
-
-      {/* Nav links */}
-      <div
-        className="rl-mobile-hide"
-        style={{ display: "flex", gap: 28, alignItems: "center" }}
-      >
-        {["features", "how_it_works", "testimonials", "faq", "pricing"].map(
-          (item) => (
-            <a
-              key={item}
-              href={`#${item}`}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                color: "var(--fg-3)",
-                textDecoration: "none",
-                letterSpacing: "0.05em",
-                transition: "color var(--dur-fast)",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--fg-1)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--fg-3)")
-              }
-            >
-              {item}
-            </a>
-          ),
-        )}
-      </div>
-
-      {/* Right CTAs */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-        {auth.isAuthenticated ? (
-          <Link
-            to="/"
-            className="rl-btn rl-btn-primary"
-            style={{ fontSize: 12 }}
-          >
-            → open_dashboard
-          </Link>
-        ) : (
-          <>
-            <Link
-              to="/auth"
-              className="rl-btn rl-btn-ghost rl-mobile-hide"
-              style={{ fontSize: 12 }}
-            >
-              sign_in
-            </Link>
-            <Link
-              to="/auth"
-              className="rl-btn rl-btn-primary"
-              style={{ fontSize: 12 }}
-            >
-              $ analyze_resume →
-            </Link>
-          </>
-        )}
+          Pricing
+        </Link>
+        <Link
+          to="/auth"
+          style={{
+            border: "var(--bw) solid var(--ink)",
+            padding: "9px 18px",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 800,
+            color: "var(--ink)",
+            textDecoration: "none",
+          }}
+        >
+          Sign in
+        </Link>
+        <Link
+          to={authed ? "/upload" : "/auth"}
+          style={{
+            background: "var(--ink)",
+            color: "var(--cyan)",
+            padding: "10px 20px",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 800,
+            textDecoration: "none",
+          }}
+        >
+          Get started
+        </Link>
       </div>
     </nav>
   );
 }
 
-// ── Gauge (reusable semicircular tick gauge) ─────────────────────────
-function Gauge({
-  value,
-  color = "#ef4d23",
-  showLabels = false,
-  min,
-  max,
-}: {
-  value: number;
-  color?: string;
-  showLabels?: boolean;
-  min?: string;
-  max?: string;
-}) {
-  const TICKS = 40;
-  const active = Math.round((value / 100) * TICKS);
-  const cx = 100;
-  const cy = 100;
-  const rOuter = 80;
-  const rInner = rOuter - 10;
+// ═══ Hero pixel sprites ═══
+function HeroSpriteRight() {
+  return (
+    <svg
+      width="180"
+      height="120"
+      viewBox="0 0 180 120"
+      aria-hidden="true"
+      className="pix-float mobile-hide"
+      style={{ position: "absolute", top: 22, right: 52 }}
+    >
+      <rect
+        x="0"
+        y="40"
+        width="16"
+        height="16"
+        fill="var(--lime)"
+        className="pix-blink"
+      />
+      <rect x="18" y="22" width="16" height="16" fill="var(--lime)" />
+      <rect
+        x="36"
+        y="40"
+        width="16"
+        height="16"
+        fill="var(--lime)"
+        className="pix-blink"
+        style={{ animationDelay: "0.4s" }}
+      />
+      <rect x="18" y="58" width="16" height="16" fill="var(--lime)" />
+      <rect
+        x="54"
+        y="22"
+        width="16"
+        height="16"
+        fill="var(--ink)"
+        className="pix-blink"
+        style={{ animationDelay: "0.2s" }}
+      />
+      <rect x="72" y="4" width="16" height="16" fill="var(--lime)" />
+      <rect
+        x="90"
+        y="22"
+        width="16"
+        height="16"
+        fill="var(--lime)"
+        className="pix-blink"
+        style={{ animationDelay: "0.7s" }}
+      />
+      <rect x="108" y="40" width="16" height="16" fill="var(--violet)" />
+      <rect
+        x="126"
+        y="58"
+        width="16"
+        height="16"
+        fill="var(--violet)"
+        className="pix-blink"
+        style={{ animationDelay: "0.3s" }}
+      />
+      <rect x="144" y="40" width="16" height="16" fill="var(--violet)" />
+      <rect
+        x="126"
+        y="22"
+        width="16"
+        height="16"
+        fill="var(--ink)"
+        className="pix-blink"
+      />
+      <rect x="90" y="76" width="16" height="16" fill="var(--ink)" />
+    </svg>
+  );
+}
+
+function HeroSpriteLeft() {
+  return (
+    <svg
+      width="150"
+      height="110"
+      viewBox="0 0 150 110"
+      aria-hidden="true"
+      className="pix-float mobile-hide"
+      style={{
+        position: "absolute",
+        bottom: 26,
+        left: 34,
+        animationDelay: "1s",
+        animationDuration: "7s",
+      }}
+    >
+      <rect
+        x="0"
+        y="60"
+        width="14"
+        height="14"
+        fill="var(--violet)"
+        className="pix-blink"
+      />
+      <rect x="16" y="44" width="14" height="14" fill="var(--violet)" />
+      <rect
+        x="32"
+        y="60"
+        width="14"
+        height="14"
+        fill="var(--violet)"
+        className="pix-blink"
+        style={{ animationDelay: "0.5s" }}
+      />
+      <rect x="16" y="76" width="14" height="14" fill="var(--violet)" />
+      <rect
+        x="48"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--ink)"
+        className="pix-blink"
+        style={{ animationDelay: "0.2s" }}
+      />
+      <rect x="64" y="44" width="14" height="14" fill="var(--lime)" />
+      <rect
+        x="80"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--lime)"
+        className="pix-blink"
+        style={{ animationDelay: "0.8s" }}
+      />
+      <rect x="96" y="12" width="14" height="14" fill="var(--lime)" />
+      <rect
+        x="112"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--ink)"
+        className="pix-blink"
+        style={{ animationDelay: "0.4s" }}
+      />
+    </svg>
+  );
+}
+
+// ═══ Hero resume card with sweeping lens ═══
+function HeroResumeCard() {
+  const reduced = useReducedMotion();
+  const heroScore = useCountUp(82, 1400, !reduced);
+
+  const skeleton = (width: string) => (
+    <span
+      style={{
+        width,
+        height: 8,
+        borderRadius: 5,
+        background: "var(--fill-3)",
+        display: "block",
+      }}
+    />
+  );
+
+  const highlight = (text: string, color: string, delay: string) => (
+    <span
+      style={{
+        display: "block",
+        fontSize: 12.5,
+        fontWeight: 600,
+        lineHeight: 1.5,
+        padding: "2px 4px",
+        borderRadius: 5,
+        backgroundImage: `linear-gradient(${color},${color})`,
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "0% 100%",
+        animation: `rl-hl .8s ${delay} ease forwards`,
+      }}
+    >
+      {text}
+    </span>
+  );
+
+  const chipStyle = (delayPop: string, delayFloat: string, durFloat: string) =>
+    ({
+      position: "absolute",
+      borderRadius: 10,
+      padding: "10px 14px",
+      fontFamily: "var(--font-mono)",
+      fontSize: 11.5,
+      fontWeight: 600,
+      animation: `rl-pop .5s ${delayPop} both, rl-float ${durFloat} ${delayFloat} ease-in-out infinite`,
+      zIndex: 4,
+    }) as const;
 
   return (
-    <div className="w-full max-w-[260px] mx-auto">
-      <svg viewBox="0 0 200 120" className="w-full">
-        {Array.from({ length: TICKS }).map((_, i) => {
-          // sweep across a 180° arc from π → 2π (left → right, over the top)
-          const angle = Math.PI + (i / (TICKS - 1)) * Math.PI;
-          const x1 = cx + rInner * Math.cos(angle);
-          const y1 = cy + rInner * Math.sin(angle);
-          const x2 = cx + rOuter * Math.cos(angle);
-          const y2 = cy + rOuter * Math.sin(angle);
-          const isActive = i < active;
-          return (
-            <line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke={isActive ? color : "#d4d4d8"}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-            />
-          );
-        })}
-        <text
-          x={cx}
-          y={105}
-          textAnchor="middle"
-          fontSize={22}
-          fontWeight={600}
-          fill="#0b0f1a"
+    <div style={{ position: "relative", height: 430 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: "14px 8px",
+          background: "var(--surface)",
+          border: "var(--bw) solid var(--ink)",
+          borderRadius: "var(--r-card)",
+          boxShadow: "var(--pop-hero)",
+          padding: 26,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 18,
+          }}
         >
-          {value}%
-        </text>
-      </svg>
-      {showLabels && (
-        <div className="flex justify-between text-[11px] text-neutral-500 px-1">
-          <span>{min}</span>
-          <span>{max}</span>
+          <span
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "50%",
+              background: "var(--fill-3)",
+              border: "var(--bw) solid var(--line)",
+            }}
+          />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span
+              style={{
+                width: 120,
+                height: 11,
+                borderRadius: 6,
+                background: "#D8DDD8",
+                display: "block",
+              }}
+            />
+            <span
+              style={{
+                width: 80,
+                height: 8,
+                borderRadius: 5,
+                background: "#EAEDEA",
+                display: "block",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              marginLeft: "auto",
+              fontFamily: "var(--font-mono)",
+              fontSize: 22,
+              fontWeight: 600,
+            }}
+          >
+            {heroScore}
+            <span style={{ fontSize: 11, color: "var(--fg-3)" }}>/100</span>
+          </span>
         </div>
-      )}
+        <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+          {skeleton("100%")}
+          {highlight(
+            "Led 6 engineers to ship 3 releases, cutting churn 14%",
+            "#D9F7B1",
+            "0.8s",
+          )}
+          {skeleton("92%")}
+          {skeleton("97%")}
+          {highlight(
+            "Grew 4 channels to 120K followers — 30% of inbound leads",
+            "#C9EEF4",
+            "2.1s",
+          )}
+          {skeleton("88%")}
+          {skeleton("95%")}
+          {skeleton("70%")}
+          {highlight(
+            "Drove A/B program to 120 experiments per quarter",
+            "#E4D9FF",
+            "3.3s",
+          )}
+          {skeleton("84%")}
+        </div>
+      </div>
+
+      {/* the Lens: pixel magnifying glass sweeping the resume */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 36,
+          right: 30,
+          zIndex: 3,
+          animation: "rl-lens 9s ease-in-out infinite",
+          pointerEvents: "none",
+        }}
+      >
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <circle
+            cx="62"
+            cy="62"
+            r="44"
+            fill="rgba(111,214,227,.35)"
+            stroke="var(--ink)"
+            strokeWidth="7"
+          />
+          <circle
+            cx="62"
+            cy="62"
+            r="44"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="2"
+            strokeDasharray="10 14"
+            opacity=".8"
+          />
+          <rect
+            x="99"
+            y="92"
+            width="14"
+            height="14"
+            fill="var(--ink)"
+            transform="rotate(45 106 99)"
+          />
+          <rect
+            x="110"
+            y="103"
+            width="15"
+            height="15"
+            fill="var(--ink)"
+            transform="rotate(45 117.5 110.5)"
+          />
+          <rect
+            x="121"
+            y="114"
+            width="16"
+            height="16"
+            fill="var(--ink)"
+            transform="rotate(45 129 122)"
+          />
+          <circle cx="48" cy="48" r="10" fill="rgba(255,255,255,.75)" />
+        </svg>
+      </div>
+
+      <div
+        style={{
+          ...chipStyle("1.1s", "1.6s", "4s"),
+          top: 30,
+          left: -4,
+          background: "var(--ink)",
+          color: "#fff",
+          boxShadow: "4px 4px 0 rgba(11,11,11,.25)",
+        }}
+      >
+        keywords <span style={{ color: "var(--lime)" }}>91</span>
+      </div>
+      <div
+        style={{
+          ...chipStyle("2.4s", "2.9s", "5s"),
+          bottom: 92,
+          right: 2,
+          background: "var(--lime)",
+          border: "var(--bw) solid var(--ink)",
+        }}
+      >
+        impact +9
+      </div>
+      <div
+        style={{
+          ...chipStyle("3.4s", "0s", "4.4s"),
+          bottom: 26,
+          left: -2,
+          background: "var(--violet)",
+          color: "#fff",
+          border: "var(--bw) solid var(--ink)",
+        }}
+      >
+        role_fit <span style={{ color: "var(--lime)" }}>88</span>
+      </div>
     </div>
   );
 }
 
-// ── ConvixHero — full-viewport video hero (adapted for resumelens) ────
-function ConvixHero() {
-  const { auth } = usePuterStore();
-  const ctaTo = auth.isAuthenticated ? "/" : "/auth";
+// ═══ X-ray — draggable before/after ═══
+function XRaySection() {
+  const [split, setSplit] = useState(50);
+  const machinePct = Math.round(100 - split);
+  const eyeLX = Math.round(24 + (split - 50) * 0.12);
+  const eyeRX = Math.round(40 + (split - 50) * 0.12);
+
+  const failRed = "#FF7B6B";
+  const dimOlive = "#6B7050";
 
   return (
-    <section
-      className="min-h-screen w-full bg-[#ededed] p-3 sm:p-4"
-      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
-    >
-      <div className="relative w-full h-[calc(100vh-24px)] sm:h-[calc(100vh-32px)] overflow-hidden bg-[#d9d9d9] rounded-2xl sm:rounded-3xl">
-        {/* Background video */}
-        <video
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          disableRemotePlayback
-          webkit-playsinline="true"
-          x5-playsinline="true"
-          poster="https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&q=60"
+    <FadeInView>
+      <div
+        id="xray"
+        className="rl-container"
+        style={{ padding: "88px var(--gutter-inner) 80px" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: 24,
+            marginBottom: 26,
+            flexWrap: "wrap",
+          }}
         >
-          <source
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4"
-            type="video/mp4"
-          />
-        </video>
-        {/* Lighten overlay */}
-        <div className="absolute inset-0 bg-white/10" />
-
-        {/* Foreground */}
-        <div className="relative z-10 flex flex-col items-center px-4 pt-10 sm:pt-16 pb-8 sm:pb-12 text-center">
-          {/* Badge */}
-          <span className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm text-[13px] text-neutral-800">
-            <span className="w-2 h-2 rounded-full bg-[#ef4d23]" />
-            ResumeLens
-          </span>
-
-          {/* Headline */}
-          <h1
-            className="mt-5 sm:mt-6 max-w-4xl text-[#0b0f1a]"
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>
+              {"// THE X-RAY"}
+            </div>
+            <h2 style={{ maxWidth: "18ch" }}>
+              What you send is not what they see.
+            </h2>
+          </div>
+          <p
             style={{
-              fontSize: "clamp(36px, 8vw, 72px)",
-              lineHeight: 1.05,
-              fontWeight: 500,
-              letterSpacing: "-0.02em",
+              fontSize: 14.5,
+              lineHeight: 1.6,
+              color: "var(--fg-2)",
+              maxWidth: "34ch",
+              fontWeight: 600,
             }}
           >
-            Scoring{" "}
-            <span
+            ← Drag the divider. Left is your resume. Right is what the screening
+            bot parsed.
+          </p>
+        </div>
+
+        <div
+          style={{
+            position: "relative",
+            height: 380,
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: 14,
+            overflow: "hidden",
+            cursor: "ew-resize",
+            boxShadow: "6px 6px 0 rgba(11,11,11,.85)",
+          }}
+        >
+          {/* Human side */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "var(--surface)",
+              padding: "32px 36px",
+            }}
+          >
+            <div
               style={{
-                fontFamily: "'Instrument Serif', serif",
-                fontStyle: "italic",
-                fontWeight: 400,
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                marginBottom: 20,
               }}
             >
-              Resumes
-            </span>
-            <br />
-            that get hired
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className="mt-4 sm:mt-6 text-neutral-700 px-2 max-w-xl"
-            style={{ fontSize: "clamp(13px, 3.5vw, 16px)" }}
-          >
-            The AI-powered resume reviewer that scores you against any job
-            description — in seconds.
-          </p>
-
-          {/* CTA */}
-          <Link
-            to={ctaTo}
-            className="mt-6 sm:mt-8 inline-flex items-center gap-3 bg-[#0b0f1a] text-white rounded-full pl-6 sm:pl-7 pr-2 py-2 sm:py-2.5 text-[14px] hover:bg-black transition-colors"
-          >
-            Analyze my resume
-            <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/15 inline-flex items-center justify-center">
-              <ChevronRight className="w-4 h-4" />
-            </span>
-          </Link>
-
-          {/* Dashboard preview */}
-          <div className="px-3 sm:px-4 w-full mt-10 sm:mt-14">
-            <div className="bg-[#f5f2ee] rounded-3xl p-4 sm:p-6 w-full max-w-[880px] mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-left">
-                {/* Card 1 — ATS Score */}
-                <div className="bg-white rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-[#ef4d23] font-medium">
-                      ATS Score
-                    </span>
-                    <span className="text-neutral-500">This resume</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[28px] font-semibold text-[#0b0f1a] leading-none">
-                      87
-                    </span>
-                    <span className="inline-flex items-center gap-1 bg-green-50 text-green-600 rounded-full px-2 py-0.5 text-[11px]">
-                      <TrendingUp className="w-3 h-3" />
-                      +12 (16%)
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-neutral-500 mt-1">
-                    Compared to last version
-                  </p>
-                  <p className="text-center text-[12px] text-neutral-600 mt-4 mb-1">
-                    Target score reached
-                  </p>
-                  <Gauge value={92} showLabels min="48" max="100" />
-                  <div className="bg-neutral-100 rounded-full p-1 flex mt-4 text-[12px]">
-                    <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1.5">
-                      ATS
-                    </span>
-                    <span className="flex-1 text-center text-neutral-500 py-1.5">
-                      Keywords
-                    </span>
-                  </div>
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "50%",
+                  background: "var(--violet)",
+                  border: "var(--bw) solid var(--line)",
+                  color: "#fff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                  fontSize: 20,
+                  flexShrink: 0,
+                }}
+              >
+                M
+              </span>
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: 26,
+                    fontStyle: "italic",
+                    marginBottom: 2,
+                  }}
+                >
+                  Maya Chen
                 </div>
-
-                {/* Card 2 — Analysis settings */}
-                <div className="bg-white rounded-2xl p-5 flex flex-col gap-3">
-                  <div>
-                    <label className="text-[12px] text-neutral-700">
-                      Score against
-                    </label>
-                    <button className="mt-1 w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
-                      Latest version
-                      <ChevronDown className="w-4 h-4 text-neutral-400" />
-                    </button>
-                  </div>
-                  <div>
-                    <label className="text-[12px] text-neutral-700">
-                      Compare role by
-                    </label>
-                    <button className="mt-1 w-full flex items-center justify-between border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
-                      Job description (JD)
-                      <ChevronDown className="w-4 h-4 text-neutral-400" />
-                    </button>
-                  </div>
-                  <div>
-                    <label className="text-[12px] text-neutral-700">
-                      Target score
-                    </label>
-                    <div className="mt-1 flex items-center border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
-                      <span className="text-neutral-400 mr-1">#</span>90
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-[12px] text-neutral-700">
-                      Keywords to match
-                    </label>
-                    <div className="mt-1 flex items-center border border-neutral-200 rounded-lg px-3 py-2 text-[13px] text-neutral-800">
-                      <span className="text-neutral-400 mr-1">#</span>24
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 pt-1">
-                    <button className="bg-[#ef4d23] text-white rounded-lg px-5 py-2 text-[13px]">
-                      Save
-                    </button>
-                    <button className="text-[13px] text-neutral-600 underline">
-                      Cancel
-                    </button>
-                    <button
-                      className="ml-auto text-neutral-400"
-                      aria-label="Close"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
+                <div style={{ fontSize: 12, color: "var(--fg-3)" }}>
+                  Product Manager · Oakland, CA · maya@chen.co
                 </div>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: "0.12em",
+                color: "var(--fg-3)",
+                marginBottom: 8,
+              }}
+            >
+              EXPERIENCE
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 2 }}>
+              Senior Product Manager — Meridian Labs
+            </div>
+            <div
+              style={{ fontSize: 11.5, color: "var(--fg-3)", marginBottom: 8 }}
+            >
+              2022 — Present
+            </div>
+            <ul
+              style={{
+                margin: "0 0 16px",
+                paddingLeft: 18,
+                fontSize: 13,
+                lineHeight: 1.65,
+                color: "#3C4043",
+              }}
+            >
+              <li>Led cross-functional team of 8 through platform migration</li>
+              <li>Shipped 3 major releases; churn down 14% YoY</li>
+              <li>Drove A/B program to 120 experiments per quarter</li>
+            </ul>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: "0.12em",
+                color: "var(--fg-3)",
+                marginBottom: 8,
+              }}
+            >
+              SKILLS
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {["Roadmapping", "SQL", "Experimentation", "Figma"].map((s) => (
+                <span
+                  key={s}
+                  style={{
+                    border: "var(--bw) solid var(--line)",
+                    padding: "5px 12px",
+                    borderRadius: 999,
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
 
-                {/* Card 3 — Keyword Match */}
-                <div className="bg-white rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-[#ef4d23] font-medium">
-                      Keyword Match
-                    </span>
-                    <span className="text-neutral-500">today</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[28px] font-semibold text-[#0b0f1a] leading-none">
-                      18
-                    </span>
-                    <span className="inline-flex items-center gap-1 bg-neutral-100 text-neutral-600 rounded-full px-2 py-0.5 text-[11px]">
-                      <TrendingDown className="w-3 h-3" />6
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-neutral-500 mt-1">
-                    Compared to last version
-                  </p>
-                  <p className="text-center text-[12px] text-neutral-600 mt-4 mb-1">
-                    Matched vs. job description
-                  </p>
-                  <Gauge value={68} color="#9ca3af" />
-                  <div className="bg-neutral-100 rounded-full p-1 flex mt-4 text-[12px]">
-                    <span className="flex-1 text-center bg-white rounded-full shadow-sm py-1.5">
-                      Matched
-                    </span>
-                    <span className="flex-1 text-center text-neutral-500 py-1.5">
-                      Missing
-                    </span>
-                  </div>
+          {/* Machine side */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              overflow: "hidden",
+              width: `${100 - split}%`,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 1062,
+                background: "var(--dark-bg)",
+                color: "var(--lime)",
+                padding: "32px 36px",
+                fontFamily: "var(--font-mono)",
+                textAlign: "right",
+              }}
+            >
+              <svg
+                width="72"
+                height="72"
+                viewBox="0 0 72 72"
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: 18,
+                  right: 26,
+                  opacity: 0.9,
+                }}
+              >
+                <rect x="18" y="8" width="36" height="8" fill="var(--lime)" />
+                <rect x="10" y="16" width="8" height="8" fill="var(--lime)" />
+                <rect x="54" y="16" width="8" height="8" fill="var(--lime)" />
+                <rect
+                  x="18"
+                  y="16"
+                  width="36"
+                  height="32"
+                  fill="var(--dark-surface)"
+                  stroke="var(--lime)"
+                  strokeWidth="2"
+                />
+                <rect
+                  x={eyeLX}
+                  y="24"
+                  width="8"
+                  height="8"
+                  fill="var(--lime)"
+                  style={{
+                    animation: "rl-blink 1.3s step-end infinite",
+                    transition: "x .15s ease",
+                  }}
+                />
+                <rect
+                  x={eyeRX}
+                  y="24"
+                  width="8"
+                  height="8"
+                  fill="var(--lime)"
+                  style={{
+                    animation: "rl-blink 1.3s .3s step-end infinite",
+                    transition: "x .15s ease",
+                  }}
+                />
+                <rect x="26" y="40" width="20" height="4" fill="var(--lime)" />
+                <rect x="10" y="48" width="8" height="16" fill="var(--lime)" />
+                <rect x="54" y="48" width="8" height="16" fill="var(--lime)" />
+                <rect x="22" y="48" width="10" height="16" fill={dimOlive} />
+                <rect x="40" y="48" width="10" height="16" fill={dimOlive} />
+              </svg>
+              <div style={{ fontSize: 11, color: dimOlive, marginBottom: 16 }}>
+                ATS PARSER v2.31 — resume_final_v2.pdf
+              </div>
+              <div
+                style={{
+                  fontSize: 12.5,
+                  lineHeight: 2.05,
+                  display: "inline-block",
+                  textAlign: "left",
+                }}
+              >
+                <div>
+                  name:{" "}
+                  <span style={{ color: "var(--dark-fg)" }}>MAYA CH▯N</span>{" "}
+                  <span style={{ color: dimOlive }}>
+                    {"// header image skipped"}
+                  </span>
+                </div>
+                <div>
+                  title: <span style={{ color: failRed }}>[NOT FOUND]</span>{" "}
+                  <span style={{ color: dimOlive }}>
+                    {"// stored in text box"}
+                  </span>
+                </div>
+                <div>
+                  experience: Senior Product Ma—{" "}
+                  <span style={{ color: failRed }}>[TRUNCATED]</span>
+                </div>
+                <div>
+                  dates: 2022 —{" "}
+                  <span style={{ color: failRed }}>[PARSE ERROR: en-dash]</span>
+                </div>
+                <div>
+                  bullets: 1 of 3 recovered{" "}
+                  <span style={{ color: failRed }}>⚠ two-column layout</span>
+                </div>
+                <div>
+                  skills_matched: <span style={{ color: failRed }}>4 / 12</span>{" "}
+                  <span style={{ color: dimOlive }}>
+                    {'// "Roadmapping" ≠ "roadmap"'}
+                  </span>
+                </div>
+                <div style={{ marginTop: 14, color: "var(--dark-fg)" }}>
+                  verdict: RANK{" "}
+                  <span style={{ color: failRed, fontWeight: 700 }}>
+                    118 / 212
+                  </span>{" "}
+                  → auto-declined
+                  <span style={{ animation: "rl-blink 1s step-end infinite" }}>
+                    ▌
+                  </span>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Divider */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: `${split}%`,
+              width: 0,
+              borderLeft: "2.5px solid var(--ink)",
+              zIndex: 3,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: -31,
+                transform: "translateY(-50%)",
+                width: 62,
+                height: 34,
+                background: "var(--ink)",
+                color: "var(--page)",
+                borderRadius: 999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              ◂ ▸
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 14,
+                left: -86,
+                background: "var(--surface)",
+                border: "var(--bw) solid var(--ink)",
+                padding: "4px 9px",
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: "0.1em",
+                borderRadius: 6,
+              }}
+            >
+              HUMAN
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 14,
+                left: 10,
+                background: "var(--lime)",
+                border: "var(--bw) solid var(--ink)",
+                padding: "4px 9px",
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: "0.1em",
+                borderRadius: 6,
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              MACHINE
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                bottom: 14,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "var(--ink)",
+                color: "var(--lime)",
+                padding: "5px 11px",
+                fontSize: 10.5,
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                borderRadius: 6,
+                fontFamily: "var(--font-mono)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {machinePct}% MACHINE VIEW
+            </div>
+          </div>
+
+          <input
+            type="range"
+            min={18}
+            max={82}
+            value={split}
+            aria-label="Drag to compare your resume with the machine-parsed view"
+            onChange={(e) => setSplit(Number(e.target.value))}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              opacity: 0,
+              cursor: "ew-resize",
+              margin: 0,
+              zIndex: 4,
+            }}
+          />
+        </div>
+        <div
+          style={{
+            marginTop: 16,
+            fontSize: 13,
+            color: "var(--fg-2)",
+            fontWeight: 600,
+          }}
+        >
+          73% of resumes are filtered before a human ever opens them.{" "}
+          <strong style={{ color: "var(--ink)" }}>
+            ResumeLens fixes the right side.
+          </strong>
         </div>
       </div>
-    </section>
+    </FadeInView>
   );
 }
 
-// ── Landing page ───────────────────────────────────────────────────────
-export default function Landing() {
+// ═══ How it works ═══
+const STEPS = [
+  {
+    n: "1",
+    bg: "var(--cyan)",
+    fg: "var(--ink)",
+    title: "Upload & set your target",
+    body: "PDF or DOCX. Tell us the role you're chasing and the analysis tunes itself to it.",
+  },
+  {
+    n: "2",
+    bg: "var(--lime)",
+    fg: "var(--ink)",
+    title: "Get scored on 5 dimensions",
+    body: "Keywords, impact, formatting, clarity, role fit — with the reasoning behind every number.",
+  },
+  {
+    n: "3",
+    bg: "var(--violet)",
+    fg: "#fff",
+    title: "Accept rewrites, re-score",
+    body: "Approve AI-rewritten bullets one by one, then watch your score climb version over version.",
+  },
+];
+
+function HowItWorksSection() {
   return (
-    <main className="rl-page rl-landing" style={{ paddingBottom: 0 }}>
-      <div className="rl-scroll-bar" />
-      <LandingNavbar />
-
-      {/* ── HERO ──────────────────────────────────────────────────── */}
-      <ConvixHero />
-
-      {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-      <section
-        id="how_it_works"
-        className="rl-landing-section"
-        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
-      >
-        <div
-          style={{
-            maxWidth: 1280,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 48,
-          }}
-        >
-          <FadeInView
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
-            }}
-          >
-            <span className="rl-eyebrow">// how_it_works</span>
-            <h2
+    <div
+      id="how-it-works"
+      style={{
+        background: "var(--surface)",
+        borderTop: "var(--bw) solid var(--ink)",
+        borderBottom: "var(--bw) solid var(--ink)",
+        padding: "80px var(--gutter)",
+      }}
+    >
+      <FadeInView className="rl-container" style={{ padding: 0 }}>
+        <div className="eyebrow" style={{ marginBottom: 14 }}>
+          {"// HOW IT WORKS"}
+        </div>
+        <h2 style={{ margin: "0 0 40px", maxWidth: "20ch" }}>
+          Three steps between you and the interview.
+        </h2>
+        <div className="g-thirds">
+          {STEPS.map((s) => (
+            <div
+              key={s.n}
+              className="card card--hover"
               style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
+                borderRadius: 14,
+                padding: 28,
+                background: "var(--page)",
               }}
             >
-              three commands. three seconds.
-            </h2>
-          </FadeInView>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 20,
-            }}
-          >
-            {[
-              {
-                step: "STEP_01",
-                cmd: "$ upload",
-                title: "Drop your PDF",
-                desc: "Upload your resume PDF and paste any job description. No account required — your file goes straight to your private Puter cloud, never our servers.",
-              },
-              {
-                step: "STEP_02",
-                cmd: "$ analyze",
-                title: "AI scores 5 dimensions",
-                desc: "Claude scores ATS compatibility, tone & style, content quality, structure, and skills gap — each with line-by-line reasoning, not just a number.",
-              },
-              {
-                step: "STEP_03",
-                cmd: "$ rewrite",
-                title: "Apply tips & ship",
-                desc: "Get specific bullet rewrites, a keyword diff you can copy-paste, and tailored interview questions. Approve or skip each suggestion individually.",
-              },
-            ].map((s, i) => (
-              <motion.div
-                key={s.step}
-                variants={revealUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                whileHover={{
-                  y: -4,
-                  boxShadow: "var(--depth-card-hover)",
-                  borderColor: "var(--border-hi)",
-                }}
-                transition={springs.smooth}
-                className="rl-card"
+              <div
                 style={{
-                  position: "relative",
-                  willChange: "transform",
-                  background: "var(--bg-3)",
-                  borderColor: "var(--border-hi)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-                  transitionDelay: `${i * 120}ms`,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  background: s.bg,
+                  color: s.fg,
+                  border: "var(--bw) solid var(--ink)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                  fontSize: 17,
+                  marginBottom: 18,
                 }}
               >
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--copper)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {s.step}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--fg-4)",
-                      }}
-                    >
-                      {s.cmd}
-                    </span>
-                  </div>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 18,
-                      fontWeight: 500,
-                      color: "var(--fg-1)",
-                      margin: 0,
-                    }}
-                  >
-                    {s.title}
-                  </h3>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontFamily: "var(--font-body)",
-                      fontSize: 14,
-                      color: "var(--fg-2)",
-                      lineHeight: 1.65,
-                    }}
-                  >
-                    {s.desc}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                {s.n}
+              </div>
+              <h3 style={{ margin: "0 0 10px" }}>{s.title}</h3>
+              <p
+                style={{
+                  fontSize: 14.5,
+                  lineHeight: 1.6,
+                  color: "var(--fg-2)",
+                }}
+              >
+                {s.body}
+              </p>
+            </div>
+          ))}
         </div>
-      </section>
+      </FadeInView>
+    </div>
+  );
+}
 
-      {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <FeaturesSection />
+// ═══ Rewrite Lab — interactive ═══
+function RewriteLab() {
+  const [idx, setIdx] = useState(0);
+  const [typed, setTyped] = useState("");
+  const [typing, setTyping] = useState(false);
+  const [done, setDone] = useState(false);
+  const [score, setScore] = useState(34);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reduced = useReducedMotion();
 
-      {/* ── TESTIMONIALS MARQUEE ─────────────────────────────────── */}
-      <section
-        id="testimonials"
-        className="rl-testimonials-section"
-        style={{
-          width: "100%",
-          borderTop: "1px dashed var(--border)",
-          paddingTop: 64,
-          paddingBottom: 64,
-          overflow: "hidden",
-        }}
-      >
-        {/* Header */}
-        <FadeInView
-          className="rl-testimonials-header"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            textAlign: "center",
-            marginBottom: 40,
-            padding: "0 32px",
-          }}
-        >
-          <span className="rl-eyebrow">// early_access</span>
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const sample = RW_SAMPLES[idx];
+
+  const runRewrite = () => {
+    if (typing) return;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (reduced) {
+      setTyped(sample.after);
+      setDone(true);
+      setScore(sample.score);
+      return;
+    }
+    setTyped("");
+    setDone(false);
+    setTyping(true);
+    setScore(34);
+    let i = 0;
+    intervalRef.current = setInterval(() => {
+      i += 2;
+      if (i >= sample.after.length) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        setTyped(sample.after);
+        setDone(true);
+        setTyping(false);
+        setScore(sample.score);
+      } else {
+        setTyped(sample.after.slice(0, i));
+      }
+    }, 28);
+  };
+
+  const nextSample = () => {
+    if (typing) return;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIdx((v) => (v + 1) % RW_SAMPLES.length);
+    setTyped("");
+    setDone(false);
+    setScore(34);
+  };
+
+  return (
+    <div
+      style={{
+        background: "var(--lime)",
+        borderBottom: "var(--bw) solid var(--ink)",
+        padding: "80px var(--gutter)",
+      }}
+    >
+      <FadeInView className="rl-container g-feature" style={{ padding: 0 }}>
+        <div>
+          <div className="eyebrow eyebrow--ink" style={{ marginBottom: 14 }}>
+            {"// REWRITE LAB — TRY IT"}
+          </div>
           <h2
             style={{
-              fontSize: "clamp(28px, 4vw, 48px)",
-              color: "var(--fg-1)",
-              fontWeight: 500,
-              letterSpacing: "-1.5px",
+              fontSize: 42,
+              lineHeight: 1.02,
+              margin: "0 0 16px",
             }}
           >
-            from job-seeker to job-shipper
+            "Managed a team" isn't a story.
           </h2>
           <p
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              color: "var(--fg-3)",
-              margin: 0,
-              letterSpacing: "0.04em",
+              fontSize: 16,
+              lineHeight: 1.65,
+              fontWeight: 500,
+              margin: "0 0 26px",
+              maxWidth: "42ch",
             }}
           >
-            illustrative feedback from early testers
+            Press the button. Watch a weak bullet become an interview magnet —
+            the same engine that rewrites yours.
           </p>
-        </FadeInView>
-
-        {/* Marquee track — duplicated for seamless loop */}
-        <div className="rl-marquee-wrap">
-          <div className="rl-marquee-track">
-            {[...TESTIMONIALS, ...TESTIMONIALS].map((t, idx) => (
-              <motion.div
-                key={`${t.name}-${idx}`}
-                className="rl-card rl-marquee-card"
-                style={{ position: "relative", flexShrink: 0 }}
-                whileHover={{
-                  y: -4,
-                  scale: 1.02,
-                  boxShadow: "var(--depth-card-hover)",
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button
+              onClick={runRewrite}
+              style={{
+                background: "var(--ink)",
+                color: "var(--lime)",
+                padding: "14px 28px",
+                borderRadius: 8,
+                border: "none",
+                fontWeight: 800,
+                fontSize: 14.5,
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              ▸ Run AI rewrite
+            </button>
+            <button
+              onClick={nextSample}
+              style={{
+                background: "transparent",
+                border: "var(--bw) solid var(--ink)",
+                padding: "14px 22px",
+                borderRadius: 8,
+                fontWeight: 800,
+                fontSize: 14.5,
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+                color: "var(--ink)",
+              }}
+            >
+              Try another bullet
+            </button>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 12,
+              padding: "20px 22px",
+            }}
+          >
+            <div
+              className="eyebrow"
+              style={{ fontSize: 10, color: "var(--fg-3)", marginBottom: 8 }}
+            >
+              BEFORE
+            </div>
+            <p style={{ fontSize: 15, lineHeight: 1.55, color: "var(--fg-2)" }}>
+              {sample.before}
+            </p>
+          </div>
+          <div
+            style={{
+              background: "var(--ink)",
+              color: "#fff",
+              borderRadius: 12,
+              padding: "20px 22px",
+              boxShadow: "5px 5px 0 rgba(11,11,11,.25)",
+              minHeight: 74,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+            >
+              <span
+                className="eyebrow"
+                style={{ fontSize: 10, color: "var(--lime)" }}
+              >
+                AFTER
+              </span>
+              {done && (
+                <span
+                  style={{
+                    background: "var(--lime)",
+                    color: "var(--ink)",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    padding: "3px 9px",
+                    borderRadius: 6,
+                    animation: "rl-pop .4s both",
+                  }}
+                >
+                  {sample.gain}
+                </span>
+              )}
+            </div>
+            <p
+              style={{
+                lineHeight: 1.55,
+                fontFamily: "var(--font-mono)",
+                fontSize: 13.5,
+              }}
+            >
+              {typed === "" && !typing ? "…press Run AI rewrite" : typed}
+              {typing && (
+                <span
+                  style={{
+                    animation: "rl-blink .8s step-end infinite",
+                    color: "var(--lime)",
+                  }}
+                >
+                  ▌
+                </span>
+              )}
+            </p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              background: "rgba(255,255,255,.5)",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 12,
+              padding: "14px 18px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10.5,
+                letterSpacing: "0.1em",
+                fontWeight: 600,
+              }}
+            >
+              IMPACT SCORE
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 8,
+                background: "rgba(11,11,11,.12)",
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${score}%`,
+                  height: 8,
+                  background: "var(--ink)",
+                  borderRadius: 4,
+                  transition: "width .6s ease",
                 }}
-                transition={springs.smooth}
+              />
+            </div>
+            <span style={{ fontWeight: 900, fontSize: 19 }}>{score}</span>
+          </div>
+        </div>
+      </FadeInView>
+    </div>
+  );
+}
+
+// ═══ Dark version-history section ═══
+const DARK_BARS = [
+  {
+    h: "38%",
+    bg: "rgba(255,255,255,.14)",
+    label: "v1 · 48",
+    labelColor: "var(--dark-muted)",
+  },
+  {
+    h: "52%",
+    bg: "rgba(111,214,227,.5)",
+    label: "v2 · 61",
+    labelColor: "var(--dark-muted)",
+  },
+  {
+    h: "68%",
+    bg: "rgba(139,92,246,.65)",
+    label: "v3 · 74",
+    labelColor: "var(--dark-muted)",
+  },
+  {
+    h: "86%",
+    bg: "var(--lime)",
+    label: "v4 · 82 ✓",
+    labelColor: "var(--lime)",
+  },
+];
+
+function DarkTrackSection() {
+  return (
+    <div
+      style={{
+        background: "var(--dark-bg)",
+        color: "var(--dark-fg)",
+        padding: "88px var(--gutter)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <svg
+        width="130"
+        height="96"
+        viewBox="0 0 130 96"
+        aria-hidden="true"
+        className="pix-float mobile-hide"
+        style={{ position: "absolute", top: 34, right: 56 }}
+      >
+        <rect
+          x="0"
+          y="48"
+          width="14"
+          height="14"
+          fill="var(--lime)"
+          className="pix-blink"
+        />
+        <rect x="16" y="32" width="14" height="14" fill="var(--lime)" />
+        <rect
+          x="32"
+          y="48"
+          width="14"
+          height="14"
+          fill="var(--lime)"
+          className="pix-blink"
+          style={{ animationDelay: "0.4s" }}
+        />
+        <rect
+          x="48"
+          y="16"
+          width="14"
+          height="14"
+          fill="var(--cyan)"
+          className="pix-blink"
+          style={{ animationDelay: "0.2s" }}
+        />
+        <rect x="64" y="32" width="14" height="14" fill="var(--violet)" />
+        <rect
+          x="80"
+          y="16"
+          width="14"
+          height="14"
+          fill="var(--violet)"
+          className="pix-blink"
+          style={{ animationDelay: "0.8s" }}
+        />
+        <rect x="96" y="0" width="14" height="14" fill="var(--cyan)" />
+      </svg>
+      <FadeInView className="rl-container g-feature" style={{ padding: 0 }}>
+        <div>
+          <div
+            className="eyebrow"
+            style={{ color: "var(--lime)", marginBottom: 14 }}
+          >
+            {"// VERSION HISTORY"}
+          </div>
+          <h2
+            style={{
+              color: "var(--dark-fg)",
+              fontSize: 42,
+              lineHeight: 1.02,
+              margin: "0 0 16px",
+            }}
+          >
+            Watch your score climb, version by version.
+          </h2>
+          <p
+            style={{
+              fontSize: 16,
+              lineHeight: 1.65,
+              color: "var(--dark-muted)",
+              maxWidth: "42ch",
+            }}
+          >
+            Every scan is saved. Compare any two versions, see which rewrites
+            moved the needle, and never lose a good draft again.
+          </p>
+        </div>
+        <div
+          style={{
+            background: "var(--dark-surface)",
+            border: "1px solid var(--dark-line)",
+            borderRadius: 14,
+            padding: 26,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontFamily: "var(--font-mono)",
+              fontSize: 10.5,
+              letterSpacing: "0.1em",
+              color: "var(--dark-muted)",
+              marginBottom: 20,
+            }}
+          >
+            <span>SCORE_HISTORY</span>
+            <span style={{ color: "var(--lime)" }}>▲ +34 TOTAL</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 14,
+              height: 150,
+            }}
+          >
+            {DARK_BARS.map((b) => (
+              <div
+                key={b.label}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                  height: "100%",
+                  justifyContent: "flex-end",
+                }}
               >
                 <div
-                  style={{ display: "flex", flexDirection: "column", gap: 16 }}
+                  style={{
+                    width: "100%",
+                    height: b.h,
+                    background: b.bg,
+                    borderRadius: "6px 6px 0 0",
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    color: b.labelColor,
+                  }}
                 >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontFamily: "var(--font-body)",
-                      fontSize: 14,
-                      color: "var(--fg-1)",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    "{t.quote}"
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      paddingTop: 8,
-                      borderTop: "1px dashed var(--border)",
-                    }}
-                  >
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
-                    >
-                      <span
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: "50%",
-                          background: "var(--surface-2)",
-                          border: "1px solid var(--border-hi)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: "var(--copper)",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {t.avatar}
-                      </span>
-                      <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 12,
-                            color: "var(--fg-1)",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {t.name}
-                        </p>
-                        <p
-                          style={{
-                            margin: "2px 0 0",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 10,
-                            color: "var(--fg-3)",
-                          }}
-                        >
-                          {t.role}
-                        </p>
-                        <p
-                          style={{
-                            margin: "1px 0 0",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 10,
-                            color: "var(--fg-4)",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          {t.target}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+                  {b.label}
+                </span>
+              </div>
             ))}
           </div>
         </div>
-      </section>
+      </FadeInView>
+    </div>
+  );
+}
 
-      {/* ── FAQ ──────────────────────────────────────────────────── */}
-      <section
-        id="faq"
-        className="rl-landing-section"
-        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+// ═══ Pricing teaser ═══
+function PricingTeaser({ ctaTo }: { ctaTo: string }) {
+  const [annual, setAnnual] = useState(false);
+
+  const segStyle = (active: boolean) =>
+    ({
+      padding: "10px 18px",
+      fontSize: 12.5,
+      fontWeight: 800,
+      background: active ? "var(--ink)" : "var(--surface)",
+      color: active ? "#fff" : "var(--ink)",
+      border: "none",
+      cursor: "pointer",
+      fontFamily: "var(--font-sans)",
+    }) as const;
+
+  return (
+    <FadeInView
+      className="rl-container"
+      style={{ padding: "88px var(--gutter-inner)" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 20,
+          flexWrap: "wrap",
+          marginBottom: 40,
+        }}
       >
+        <div>
+          <div className="eyebrow" style={{ marginBottom: 14 }}>
+            {"// PRICING"}
+          </div>
+          <h2>Start free. Upgrade when it works.</h2>
+        </div>
         <div
           style={{
-            maxWidth: 800,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 48,
+            display: "inline-flex",
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: 999,
+            overflow: "hidden",
+            userSelect: "none",
           }}
         >
-          <FadeInView
+          <button style={segStyle(!annual)} onClick={() => setAnnual(false)}>
+            Monthly
+          </button>
+          <button style={segStyle(annual)} onClick={() => setAnnual(true)}>
+            Annual −25%
+          </button>
+        </div>
+      </div>
+      <div className="g-halves" style={{ maxWidth: 860 }}>
+        <div className="card" style={{ borderRadius: 14, padding: 30 }}>
+          <div style={{ fontWeight: 900, fontSize: 19, marginBottom: 6 }}>
+            Free
+          </div>
+          <div
+            style={{
+              fontSize: 38,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              marginBottom: 18,
+            }}
+          >
+            $0
+          </div>
+          <div
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
+              gap: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              color: "#3C4043",
+              marginBottom: 24,
             }}
           >
-            <span className="rl-eyebrow">// faq</span>
-            <h2
-              style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
-              }}
-            >
-              answers, before you ask
-            </h2>
-          </FadeInView>
+            <span>✓ 1 resume scan / month</span>
+            <span>✓ Full 5-dimension score</span>
+            <span>✓ 3 AI rewrites per scan</span>
+          </div>
+          <Link to={ctaTo} className="btn btn--outline">
+            Start free
+          </Link>
+        </div>
+        <div
+          className="card card--cyan"
+          style={{ borderRadius: 14, padding: 30, position: "relative" }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -13,
+              right: 22,
+              background: "var(--violet)",
+              color: "#fff",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 999,
+              padding: "5px 13px",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+            }}
+          >
+            MOST POPULAR
+          </div>
+          <div style={{ fontWeight: 900, fontSize: 19, marginBottom: 6 }}>
+            Pro
+          </div>
+          <div
+            style={{
+              fontSize: 38,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              marginBottom: 18,
+            }}
+          >
+            {annual ? "$9" : "$12"}
+            <span style={{ fontSize: 15, fontWeight: 700 }}>/mo</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              marginBottom: 24,
+            }}
+          >
+            <span>✓ Unlimited scans & roles</span>
+            <span>✓ Unlimited AI rewrites</span>
+            <span>✓ Version history & compare</span>
+          </div>
+          <Link
+            to={ctaTo}
+            style={{
+              display: "inline-block",
+              background: "var(--ink)",
+              color: "var(--cyan)",
+              padding: "13px 26px",
+              borderRadius: 8,
+              fontWeight: 800,
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            Go Pro
+          </Link>
+        </div>
+      </div>
+    </FadeInView>
+  );
+}
 
-          <FadeInView delay={0.1}>
+// ═══ Landing page ═══
+export default function Landing() {
+  const { auth } = usePuterStore();
+  const ctaTo = auth.isAuthenticated ? "/upload" : "/auth";
+
+  return (
+    <main id="main-content" style={{ background: "var(--page)" }}>
+      <PublicNav />
+
+      {/* ═══ HERO ═══ */}
+      <div
+        style={{
+          position: "relative",
+          background: "var(--cyan)",
+          padding: "64px var(--gutter) 72px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(rgba(11,11,11,.10) 1.5px,transparent 1.5px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <HeroSpriteRight />
+        <HeroSpriteLeft />
+
+        <div
+          className="g-hero"
+          style={{
+            position: "relative",
+            maxWidth: 1240,
+            margin: "0 auto",
+          }}
+        >
+          <div>
             <div
-              className="rl-card"
-              style={{ position: "relative", padding: "0 24px" }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "rgba(255,255,255,.55)",
+                border: "var(--bw) solid var(--ink)",
+                borderRadius: 999,
+                padding: "8px 16px",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                fontWeight: 600,
+                marginBottom: 24,
+              }}
             >
-              {FAQS.map((f) => (
-                <FAQItem
-                  key={f.q}
-                  q={f.q}
-                  a={f.a}
-                  defaultOpen={f === FAQS[0]}
-                />
-              ))}
+              <span
+                className="pix-blink"
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "var(--ink)",
+                }}
+              />
+              12,408 RESUMES SCANNED TODAY
             </div>
-          </FadeInView>
-        </div>
-      </section>
+            <h1
+              style={{
+                fontSize: "clamp(42px, 4.6vw, 66px)",
+                lineHeight: 0.97,
+                letterSpacing: "-0.04em",
+                margin: "0 0 22px",
+              }}
+            >
+              Resume optimization that beats the bots.
+            </h1>
+            <p
+              style={{
+                fontSize: 17.5,
+                lineHeight: 1.6,
+                fontWeight: 500,
+                margin: "0 0 28px",
+                maxWidth: "44ch",
+              }}
+            >
+              The same scan recruiters' software runs — turned to your
+              advantage. Five dimensions, AI-rewritten bullets, version
+              tracking.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Link
+                to={ctaTo}
+                style={{
+                  background: "var(--ink)",
+                  color: "#fff",
+                  padding: "16px 32px",
+                  borderRadius: 8,
+                  fontWeight: 800,
+                  fontSize: 15,
+                  textDecoration: "none",
+                }}
+              >
+                Score my resume — free
+              </Link>
+              <a
+                href="#xray"
+                style={{
+                  background: "rgba(255,255,255,.55)",
+                  padding: "16px 26px",
+                  borderRadius: 8,
+                  fontWeight: 800,
+                  fontSize: 15,
+                  textDecoration: "none",
+                  color: "var(--ink)",
+                }}
+              >
+                See a sample
+              </a>
+            </div>
+            <div
+              style={{
+                marginTop: 20,
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                opacity: 0.65,
+              }}
+            >
+              NO CARD REQUIRED · FIRST SCAN FREE
+            </div>
+          </div>
 
-      {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section
-        id="pricing"
-        className="rl-landing-section"
-        style={{ width: "100%", borderTop: "1px dashed var(--border)" }}
+          <HeroResumeCard />
+        </div>
+      </div>
+
+      {/* ═══ LOGO MARQUEE ═══ */}
+      <div
+        style={{
+          background: "var(--surface)",
+          borderTop: "var(--bw) solid var(--ink)",
+          borderBottom: "var(--bw) solid var(--ink)",
+          padding: "26px 0 16px",
+        }}
       >
         <div
           style={{
-            maxWidth: 1280,
-            margin: "0 auto",
             display: "flex",
-            flexDirection: "column",
-            gap: 48,
+            justifyContent: "space-between",
             alignItems: "center",
+            padding: "0 var(--gutter) 12px",
+            fontSize: 12,
+            fontWeight: 700,
+            color: "var(--fg-2)",
           }}
         >
-          <FadeInView
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-              textAlign: "center",
-            }}
-          >
-            <span className="rl-eyebrow">// pricing</span>
-            <h2
+          <span>Trusted by 120,000+ job seekers</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5 }}>
+            HIRED AT ↓
+          </span>
+        </div>
+        <div className="marquee">
+          <div className="marquee__track">
+            <div
               style={{
-                fontSize: "clamp(28px, 4vw, 48px)",
-                color: "var(--fg-1)",
-                fontWeight: 500,
-                letterSpacing: "-1.5px",
+                display: "flex",
+                gap: 56,
+                paddingRight: 56,
+                alignItems: "center",
+                whiteSpace: "nowrap",
               }}
             >
-              start free. upgrade when you're ready.
-            </h2>
-          </FadeInView>
-          <FadeInView delay={0.1} style={{ width: "100%" }}>
-            <PricingTiers />
-          </FadeInView>
+              {MARQUEE_LOGOS}
+            </div>
+            <div
+              aria-hidden="true"
+              style={{
+                display: "flex",
+                gap: 56,
+                paddingRight: 56,
+                alignItems: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {MARQUEE_LOGOS}
+            </div>
+          </div>
         </div>
-      </section>
-      <Footer />
-      <MobileBottomNav />
+      </div>
+
+      <XRaySection />
+      <HowItWorksSection />
+      <RewriteLab />
+      <DarkTrackSection />
+      <PricingTeaser ctaTo={ctaTo} />
+
+      {/* ═══ FINAL CTA ═══ */}
+      <div
+        className="rl-container"
+        style={{ margin: "0 auto 88px", padding: "0 var(--gutter-inner)" }}
+      >
+        <div
+          style={{
+            background: "var(--violet)",
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: 20,
+            padding: "64px 48px",
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <svg
+            width="110"
+            height="80"
+            viewBox="0 0 110 80"
+            aria-hidden="true"
+            className="pix-float mobile-hide"
+            style={{ position: "absolute", top: 18, left: 26 }}
+          >
+            <rect
+              x="0"
+              y="40"
+              width="13"
+              height="13"
+              fill="var(--lime)"
+              className="pix-blink"
+            />
+            <rect x="15" y="25" width="13" height="13" fill="var(--lime)" />
+            <rect
+              x="30"
+              y="40"
+              width="13"
+              height="13"
+              fill="var(--cyan)"
+              className="pix-blink"
+              style={{ animationDelay: "0.5s" }}
+            />
+            <rect x="45" y="10" width="13" height="13" fill="var(--cyan)" />
+            <rect
+              x="60"
+              y="25"
+              width="13"
+              height="13"
+              fill="var(--lime)"
+              className="pix-blink"
+              style={{ animationDelay: "0.3s" }}
+            />
+          </svg>
+          <h2 style={{ color: "#fff", margin: "0 0 14px" }}>
+            Stop guessing what the bots want.
+          </h2>
+          <p style={{ color: "#E4D9FF", fontSize: 16, margin: "0 0 28px" }}>
+            Your first scan is free — see your score in under a minute.
+          </p>
+          <Link
+            to={ctaTo}
+            style={{
+              display: "inline-block",
+              background: "var(--lime)",
+              color: "var(--ink)",
+              padding: "16px 34px",
+              borderRadius: 8,
+              fontWeight: 900,
+              fontSize: 15.5,
+              textDecoration: "none",
+            }}
+          >
+            Score my resume
+            <span style={{ animation: "rl-blink 1.1s step-end infinite" }}>
+              {" "}
+              ▌
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      {/* ═══ FOOTER ═══ */}
+      <div
+        style={{
+          borderTop: "var(--bw) solid var(--ink)",
+          background: "var(--surface)",
+          padding: "44px var(--gutter)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 18,
+        }}
+      >
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontWeight: 900,
+            fontSize: 15,
+          }}
+        >
+          <LogoMark size={17} />
+          ResumeLens
+        </span>
+        <div
+          style={{
+            display: "flex",
+            gap: 26,
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--fg-2)",
+          }}
+        >
+          <Link
+            to="/pricing"
+            style={{ color: "inherit", textDecoration: "none" }}
+          >
+            Pricing
+          </Link>
+          <a href="#xray" style={{ color: "inherit", textDecoration: "none" }}>
+            Samples
+          </a>
+          <span>Privacy</span>
+          <span>Terms</span>
+        </div>
+        <span className="mono-stamp">
+          © {new Date().getFullYear()} RESUMELENS
+        </span>
+      </div>
     </main>
   );
 }

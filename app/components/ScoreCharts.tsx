@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScoreBar } from "~/components/atoms";
 
 export function scoreTierColor(s: number) {
-  return s > 69 ? "var(--phos)" : s > 49 ? "var(--copper-hi)" : "var(--ember)";
+  return s > 69 ? "var(--lime)" : s > 49 ? "var(--amber)" : "var(--red)";
 }
 
 export function scoreTier(s: number): "good" | "warn" | "bad" {
@@ -21,17 +21,15 @@ export function Sparkline({ scores }: { scores: number[] }) {
     const y = h - ((s - min) / (max - min + 1)) * h;
     return `${x},${y}`;
   });
-  const last = scores[scores.length - 1];
-  const color = scoreTierColor(last);
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
       <polyline
         points={pts.join(" ")}
         fill="none"
-        stroke={color}
-        strokeWidth={1.5}
+        stroke="var(--ink)"
+        strokeWidth={2}
         strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 0 4px ${color}88)` }}
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -39,11 +37,11 @@ export function Sparkline({ scores }: { scores: number[] }) {
 
 // ── Dimension sparkline card ───────────────────────────────────────────
 export const DIMS: { key: keyof Feedback; label: string }[] = [
-  { key: "ATS", label: "ats" },
-  { key: "toneAndStyle", label: "tone_style" },
-  { key: "content", label: "content" },
-  { key: "structure", label: "structure" },
-  { key: "skills", label: "skills" },
+  { key: "ATS", label: "ATS" },
+  { key: "toneAndStyle", label: "Tone & style" },
+  { key: "content", label: "Content" },
+  { key: "structure", label: "Structure" },
+  { key: "skills", label: "Skills" },
 ];
 
 export function DimSparklineCard({
@@ -55,8 +53,8 @@ export function DimSparklineCard({
 }) {
   const last = dimScores[dimScores.length - 1] ?? 0;
   return (
-    <div className="rl-card" style={{ position: "relative" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div className="card" style={{ position: "relative" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div
           style={{
             display: "flex",
@@ -64,22 +62,13 @@ export function DimSparklineCard({
             alignItems: "center",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--fg-3)",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {label}
+          <span className="eyebrow" style={{ fontSize: 10 }}>
+            {label.toUpperCase()}
           </span>
           <span
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 16,
-              fontWeight: 700,
-              color: scoreTierColor(last),
+              fontSize: 18,
+              fontWeight: 900,
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -87,7 +76,7 @@ export function DimSparklineCard({
           </span>
         </div>
         <Sparkline scores={dimScores} />
-        <ScoreBar score={last} cells={20} />
+        <ScoreBar score={last} />
       </div>
     </div>
   );
@@ -105,12 +94,12 @@ export function LineChart({ runs }: { runs: Resume[] }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "var(--fg-4)",
-          fontFamily: "var(--font-mono)",
-          fontSize: 12,
+          color: "var(--fg-3)",
+          fontSize: 13,
+          fontWeight: 600,
         }}
       >
-        // need at least 2 runs to show chart
+        Run at least 2 scans to see your trend.
       </div>
     );
 
@@ -147,15 +136,14 @@ export function LineChart({ runs }: { runs: Resume[] }) {
               x2={pad.left + iw}
               y1={y}
               y2={y}
-              stroke="var(--border)"
+              stroke="var(--line)"
               strokeWidth={1}
-              strokeDasharray="4 4"
             />
             <text
               x={pad.left - 6}
               y={y + 4}
               textAnchor="end"
-              fill="var(--fg-4)"
+              fill="var(--fg-3)"
               fontSize={9}
               fontFamily="var(--font-mono)"
             >
@@ -169,10 +157,10 @@ export function LineChart({ runs }: { runs: Resume[] }) {
       <polyline
         points={pts.join(" ")}
         fill="none"
-        stroke="var(--phos)"
-        strokeWidth={2}
+        stroke="var(--ink)"
+        strokeWidth={2.5}
         strokeLinejoin="round"
-        style={{ filter: "drop-shadow(0 0 6px var(--phos-glow))" }}
+        strokeLinecap="round"
       />
 
       {/* Dots + hover targets */}
@@ -186,11 +174,10 @@ export function LineChart({ runs }: { runs: Resume[] }) {
             <circle
               cx={cx}
               cy={cy}
-              r={isHover ? 6 : 4}
+              r={isHover ? 6.5 : 5}
               fill={color}
-              style={{
-                filter: isHover ? `drop-shadow(0 0 8px ${color})` : "none",
-              }}
+              stroke="var(--ink)"
+              strokeWidth={1.5}
             />
             <circle
               cx={cx}
@@ -202,32 +189,32 @@ export function LineChart({ runs }: { runs: Resume[] }) {
             {isHover && (
               <g>
                 <rect
-                  x={cx - 40}
-                  y={cy - 36}
-                  width={80}
-                  height={28}
-                  rx={3}
-                  fill="var(--bg-3)"
-                  stroke="var(--border-hi)"
-                  strokeWidth={1}
+                  x={cx - 44}
+                  y={cy - 40}
+                  width={88}
+                  height={30}
+                  rx={6}
+                  fill="var(--surface)"
+                  stroke="var(--ink)"
+                  strokeWidth={1.5}
                 />
                 <text
                   x={cx}
-                  y={cy - 24}
+                  y={cy - 26}
                   textAnchor="middle"
-                  fill={color}
+                  fill="var(--ink)"
                   fontSize={13}
-                  fontFamily="var(--font-mono)"
-                  fontWeight={700}
+                  fontFamily="var(--font-sans)"
+                  fontWeight={900}
                 >
                   {r.feedback.overallScore}
                 </text>
                 <text
                   x={cx}
-                  y={cy - 13}
+                  y={cy - 15}
                   textAnchor="middle"
-                  fill="var(--fg-3)"
-                  fontSize={9}
+                  fill="var(--fg-2)"
+                  fontSize={8.5}
                   fontFamily="var(--font-mono)"
                 >
                   {r.companyName || "resume"}
@@ -238,7 +225,7 @@ export function LineChart({ runs }: { runs: Resume[] }) {
               x={cx}
               y={pad.top + ih + 18}
               textAnchor="middle"
-              fill="var(--fg-4)"
+              fill="var(--fg-3)"
               fontSize={9}
               fontFamily="var(--font-mono)"
             >

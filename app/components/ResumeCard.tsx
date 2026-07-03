@@ -1,7 +1,7 @@
 import { Link } from "react-router";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import ScoreCircle from "~/components/ScoreCircle";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePuterStore } from "~/lib/puter";
 import { springs } from "~/lib/motion";
 
@@ -23,11 +23,6 @@ const ResumeCard = ({
   const [imageLoading, setImageLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const reduced = useReducedMotion();
-
-  // 3D tilt tracking
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const loadResume = async () => {
@@ -41,21 +36,6 @@ const ResumeCard = ({
     };
     loadResume();
   }, [imagePath]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (reduced || !cardRef.current || compareMode) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = ((e.clientX - cx) / (rect.width / 2)) * 4;
-    const dy = ((e.clientY - cy) / (rect.height / 2)) * -4;
-    setTilt({ x: dy, y: dx });
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setTilt({ x: 0, y: 0 });
-  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,38 +55,31 @@ const ResumeCard = ({
     setConfirmDelete(false);
   };
 
+  const lifted = isHovered && !compareMode;
+
   return (
-    <motion.div
-      ref={cardRef}
-      className="rl-card"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{
-        opacity: 1,
-        y: isHovered && !compareMode ? -4 : 0,
-        scale: compareMode && isSelected ? 1.02 : 1,
-        rotateX: reduced ? 0 : tilt.x,
-        rotateY: reduced ? 0 : tilt.y,
-        boxShadow:
-          isHovered && !compareMode
-            ? "0 12px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35)"
-            : "0 2px 8px rgba(0,0,0,0.3)",
-      }}
-      transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
+    <div
       style={{
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        gap: 0,
+        background:
+          compareMode && isSelected ? "var(--cyan)" : "var(--surface)",
+        border: "var(--bw) solid var(--ink)",
+        borderRadius: "var(--r-card)",
+        overflow: "hidden",
         cursor: compareMode ? "pointer" : "default",
-        outline: compareMode && isSelected ? `2px solid var(--phos)` : "none",
-        outlineOffset: 2,
-        willChange: "transform",
-        transformStyle: "preserve-3d",
-        borderColor: isHovered && !compareMode ? "var(--border-hi)" : undefined,
+        boxShadow:
+          lifted || (compareMode && isSelected) ? "var(--pop)" : "none",
+        transform:
+          lifted || (compareMode && isSelected)
+            ? "translate(-2px,-2px)"
+            : "none",
+        transition:
+          "box-shadow var(--dur-fast) ease, transform var(--dur-fast) ease, background var(--dur-fast) ease",
       }}
-      onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={compareMode ? onSelect : undefined}
       role={compareMode ? "checkbox" : undefined}
       aria-checked={compareMode ? isSelected : undefined}
@@ -119,34 +92,28 @@ const ResumeCard = ({
           : undefined
       }
     >
-      {/* Corner crosshairs */}
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {/* Compare checkbox */}
       {compareMode && (
         <motion.div
           animate={{
-            background: isSelected ? "var(--phos)" : "var(--surface)",
-            borderColor: isSelected ? "var(--phos)" : "var(--border-hi)",
+            background: isSelected ? "var(--lime)" : "var(--surface)",
           }}
           transition={springs.snappy}
           style={{
             position: "absolute",
-            top: 8,
-            left: 8,
+            top: 10,
+            left: 10,
             zIndex: 10,
-            width: 18,
-            height: 18,
-            border: "1px solid",
+            width: 22,
+            height: 22,
+            border: "var(--bw) solid var(--ink)",
+            borderRadius: 6,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 10,
-            color: "var(--bg)",
-            fontWeight: 700,
+            fontSize: 12,
+            color: "var(--ink)",
+            fontWeight: 900,
           }}
           aria-hidden="true"
         >
@@ -156,39 +123,45 @@ const ResumeCard = ({
 
       {/* Delete button — visible on hover */}
       {onDelete && !confirmDelete && !compareMode && (
-        <motion.button
+        <button
           onClick={handleDeleteClick}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          whileHover={{
-            color: "var(--ember)",
-            borderColor: "var(--ember-dim)",
-          }}
-          transition={springs.snappy}
           style={{
             position: "absolute",
-            top: 8,
-            right: 8,
+            top: 10,
+            right: 10,
             zIndex: 10,
-            background: "var(--surface-2)",
-            border: "1px solid var(--border)",
-            color: "var(--fg-3)",
-            width: 24,
-            height: 24,
+            background: "var(--surface)",
+            border: "var(--bw) solid var(--ink)",
+            color: "var(--ink)",
+            width: 26,
+            height: 26,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
             fontSize: 12,
-            fontFamily: "var(--font-mono)",
-            borderRadius: "var(--radius-sm)",
+            fontWeight: 900,
+            borderRadius: 8,
+            opacity: isHovered ? 1 : 0,
+            transition:
+              "opacity var(--dur-fast) ease, background var(--dur-fast) ease, color var(--dur-fast) ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--red)";
+            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.borderColor = "var(--red)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "var(--surface)";
+            e.currentTarget.style.color = "var(--ink)";
+            e.currentTarget.style.borderColor = "var(--ink)";
           }}
           onFocus={(e) => (e.currentTarget.style.opacity = "1")}
           onBlur={(e) => (e.currentTarget.style.opacity = "0")}
           aria-label="Delete resume"
         >
           ✕
-        </motion.button>
+        </button>
       )}
 
       {/* Confirm delete dialog */}
@@ -201,78 +174,65 @@ const ResumeCard = ({
           transition={springs.snappy}
           style={{
             position: "absolute",
-            top: 8,
-            right: 8,
+            top: 10,
+            right: 10,
             zIndex: 10,
-            background: "var(--bg-3)",
-            border: "1px solid var(--border-hi)",
-            padding: "12px",
+            background: "var(--surface)",
+            border: "var(--bw) solid var(--ink)",
+            padding: 12,
             display: "flex",
             flexDirection: "column",
             gap: 8,
-            minWidth: 160,
-            borderRadius: "var(--radius-md)",
-            boxShadow: "var(--shadow-md)",
+            minWidth: 170,
+            borderRadius: 12,
+            boxShadow: "var(--pop-sm)",
           }}
         >
           <p
             style={{
               margin: 0,
-              fontSize: 12,
-              fontFamily: "var(--font-mono)",
-              color: "var(--fg-1)",
+              fontSize: 13,
+              fontWeight: 800,
+              color: "var(--ink)",
             }}
           >
-            delete this resume?
+            Delete this resume?
           </p>
           <div style={{ display: "flex", gap: 6 }}>
-            <motion.button
+            <button
               onClick={handleConfirm}
-              whileHover={reduced ? {} : { background: "#f0605a", scale: 1.02 }}
-              whileTap={reduced ? {} : { scale: 0.96 }}
-              transition={springs.snappy}
               style={{
                 flex: 1,
-                fontSize: 11,
-                fontFamily: "var(--font-mono)",
-                fontWeight: 700,
-                background: "var(--ember)",
-                color: "var(--bg)",
-                border: "none",
-                padding: "5px 8px",
+                fontSize: 12,
+                fontWeight: 800,
+                fontFamily: "var(--font-sans)",
+                background: "var(--red)",
+                color: "#fff",
+                border: "var(--bw) solid var(--ink)",
+                padding: "6px 8px",
                 cursor: "pointer",
-                borderRadius: "var(--radius-sm)",
+                borderRadius: 8,
               }}
             >
-              ✕ delete
-            </motion.button>
-            <motion.button
+              Delete
+            </button>
+            <button
               onClick={handleCancel}
-              whileHover={
-                reduced
-                  ? {}
-                  : {
-                      background: "var(--surface)",
-                      borderColor: "var(--border-hi)",
-                      scale: 1.02,
-                    }
-              }
-              whileTap={reduced ? {} : { scale: 0.96 }}
-              transition={springs.snappy}
               style={{
                 flex: 1,
-                fontSize: 11,
-                fontFamily: "var(--font-mono)",
-                background: "var(--surface-2)",
-                color: "var(--fg-2)",
-                border: "1px solid var(--border)",
-                padding: "5px 8px",
+                fontSize: 12,
+                fontWeight: 800,
+                fontFamily: "var(--font-sans)",
+                background: "var(--surface)",
+                color: "var(--ink)",
+                border: "var(--bw) solid var(--ink)",
+                padding: "6px 8px",
                 cursor: "pointer",
-                borderRadius: "var(--radius-sm)",
+                borderRadius: 8,
               }}
             >
-              cancel
-            </motion.button>
+              Cancel
+            </button>
           </div>
         </motion.div>
       )}
@@ -284,67 +244,46 @@ const ResumeCard = ({
           display: "flex",
           flexDirection: "column",
           gap: 0,
+          pointerEvents: compareMode ? "none" : "auto",
         }}
+        tabIndex={compareMode ? -1 : undefined}
       >
         {/* Resume preview image */}
         <div
           style={{
-            background: "var(--bg-2)",
-            borderBottom: "1px solid var(--border)",
+            background: "var(--fill-2)",
+            borderBottom: "var(--bw) solid var(--ink)",
             overflow: "hidden",
             position: "relative",
           }}
         >
           {imageLoading ? (
             <div
-              className="rl-shimmer"
-              style={{ width: "100%", aspectRatio: "3/4" }}
+              style={{
+                width: "100%",
+                aspectRatio: "3/4",
+                background: "var(--fill-3)",
+              }}
               aria-label="Loading resume preview"
             />
           ) : resumeUrl ? (
-            <>
-              <motion.img
-                src={resumeUrl}
-                alt={`Resume preview for ${companyName || jobTitle || "this position"}`}
-                initial={{ filter: "saturate(0.3) brightness(0.7)" }}
-                animate={{
-                  filter: isHovered
-                    ? "saturate(0.7) brightness(0.95)"
-                    : "saturate(0.4) brightness(0.8)",
-                }}
-                transition={{ duration: 0.4 }}
-                style={{
-                  width: "100%",
-                  aspectRatio: "3/4",
-                  objectFit: "cover",
-                  objectPosition: "top",
-                  display: "block",
-                }}
-              />
-              {/* Hover scan line effect */}
-              {isHovered && !reduced && (
-                <motion.div
-                  initial={{ y: "-100%", opacity: 0 }}
-                  animate={{ y: "200%", opacity: [0, 0.5, 0] }}
-                  transition={{ duration: 0.8, ease: "easeInOut" }}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background:
-                      "linear-gradient(90deg, transparent, var(--phos), transparent)",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
-            </>
+            <img
+              src={resumeUrl}
+              alt={`Resume preview for ${companyName || jobTitle || "this position"}`}
+              style={{
+                width: "100%",
+                aspectRatio: "3/4",
+                objectFit: "cover",
+                objectPosition: "top",
+                display: "block",
+              }}
+            />
           ) : (
             <div
               style={{
                 width: "100%",
                 aspectRatio: "3/4",
-                background: "var(--surface)",
+                background: "var(--fill-1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -354,10 +293,10 @@ const ResumeCard = ({
                 style={{
                   fontSize: 12,
                   color: "var(--fg-3)",
-                  fontFamily: "var(--font-mono)",
+                  fontWeight: 600,
                 }}
               >
-                // preview unavailable
+                Preview unavailable
               </span>
             </div>
           )}
@@ -371,7 +310,7 @@ const ResumeCard = ({
             gap: 12,
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "12px 16px",
+            padding: "14px 16px",
           }}
         >
           <div
@@ -384,22 +323,23 @@ const ResumeCard = ({
             }}
           >
             <span
+              className="eyebrow"
               style={{
-                fontSize: 11,
-                fontFamily: "var(--font-mono)",
-                color: "var(--fg-3)",
-                letterSpacing: "0.12em",
+                fontSize: 10,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
-              // {companyName || "resume"}
+              {companyName || "Resume"}
             </span>
             {jobTitle && (
               <p
                 style={{
                   margin: 0,
-                  fontSize: 13,
-                  color: "var(--fg-2)",
-                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: "var(--ink)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -412,7 +352,7 @@ const ResumeCard = ({
           <ScoreCircle score={feedback.overallScore} />
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

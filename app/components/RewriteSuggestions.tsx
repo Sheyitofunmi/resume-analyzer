@@ -36,41 +36,36 @@ const RewriteSuggestions = ({
 
   return (
     <div
-      className="rl-card"
+      className="card"
       style={{ position: "relative", padding: 0, overflow: "hidden" }}
     >
-      {/* Header */}
+      {/* Header — lime bar per the design */}
       <div
         style={{
-          padding: "16px 20px",
-          borderBottom: "1px dashed var(--border)",
+          padding: "16px 22px",
+          borderBottom: "var(--bw) solid var(--ink)",
+          background: "var(--lime)",
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
+          flexWrap: "wrap",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span className="rl-eyebrow-prompt">rewrite_suggestions</span>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--fg-3)",
-            }}
-          >
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ fontWeight: 900, fontSize: 16 }}>AI rewrites</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>
             Turn weak resume lines into strong ones.
-          </p>
+          </span>
         </div>
 
         {!suggestions && !loading && (
           <button
             onClick={handleGenerate}
-            className="rl-btn rl-btn-primary"
-            style={{ fontSize: 11, padding: "8px 14px", flexShrink: 0 }}
+            className="btn btn--primary btn--sm"
+            style={{ flexShrink: 0 }}
           >
-            $ get_rewrites →
+            Get rewrites →
           </button>
         )}
         {suggestions && (
@@ -79,29 +74,39 @@ const RewriteSuggestions = ({
               setSuggestions(null);
               setError("");
             }}
-            className="rl-btn rl-btn-secondary"
-            style={{ fontSize: 11, padding: "6px 12px", flexShrink: 0 }}
+            className="btn btn--surface btn--sm"
+            style={{ flexShrink: 0 }}
           >
-            ↺ regenerate
+            ↺ Regenerate
           </button>
         )}
       </div>
 
       {/* Body */}
-      <div style={{ padding: "16px 20px" }}>
+      <div style={{ padding: suggestions ? 0 : "18px 22px" }}>
         {loading && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              color: "var(--fg-3)",
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: "var(--fg-2)",
             }}
           >
-            <span className="rl-dot" />
-            generating rewrite examples…
+            <span
+              className="pix-blink"
+              style={{
+                width: 10,
+                height: 10,
+                background: "var(--lime)",
+                border: "var(--bw) solid var(--ink)",
+                borderRadius: 3,
+                display: "inline-block",
+              }}
+            />
+            Writing stronger versions of your weakest bullets…
           </div>
         )}
 
@@ -110,9 +115,9 @@ const RewriteSuggestions = ({
             role="alert"
             style={{
               margin: 0,
-              fontFamily: "var(--font-mono)",
               fontSize: 13,
-              color: "var(--ember)",
+              fontWeight: 700,
+              color: "var(--red)",
             }}
           >
             ✕ {error}
@@ -123,134 +128,65 @@ const RewriteSuggestions = ({
           <p
             style={{
               margin: 0,
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-3)",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--fg-2)",
               textAlign: "center",
-              padding: "16px 0",
+              padding: "12px 0",
             }}
           >
-            // click get_rewrites for 3 before/after examples
+            Get 3 before/after examples tuned to this job.
           </p>
         )}
 
         {suggestions && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div>
             {suggestions.map((s, i) => (
               <div
                 key={i}
-                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                style={{
+                  padding: "20px 22px",
+                  borderBottom:
+                    i < suggestions.length - 1
+                      ? "1.5px solid var(--fill-3)"
+                      : "none",
+                }}
               >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    color: "var(--fg-3)",
-                    letterSpacing: "0.12em",
-                  }}
-                >
-                  // example_{String(i + 1).padStart(2, "0")}
-                </span>
-
-                <div className="rl-rewrite-grid">
-                  {/* Before */}
-                  <div
-                    style={{
-                      background: "rgba(227,83,74,0.06)",
-                      border: "1px solid var(--ember-dim)",
-                      borderRadius: "var(--radius-md)",
-                      padding: "12px",
-                    }}
-                  >
-                    <p
-                      style={{
-                        margin: "0 0 8px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color: "var(--ember)",
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      − before
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--fg-2)",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {s.weak}
-                    </p>
-                  </div>
-
-                  {/* After */}
-                  <div
-                    style={{
-                      background: "rgba(168,230,163,0.06)",
-                      border: "1px solid var(--phos-dim)",
-                      borderRadius: "var(--radius-md)",
-                      padding: "12px",
-                    }}
-                  >
-                    <p
-                      style={{
-                        margin: "0 0 8px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color: "var(--phos)",
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      + after
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--fg-1)",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {s.strong}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Why */}
                 <div
                   style={{
-                    background: "var(--surface-2)",
-                    border: "1px dashed var(--border)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "10px 14px",
+                    fontSize: 13.5,
+                    color: "var(--fg-3)",
+                    textDecoration: "line-through",
+                    marginBottom: 8,
+                    lineHeight: 1.5,
                   }}
                 >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontFamily: "var(--font-body)",
-                      fontSize: 12,
-                      color: "var(--fg-2)",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        color: "var(--copper)",
-                        marginRight: 6,
-                      }}
-                    >
-                      //
-                    </span>
-                    {s.why}
-                  </p>
+                  {s.weak}
+                </div>
+                <div
+                  style={{
+                    fontSize: 14.5,
+                    fontWeight: 700,
+                    lineHeight: 1.55,
+                    marginBottom: 12,
+                  }}
+                >
+                  {s.strong}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    background: "var(--fill-3)",
+                    borderRadius: 6,
+                    padding: "6px 10px",
+                    display: "inline-block",
+                    color: "var(--fg-2)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  WHY: {s.why}
                 </div>
               </div>
             ))}

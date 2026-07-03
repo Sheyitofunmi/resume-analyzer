@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { usePuterStore } from "~/lib/puter";
 
-const CATEGORY_COLORS: Record<string, string> = {
-  behavioral: "var(--copper-hi)",
-  technical: "var(--phos)",
-  situational: "var(--copper)",
-  "role-specific": "var(--fg-2)",
+const CATEGORY_BG: Record<string, string> = {
+  behavioral: "var(--cyan)",
+  technical: "var(--lime)",
+  situational: "var(--amber)",
+  "role-specific": "var(--violet)",
 };
 
 const InterviewQuestions = ({
@@ -49,46 +49,37 @@ const InterviewQuestions = ({
 
   return (
     <div
-      className="rl-card"
+      className="card"
       style={{ position: "relative", padding: 0, overflow: "hidden" }}
     >
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {/* Header */}
       <div
         style={{
-          padding: "16px 20px",
-          borderBottom: "1px dashed var(--border)",
+          padding: "16px 22px",
+          borderBottom: "var(--bw) solid var(--ink)",
+          background: "var(--violet)",
+          color: "#fff",
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
+          flexWrap: "wrap",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span className="rl-eyebrow-prompt">interview_prep</span>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--fg-3)",
-            }}
-          >
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ fontWeight: 900, fontSize: 16 }}>Interview prep</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: "#E4D9FF" }}>
             Predicted questions based on this role and your resume gaps.
-          </p>
+          </span>
         </div>
 
         {!questions && !loading && (
           <button
             onClick={handleGenerate}
-            className="rl-btn rl-btn-primary"
-            style={{ fontSize: 11, padding: "8px 14px", flexShrink: 0 }}
+            className="btn btn--surface btn--sm"
+            style={{ flexShrink: 0 }}
           >
-            $ predict →
+            Predict questions →
           </button>
         )}
         {questions && (
@@ -97,29 +88,39 @@ const InterviewQuestions = ({
               setQuestions(null);
               setError("");
             }}
-            className="rl-btn rl-btn-secondary"
-            style={{ fontSize: 11, padding: "6px 12px", flexShrink: 0 }}
+            className="btn btn--surface btn--sm"
+            style={{ flexShrink: 0 }}
           >
-            ↺ regenerate
+            ↺ Regenerate
           </button>
         )}
       </div>
 
       {/* Body */}
-      <div style={{ padding: "16px 20px" }}>
+      <div style={{ padding: "18px 22px" }}>
         {loading && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              color: "var(--fg-3)",
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: "var(--fg-2)",
             }}
           >
-            <span className="rl-dot" />
-            generating questions…
+            <span
+              className="pix-blink"
+              style={{
+                width: 10,
+                height: 10,
+                background: "var(--violet)",
+                border: "var(--bw) solid var(--ink)",
+                borderRadius: 3,
+                display: "inline-block",
+              }}
+            />
+            Predicting likely interview questions…
           </div>
         )}
 
@@ -128,9 +129,9 @@ const InterviewQuestions = ({
             role="alert"
             style={{
               margin: 0,
-              fontFamily: "var(--font-mono)",
               fontSize: 13,
-              color: "var(--ember)",
+              fontWeight: 700,
+              color: "var(--red)",
             }}
           >
             ✕ {error}
@@ -141,14 +142,14 @@ const InterviewQuestions = ({
           <p
             style={{
               margin: 0,
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-3)",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--fg-2)",
               textAlign: "center",
-              padding: "16px 0",
+              padding: "12px 0",
             }}
           >
-            // click predict to generate 5 likely interview questions
+            Generate 5 questions an interviewer is likely to ask for this role.
           </p>
         )}
 
@@ -165,12 +166,20 @@ const InterviewQuestions = ({
           >
             {questions.map((q, i) => {
               const cat = q.category?.toLowerCase() ?? "";
-              const color = CATEGORY_COLORS[cat] ?? "var(--fg-2)";
+              const bg = CATEGORY_BG[cat] ?? "var(--fill-2)";
               return (
                 <li
                   key={i}
-                  className="rl-row"
-                  style={{ alignItems: "flex-start", gap: 14 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 14,
+                    padding: "14px 0",
+                    borderBottom:
+                      i < questions.length - 1
+                        ? "1px solid var(--line)"
+                        : "none",
+                  }}
                 >
                   <span
                     style={{
@@ -179,7 +188,7 @@ const InterviewQuestions = ({
                       fontSize: 11,
                       color: "var(--fg-3)",
                       width: 24,
-                      paddingTop: 2,
+                      paddingTop: 3,
                       textAlign: "right",
                     }}
                   >
@@ -190,30 +199,31 @@ const InterviewQuestions = ({
                       flex: 1,
                       display: "flex",
                       flexDirection: "column",
-                      gap: 6,
+                      gap: 8,
                     }}
                   >
                     <p
                       style={{
                         margin: 0,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--fg-1)",
-                        lineHeight: 1.65,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: "var(--ink)",
+                        lineHeight: 1.6,
                       }}
                     >
                       {q.question}
                     </p>
                     <span
+                      className="chip"
                       style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color,
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
+                        background: bg,
+                        color: cat === "role-specific" ? "#fff" : "var(--ink)",
+                        fontSize: 10.5,
+                        alignSelf: "flex-start",
+                        textTransform: "capitalize",
                       }}
                     >
-                      [{cat || "general"}]
+                      {cat || "general"}
                     </span>
                   </div>
                 </li>

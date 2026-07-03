@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { usePuterStore } from "~/lib/puter";
-import { Cursor, Eyebrow } from "~/components/atoms";
+import { LogoMark } from "~/components/atoms";
 
 export const meta = () => [{ title: "ResumeLens | Onboarding" }];
 
@@ -15,38 +15,44 @@ const ROLES = [
   "Other",
 ];
 
-const SENIORITY = ["intern", "junior", "mid", "senior", "staff / principal"];
+const SENIORITY = [
+  { name: "Intern", desc: "Internships and first steps" },
+  { name: "Junior", desc: "0–2 years, first roles" },
+  { name: "Mid", desc: "2–5 years, owning projects" },
+  { name: "Senior", desc: "5–10 years, leading work" },
+  { name: "Staff / Principal", desc: "10+ years, running orgs" },
+];
 
 const INDUSTRIES = [
-  "fintech",
-  "healthtech",
-  "e-commerce",
-  "enterprise SaaS",
-  "gaming",
-  "media",
-  "gov / nonprofit",
-  "consulting",
+  "Fintech",
+  "Healthtech",
+  "E-commerce",
+  "Enterprise SaaS",
+  "Gaming",
+  "Media",
+  "Gov / Nonprofit",
+  "Consulting",
 ];
 
 const GOALS = [
   {
     id: "land_first",
-    label: "land my first offer",
+    label: "Land my first offer",
     desc: "I'm actively applying and need a strong baseline.",
   },
   {
     id: "level_up",
-    label: "level up my role",
+    label: "Level up my role",
     desc: "Targeting a promotion or senior title.",
   },
   {
     id: "switch",
-    label: "switch industries",
+    label: "Switch industries",
     desc: "Moving across domains and need keyword parity.",
   },
   {
     id: "passive",
-    label: "passive exploration",
+    label: "Passive exploration",
     desc: "Just keeping my resume sharp.",
   },
 ];
@@ -58,7 +64,7 @@ type State = {
   goal: string;
 };
 
-// ── Sub-components ─────────────────────────────────────────────────────
+// ── Selectable chip (role, industries) ─────────────────────────────────
 function Chip({
   label,
   selected,
@@ -72,21 +78,44 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`rl-btn ${selected ? "rl-btn-copper" : "rl-btn-secondary"}`}
-      style={{ fontSize: 12, padding: "6px 14px" }}
+      aria-pressed={selected}
+      style={{
+        border: "var(--bw) solid var(--ink)",
+        borderRadius: 999,
+        padding: "11px 20px",
+        fontSize: 14,
+        fontWeight: 800,
+        cursor: "pointer",
+        userSelect: "none",
+        background: selected ? "var(--ink)" : "var(--surface)",
+        color: selected ? "#fff" : "var(--ink)",
+        fontFamily: "var(--font-sans)",
+        transition:
+          "box-shadow var(--dur-fast) ease, transform var(--dur-fast) ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "3px 3px 0 var(--ink)";
+        e.currentTarget.style.transform = "translate(-1px,-1px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.transform = "none";
+      }}
     >
-      {selected ? "◆ " : ""}
       {label}
     </button>
   );
 }
 
-function GoalCard({
-  goal,
+// ── Selectable card (seniority, goal) ──────────────────────────────────
+function OptionCard({
+  title,
+  desc,
   selected,
   onClick,
 }: {
-  goal: (typeof GOALS)[0];
+  title: string;
+  desc: string;
   selected: boolean;
   onClick: () => void;
 }) {
@@ -94,217 +123,61 @@ function GoalCard({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={selected}
       style={{
-        background: selected ? "rgba(196,123,74,0.08)" : "var(--surface)",
-        border: `1px solid ${selected ? "var(--copper)" : "var(--border)"}`,
-        borderRadius: "var(--radius-md)",
-        padding: "14px 16px",
+        border: "var(--bw) solid var(--ink)",
+        borderRadius: 12,
+        padding: 20,
         cursor: "pointer",
+        userSelect: "none",
+        background: selected ? "var(--lime)" : "var(--surface)",
         textAlign: "left",
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        transition: "all var(--dur-fast)",
-        position: "relative",
+        fontFamily: "var(--font-sans)",
+        transition:
+          "box-shadow var(--dur-fast) ease, transform var(--dur-fast) ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "4px 4px 0 var(--ink)";
+        e.currentTarget.style.transform = "translate(-2px,-2px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.transform = "none";
       }}
     >
-      {selected && (
-        <span
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 12,
-            color: "var(--copper)",
-            fontSize: 14,
-          }}
-        >
-          ◆
-        </span>
-      )}
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 13,
-          color: selected ? "var(--copper-hi)" : "var(--fg-1)",
-          fontWeight: 500,
-        }}
-      >
-        {goal.label}
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 12,
-          color: "var(--fg-3)",
-          lineHeight: 1.5,
-        }}
-      >
-        {goal.desc}
-      </span>
+      <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 12.5, color: "var(--fg-2)", fontWeight: 600 }}>
+        {desc}
+      </div>
     </button>
   );
 }
 
-// ── Step components ────────────────────────────────────────────────────
-function StepRole({
-  state,
-  setState,
-}: {
-  state: State;
-  setState: (s: State) => void;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 14,
-          color: "var(--fg-2)",
-          margin: 0,
-        }}
-      >
-        What's your primary role?
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {ROLES.map((r) => (
-          <Chip
-            key={r}
-            label={r}
-            selected={state.role === r}
-            onClick={() => setState({ ...state, role: r })}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepSeniority({
-  state,
-  setState,
-}: {
-  state: State;
-  setState: (s: State) => void;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 14,
-          color: "var(--fg-2)",
-          margin: 0,
-        }}
-      >
-        What's your seniority level?
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {SENIORITY.map((s) => (
-          <Chip
-            key={s}
-            label={s}
-            selected={state.seniority === s}
-            onClick={() => setState({ ...state, seniority: s })}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepIndustries({
-  state,
-  setState,
-}: {
-  state: State;
-  setState: (s: State) => void;
-}) {
-  const toggle = (ind: string) => {
-    const next = state.industries.includes(ind)
-      ? state.industries.filter((i) => i !== ind)
-      : [...state.industries, ind];
-    setState({ ...state, industries: next });
-  };
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 14,
-          color: "var(--fg-2)",
-          margin: 0,
-        }}
-      >
-        Which industries are you targeting? (select all that apply)
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {INDUSTRIES.map((ind) => (
-          <Chip
-            key={ind}
-            label={ind}
-            selected={state.industries.includes(ind)}
-            onClick={() => toggle(ind)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepGoal({
-  state,
-  setState,
-}: {
-  state: State;
-  setState: (s: State) => void;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 14,
-          color: "var(--fg-2)",
-          margin: 0,
-        }}
-      >
-        What's your primary goal right now?
-      </p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 12,
-        }}
-      >
-        {GOALS.map((g) => (
-          <GoalCard
-            key={g.id}
-            goal={g}
-            selected={state.goal === g.id}
-            onClick={() => setState({ ...state, goal: g.id })}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const STEPS = [
-  { label: "role", title: "what do you do_", valid: (s: State) => !!s.role },
+  {
+    label: "role",
+    title: "What role are you chasing?",
+    sub: "Every score and rewrite gets tuned to this target. You can change it anytime.",
+    valid: (s: State) => !!s.role,
+  },
   {
     label: "seniority",
-    title: "how senior are you_",
+    title: "How senior?",
+    sub: "Sets the bar for impact — a senior resume gets judged harder on outcomes.",
     valid: (s: State) => !!s.seniority,
   },
   {
     label: "industries",
-    title: "where do you want to work_",
+    title: "Where do you want to work?",
+    sub: "Pick every industry you're targeting — keywords differ between them.",
     valid: (s: State) => s.industries.length > 0,
   },
   {
     label: "goal",
-    title: "what's the mission_",
+    title: "What's the mission?",
+    sub: "This shapes the advice you get alongside your scores.",
     valid: (s: State) => !!s.goal,
   },
 ];
@@ -335,170 +208,262 @@ export default function Onboarding() {
     }
   };
 
+  const toggleIndustry = (ind: string) => {
+    const next = state.industries.includes(ind)
+      ? state.industries.filter((i) => i !== ind)
+      : [...state.industries, ind];
+    setState({ ...state, industries: next });
+  };
+
   return (
     <main
-      className="rl-page"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "var(--space-8)",
-        background:
-          "radial-gradient(ellipse 700px 500px at 50% 50%, rgba(196,123,74,0.07) 0%, transparent 100%)",
-      }}
+      id="main-content"
+      style={{ minHeight: "100vh", background: "var(--page)" }}
     >
+      {/* Top bar */}
       <div
         style={{
-          width: "100%",
-          maxWidth: 640,
           display: "flex",
-          flexDirection: "column",
-          gap: 32,
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "16px var(--gutter)",
+          borderBottom: "var(--bw) solid var(--ink)",
+          background: "var(--surface)",
         }}
       >
-        {/* Stepper */}
-        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 9,
+            fontWeight: 900,
+            fontSize: 16,
+          }}
+        >
+          <LogoMark size={19} />
+          ResumeLens
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.1em",
+            color: "var(--fg-2)",
+          }}
+        >
+          SETUP · STEP {step + 1} OF {STEPS.length}
+        </span>
+      </div>
+
+      <div
+        style={{ maxWidth: 660, margin: "0 auto", padding: "56px 32px 80px" }}
+      >
+        {/* Segmented progress */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 44 }}>
           {STEPS.map((s, i) => (
-            <div
+            <span
               key={s.label}
-              style={{ display: "flex", alignItems: "center", flex: 1 }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background:
-                      i < step
-                        ? "var(--phos)"
-                        : i === step
-                          ? "var(--surface-2)"
-                          : "var(--surface)",
-                    border: `1px solid ${i <= step ? "var(--phos)" : "var(--border)"}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color:
-                      i < step
-                        ? "var(--bg)"
-                        : i === step
-                          ? "var(--phos)"
-                          : "var(--fg-4)",
-                  }}
-                >
-                  {i < step ? "✓" : `0${i + 1}`}
-                </div>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    color: i === step ? "var(--fg-2)" : "var(--fg-4)",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {s.label}
-                </span>
-              </div>
-              {i < STEPS.length - 1 && (
-                <div
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    background: i < step ? "var(--phos-dim)" : "var(--border)",
-                    margin: "0 4px",
-                    marginBottom: 20,
-                  }}
-                />
-              )}
-            </div>
+              style={{
+                flex: 1,
+                height: 8,
+                borderRadius: 4,
+                border: "var(--bw) solid var(--ink)",
+                background: i <= step ? "var(--lime)" : "var(--surface)",
+                transition: "background var(--dur-base) ease",
+              }}
+            />
           ))}
         </div>
 
-        {/* Card */}
-        <div
-          className="rl-card is-raised rl-fade-in"
-          style={{ position: "relative" }}
-          key={step}
+        <h1
+          style={{
+            fontWeight: 900,
+            fontSize: 38,
+            letterSpacing: "-0.03em",
+            margin: "0 0 10px",
+          }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            <div>
-              <Eyebrow mode="prompt">step_0{step + 1} / 04</Eyebrow>
-              <h2
+          {current.title}
+        </h1>
+        <p
+          style={{
+            fontSize: 15,
+            color: "var(--fg-2)",
+            fontWeight: 500,
+            margin: "0 0 30px",
+          }}
+        >
+          {current.sub}
+        </p>
+
+        {step === 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              marginBottom: 34,
+            }}
+          >
+            {ROLES.map((r) => (
+              <Chip
+                key={r}
+                label={r}
+                selected={state.role === r}
+                onClick={() => setState({ ...state, role: r })}
+              />
+            ))}
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="g-halves" style={{ gap: 12, marginBottom: 34 }}>
+            {SENIORITY.map((l) => (
+              <OptionCard
+                key={l.name}
+                title={l.name}
+                desc={l.desc}
+                selected={state.seniority === l.name}
+                onClick={() => setState({ ...state, seniority: l.name })}
+              />
+            ))}
+          </div>
+        )}
+
+        {step === 2 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              marginBottom: 34,
+            }}
+          >
+            {INDUSTRIES.map((ind) => (
+              <Chip
+                key={ind}
+                label={ind}
+                selected={state.industries.includes(ind)}
+                onClick={() => toggleIndustry(ind)}
+              />
+            ))}
+          </div>
+        )}
+
+        {step === 3 && (
+          <>
+            <div className="g-halves" style={{ gap: 12, marginBottom: 24 }}>
+              {GOALS.map((g) => (
+                <OptionCard
+                  key={g.id}
+                  title={g.label}
+                  desc={g.desc}
+                  selected={state.goal === g.id}
+                  onClick={() => setState({ ...state, goal: g.id })}
+                />
+              ))}
+            </div>
+            {isValid && (
+              <div
+                className="pop-in"
                 style={{
-                  marginTop: 8,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "clamp(22px, 4vw, 32px)",
-                  color: "var(--fg-1)",
-                  fontWeight: 500,
+                  border: "var(--bw) solid var(--ink)",
+                  borderRadius: 14,
+                  background: "var(--cyan)",
+                  padding: 26,
+                  marginBottom: 34,
                 }}
               >
-                {current.title}
-                <Cursor />
-              </h2>
-            </div>
-
-            {step === 0 && <StepRole state={state} setState={setState} />}
-            {step === 1 && <StepSeniority state={state} setState={setState} />}
-            {step === 2 && <StepIndustries state={state} setState={setState} />}
-            {step === 3 && <StepGoal state={state} setState={setState} />}
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingTop: 8,
-                borderTop: "1px dashed var(--border)",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="rl-btn rl-btn-ghost"
-                style={{ fontSize: 12 }}
-              >
-                skip →
-              </button>
-
-              <div style={{ display: "flex", gap: 10 }}>
-                {step > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setStep((s) => s - 1)}
-                    className="rl-btn rl-btn-secondary"
-                    style={{ fontSize: 12 }}
-                  >
-                    ← back
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={advance}
-                  className="rl-btn rl-btn-primary"
-                  disabled={!isValid}
+                <div
+                  className="eyebrow eyebrow--ink"
+                  style={{ fontSize: 10, marginBottom: 10 }}
+                >
+                  YOUR TARGET
+                </div>
+                <div
                   style={{
-                    fontSize: 13,
-                    opacity: isValid ? 1 : 0.4,
-                    cursor: isValid ? "pointer" : "not-allowed",
+                    fontWeight: 900,
+                    fontSize: 26,
+                    letterSpacing: "-0.02em",
+                    marginBottom: 4,
                   }}
                 >
-                  {isLast ? "$ finish →" : "continue →"}
-                </button>
+                  {state.role}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>
+                  {state.seniority} · scored on 5 dimensions
+                </div>
               </div>
-            </div>
+            )}
+          </>
+        )}
+
+        {/* Controls */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ display: "flex", gap: 18, alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
+              style={{
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: step === 0 ? "default" : "pointer",
+                userSelect: "none",
+                color: step === 0 ? "#D8DDD8" : "var(--ink)",
+                background: "none",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                padding: 0,
+              }}
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                color: "var(--fg-3)",
+                background: "none",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                padding: 0,
+              }}
+            >
+              Skip for now
+            </button>
           </div>
+
+          {isLast ? (
+            <button
+              type="button"
+              onClick={advance}
+              disabled={!isValid}
+              className="btn btn--lime"
+              style={{ fontWeight: 900, padding: "14px 30px" }}
+            >
+              Finish setup ▸
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={advance}
+              disabled={!isValid}
+              className="btn btn--primary"
+              style={{ padding: "14px 30px" }}
+            >
+              Continue →
+            </button>
+          )}
         </div>
       </div>
     </main>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { usePuterStore } from "~/lib/puter";
@@ -7,11 +6,10 @@ import { springs } from "~/lib/motion";
 import { useProductTour } from "~/hooks/useProductTour";
 
 const NAV_LINKS = [
-  { to: "/", label: "dashboard", exact: true },
-  { to: "/upload", label: "upload", exact: false },
-  { to: "/history", label: "history", exact: false },
-  { to: "/pricing", label: "pricing", exact: false },
-  { to: "/settings", label: "settings", exact: false },
+  { to: "/", label: "Home", exact: true },
+  { to: "/upload", label: "Upload", exact: false },
+  { to: "/history", label: "History", exact: false },
+  { to: "/settings", label: "Settings", exact: false },
 ];
 
 const Navbar = () => {
@@ -19,12 +17,11 @@ const Navbar = () => {
   const location = useLocation();
   const reduced = useReducedMotion();
   const { startTour } = useProductTour();
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
   const user = auth.user;
   const initials = user?.username
-    ? user.username.slice(0, 2).toUpperCase()
-    : "??";
+    ? user.username.slice(0, 1).toUpperCase()
+    : "?";
 
   const isActive = (to: string, exact: boolean) =>
     exact ? location.pathname === to : location.pathname.startsWith(to);
@@ -35,236 +32,176 @@ const Navbar = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "10px 16px",
-        borderBottom: "1px solid var(--border)",
-        background: "rgba(11,11,10,0.9)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        padding: "14px var(--gutter)",
+        borderBottom: "var(--bw) solid var(--ink)",
+        background: "var(--surface)",
         position: "sticky",
         top: 0,
         zIndex: 50,
-        gap: 12,
+        gap: 16,
         minWidth: 0,
       }}
     >
-      {/* Logo */}
-      <Link to="/landing" style={{ textDecoration: "none", flexShrink: 0 }}>
-        <motion.div
-          whileHover={reduced ? {} : { scale: 1.04 }}
-          whileTap={reduced ? {} : { scale: 0.97 }}
-          transition={springs.snappy}
-          style={{ display: "inline-flex" }}
-        >
-          <Logo size={15} />
-        </motion.div>
-      </Link>
-
-      {/* Nav links — desktop */}
       <div
-        id="nav-links"
-        className="rl-mobile-hide"
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
-          flex: 1,
-          justifyContent: "center",
+          gap: 32,
+          minWidth: 0,
         }}
-        onMouseLeave={() => setHoveredLink(null)}
       >
-        {NAV_LINKS.map(({ to, label, exact }) => {
-          const active = isActive(to, exact);
-          const isHovered = hoveredLink === to;
+        <Link
+          to={auth.isAuthenticated ? "/" : "/landing"}
+          style={{ textDecoration: "none", flexShrink: 0 }}
+          aria-label="ResumeLens home"
+        >
+          <Logo size={16} />
+        </Link>
 
-          return (
-            <Link
-              key={to}
-              to={to}
-              onMouseEnter={() => setHoveredLink(to)}
-              style={{
-                position: "relative",
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                color: active
-                  ? "var(--fg-1)"
-                  : isHovered
-                    ? "var(--fg-1)"
-                    : "var(--fg-3)",
-                textDecoration: "none",
-                padding: "5px 12px",
-                borderRadius: "var(--radius-sm)",
-                letterSpacing: "0.04em",
-                transition: "color 120ms ease",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                zIndex: 0,
-              }}
-            >
-              {/* Sliding hover background — magic pill */}
-              {isHovered && !active && (
-                <motion.span
-                  layoutId="nav-hover-bg"
+        {/* Nav links — desktop */}
+        {auth.isAuthenticated && (
+          <div
+            id="nav-links"
+            className="mobile-hide"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            {NAV_LINKS.map(({ to, label, exact }) => {
+              const active = isActive(to, exact);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  aria-current={active ? "page" : undefined}
                   style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "var(--surface)",
-                    borderRadius: "var(--radius-sm)",
-                    zIndex: -1,
+                    position: "relative",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: "var(--ink)",
+                    textDecoration: "none",
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    border: "var(--bw) solid transparent",
+                    zIndex: 0,
+                    transition: "background var(--dur-fast) ease",
                   }}
-                  transition={reduced ? { duration: 0 } : springs.smooth}
-                />
-              )}
-
-              {/* Sliding active background */}
-              {active && (
-                <motion.span
-                  layoutId="nav-active-bg"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "var(--surface)",
-                    border: "1px solid var(--border-hi)",
-                    borderRadius: "var(--radius-sm)",
-                    zIndex: -1,
+                  onMouseEnter={(e) => {
+                    if (!active)
+                      e.currentTarget.style.background = "var(--fill-2)";
                   }}
-                  transition={reduced ? { duration: 0 } : springs.smooth}
-                />
-              )}
-              {active && (
-                <motion.span
-                  layoutId="nav-active-dot"
-                  style={{ color: "var(--phos)", fontSize: 8, lineHeight: 1 }}
-                  transition={reduced ? { duration: 0 } : springs.smooth}
+                  onMouseLeave={(e) => {
+                    if (!active) e.currentTarget.style.background = "";
+                  }}
                 >
-                  ◆
-                </motion.span>
-              )}
-              {label}
-            </Link>
-          );
-        })}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-active-bg"
+                      style={{
+                        position: "absolute",
+                        inset: -1.5,
+                        background: "var(--cyan)",
+                        border: "var(--bw) solid var(--ink)",
+                        borderRadius: 8,
+                        zIndex: -1,
+                      }}
+                      transition={reduced ? { duration: 0 } : springs.smooth}
+                    />
+                  )}
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Right: user + actions */}
+      {/* Right: plan badge + tour + avatar / sign in */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 14,
           flexShrink: 0,
           minWidth: 0,
         }}
       >
-        {auth.isAuthenticated && user && (
-          <div
-            className="rl-mobile-hide"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "4px 10px",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: 12,
-            }}
-          >
-            <motion.span
-              whileHover={reduced ? {} : { scale: 1.1 }}
-              transition={springs.snappy}
-              style={{
-                width: 20,
-                height: 20,
-                background: "var(--copper)",
-                color: "var(--bg)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 10,
-                fontWeight: 700,
-                borderRadius: "50%",
-                flexShrink: 0,
-                boxShadow: "0 0 8px var(--copper-glow)",
-              }}
-            >
-              {initials}
-            </motion.span>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                color: "var(--fg-2)",
-                maxWidth: 110,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {user.username}
-            </span>
-          </div>
-        )}
-
         {auth.isAuthenticated && (
           <Link
+            to="/pricing"
+            className="badge-mono mobile-hide"
             id="nav-upload-btn"
-            to="/upload"
-            style={{ textDecoration: "none" }}
           >
-            <motion.span
-              className="rl-btn rl-btn-primary"
-              style={{
-                fontSize: 12,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-              whileHover={reduced ? {} : { y: -2, scale: 1.02 }}
-              whileTap={reduced ? {} : { y: 0, scale: 0.97 }}
-              transition={springs.snappy}
-            >
-              $ upload<span className="rl-mobile-hide">_resume</span> →
-            </motion.span>
+            Free plan · Upgrade
           </Link>
         )}
 
         {auth.isAuthenticated && (
-          <motion.button
+          <button
             id="tour-btn"
             onClick={startTour}
-            className="rl-btn rl-btn-ghost rl-mobile-hide"
-            style={{ fontSize: 12 }}
-            whileHover={reduced ? {} : { color: "var(--phos)" }}
-            whileTap={reduced ? {} : { scale: 0.97 }}
-            transition={springs.snappy}
-            title="take a tour"
+            className="mobile-hide"
+            title="Take a tour"
+            aria-label="Take a tour"
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              border: "var(--bw) solid var(--ink)",
+              background: "var(--surface)",
+              fontWeight: 900,
+              fontSize: 14,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background var(--dur-fast) ease",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "var(--fill-2)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "var(--surface)")
+            }
           >
-            ? tour
-          </motion.button>
+            ?
+          </button>
+        )}
+
+        {auth.isAuthenticated && user && (
+          <span
+            title={user.username}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              background: "var(--violet)",
+              border: "var(--bw) solid var(--ink)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontWeight: 900,
+              fontSize: 13,
+              flexShrink: 0,
+            }}
+          >
+            {initials}
+          </span>
         )}
 
         {auth.isAuthenticated ? (
-          <motion.button
+          <button
             onClick={auth.signOut}
-            className="rl-btn rl-btn-ghost rl-mobile-hide"
-            style={{ fontSize: 12 }}
-            whileHover={reduced ? {} : { color: "var(--ember)" }}
-            whileTap={reduced ? {} : { scale: 0.97 }}
-            transition={springs.snappy}
+            className="btn btn--outline btn--sm mobile-hide"
           >
-            sign_out
-          </motion.button>
+            Sign out
+          </button>
         ) : (
-          <Link to="/auth" style={{ textDecoration: "none" }}>
-            <motion.span
-              className="rl-btn rl-btn-primary"
-              style={{ fontSize: 12, display: "inline-flex" }}
-              whileHover={reduced ? {} : { y: -2, scale: 1.02 }}
-              whileTap={reduced ? {} : { scale: 0.97 }}
-              transition={springs.snappy}
-            >
-              $ sign_in →
-            </motion.span>
+          <Link to="/auth" className="btn btn--primary btn--sm">
+            Sign in
           </Link>
         )}
       </div>

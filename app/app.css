@@ -682,6 +682,45 @@ select:focus-visible {
   }
 }
 
+@keyframes rl-scan {
+  0% {
+    top: 4%;
+  }
+  50% {
+    top: 88%;
+  }
+  100% {
+    top: 4%;
+  }
+}
+
+@keyframes rl-hl {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+@keyframes rl-lens {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-120px, 60px);
+  }
+  50% {
+    transform: translate(-40px, 150px);
+  }
+  75% {
+    transform: translate(-150px, 210px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
 .pix-blink {
   animation: rl-pix 1.6s steps(2) infinite;
 }
@@ -728,6 +767,57 @@ select:focus-visible {
   background: transparent;
 }
 
+/* ── Product tour (driver.js) popover ─────────────────────────────── */
+.rl-driver-popover {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border: var(--bw) solid var(--ink) !important;
+  border-radius: var(--r-card) !important;
+  box-shadow: var(--pop) !important;
+  font-family: var(--font-sans) !important;
+}
+
+.rl-driver-popover .driver-popover-title {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.rl-driver-popover .driver-popover-description {
+  color: var(--fg-2);
+  font-weight: 500;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.rl-driver-popover .driver-popover-progress-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-3);
+}
+
+.rl-driver-popover .driver-popover-navigation-btns button {
+  background: var(--ink);
+  color: #fff;
+  border: var(--bw) solid var(--ink);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 12px;
+  padding: 7px 14px;
+  text-shadow: none;
+}
+
+.rl-driver-popover .driver-popover-navigation-btns button:hover {
+  background: var(--ink);
+  color: var(--cyan);
+}
+
+.rl-driver-popover .driver-popover-close-btn {
+  color: var(--fg-2);
+}
+
 /* ── Reduced motion ───────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -737,6 +827,125 @@ select:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── Responsive grid helpers ──────────────────────────────────────── */
+.g-halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.g-thirds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.g-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.g-feature {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 52px;
+  align-items: center;
+}
+
+.g-split-wide {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .g-halves,
+  .g-thirds,
+  .g-hero,
+  .g-feature,
+  .g-split-wide {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Resume report split layout ───────────────────────────────────── */
+.rl-resume-layout {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.rl-resume-left {
+  width: 38%;
+  max-width: 480px;
+  position: sticky;
+  top: 78px;
+  flex-shrink: 0;
+}
+
+.rl-resume-right {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .rl-resume-layout {
+    flex-direction: column;
+  }
+
+  .rl-resume-left {
+    position: static;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .rl-summary-grid {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+  }
+}
+
+/* ── Compare panel rows ───────────────────────────────────────────── */
+.rl-compare-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Mobile bottom nav ────────────────────────────────────────────── */
+.rl-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: var(--surface);
+  border-top: var(--bw) solid var(--ink);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@media (max-width: 720px) {
+  .rl-bottom-nav {
+    display: block;
+  }
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+  /* Keep content clear of the fixed bottom nav */
+  .has-bottom-nav {
+    padding-bottom: 84px;
   }
 }
 

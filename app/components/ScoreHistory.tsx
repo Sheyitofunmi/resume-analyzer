@@ -1,11 +1,11 @@
 const LINES: { key: keyof ScoreHistoryEntry; label: string; color: string }[] =
   [
-    { key: "overall", label: "Overall", color: "var(--phos)" },
-    { key: "ats", label: "ATS", color: "var(--copper-hi)" },
-    { key: "tone", label: "Tone", color: "#a78bfa" },
-    { key: "content", label: "Content", color: "#60a5fa" },
-    { key: "structure", label: "Structure", color: "#f472b6" },
-    { key: "skills", label: "Skills", color: "var(--ember)" },
+    { key: "overall", label: "Overall", color: "var(--ink)" },
+    { key: "ats", label: "ATS", color: "var(--cyan)" },
+    { key: "tone", label: "Tone", color: "var(--violet)" },
+    { key: "content", label: "Content", color: "#7BB662" },
+    { key: "structure", label: "Structure", color: "var(--amber)" },
+    { key: "skills", label: "Skills", color: "var(--red)" },
   ];
 
 const W = 500;
@@ -27,9 +27,9 @@ function formatDate(iso: string) {
 }
 
 function dotColor(score: number) {
-  if (score > 69) return "var(--phos)";
-  if (score > 49) return "var(--copper-hi)";
-  return "var(--ember)";
+  if (score > 69) return "var(--lime)";
+  if (score > 49) return "var(--amber)";
+  return "var(--red)";
 }
 
 const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
@@ -39,36 +39,23 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
 
   return (
     <div
-      style={{
-        background: "var(--parchment)",
-        border: "1px solid var(--parchment-border)",
-        borderRadius: 12,
-        width: "100%",
-        overflow: "hidden",
-      }}
+      className="card"
+      style={{ width: "100%", overflow: "hidden", padding: 0 }}
     >
       <div
         style={{
-          padding: "14px 20px 10px",
-          borderBottom: "1px solid var(--parchment-border)",
+          padding: "16px 22px 12px",
+          borderBottom: "1px solid var(--line)",
         }}
       >
-        <h3
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            fontWeight: 600,
-            color: "var(--parchment-fg-1)",
-            margin: "0 0 2px",
-          }}
-        >
-          score_history
+        <h3 style={{ fontSize: 15, fontWeight: 900, margin: "0 0 2px" }}>
+          Score history
         </h3>
         <p
           style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--parchment-fg-3)",
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: "var(--fg-2)",
             margin: 0,
           }}
         >
@@ -98,10 +85,10 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 20,
-                fontWeight: 700,
-                fontFamily: "var(--font-mono)",
-                color: "var(--parchment)",
+                fontWeight: 900,
+                color: "var(--ink)",
                 background: dotColor(history[0].overall),
+                border: "var(--bw) solid var(--ink)",
               }}
             >
               {history[0].overall}
@@ -109,12 +96,13 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
             <p
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--parchment-fg-3)",
+                fontSize: 10.5,
+                letterSpacing: "0.06em",
+                color: "var(--fg-2)",
                 margin: 0,
               }}
             >
-              First analysis on {formatDate(history[0].date)}
+              FIRST ANALYSIS ON {formatDate(history[0].date).toUpperCase()}
             </p>
           </div>
         ) : (
@@ -132,7 +120,7 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     x2={W - PAD.right}
                     y1={yOf(v)}
                     y2={yOf(v)}
-                    stroke="var(--parchment-border)"
+                    stroke="var(--line)"
                     strokeWidth={1}
                   />
                   <text
@@ -140,7 +128,8 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     y={yOf(v) + 4}
                     textAnchor="end"
                     fontSize={9}
-                    fill="var(--parchment-fg-3)"
+                    fill="var(--fg-3)"
+                    fontFamily="var(--font-mono)"
                   >
                     {v}
                   </text>
@@ -154,7 +143,8 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                   y={H - 4}
                   textAnchor="middle"
                   fontSize={9}
-                  fill="var(--parchment-fg-3)"
+                  fill="var(--fg-3)"
+                  fontFamily="var(--font-mono)"
                 >
                   {formatDate(entry.date)}
                 </text>
@@ -170,8 +160,8 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     points={pts}
                     fill="none"
                     stroke={color}
-                    strokeWidth={key === "overall" ? 2.5 : 1.2}
-                    strokeOpacity={key === "overall" ? 1 : 0.6}
+                    strokeWidth={key === "overall" ? 2.5 : 1.4}
+                    strokeOpacity={key === "overall" ? 1 : 0.65}
                     strokeLinejoin="round"
                     strokeLinecap="round"
                   />
@@ -183,9 +173,9 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                   key={i}
                   cx={xOf(i, n)}
                   cy={yOf(entry.overall)}
-                  r={4}
+                  r={4.5}
                   fill={dotColor(entry.overall)}
-                  stroke="var(--parchment)"
+                  stroke="var(--ink)"
                   strokeWidth={1.5}
                 />
               ))}
@@ -196,7 +186,7 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "4px 16px",
-                marginTop: 4,
+                marginTop: 6,
                 paddingLeft: 4,
               }}
             >
@@ -209,16 +199,16 @@ const ScoreHistory = ({ history }: { history: ScoreHistoryEntry[] }) => {
                     style={{
                       display: "inline-block",
                       width: 12,
-                      height: 2,
+                      height: 3,
                       borderRadius: 9999,
                       background: color,
                     }}
                   />
                   <span
                     style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 10,
-                      color: "var(--parchment-fg-3)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "var(--fg-2)",
                     }}
                   >
                     {label}

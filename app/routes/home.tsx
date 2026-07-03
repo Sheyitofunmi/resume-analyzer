@@ -11,26 +11,26 @@ import { usePuterStore } from "~/lib/puter";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { springs, staggerContainer, fadeUp } from "~/lib/motion";
+import { PixelSprite, ScoreCircle } from "~/components/atoms";
 
 const SECTIONS: { key: keyof Feedback; label: string }[] = [
   { key: "ATS", label: "ATS" },
-  { key: "toneAndStyle", label: "tone_style" },
-  { key: "content", label: "content" },
-  { key: "structure", label: "structure" },
-  { key: "skills", label: "skills" },
+  { key: "toneAndStyle", label: "Tone & style" },
+  { key: "content", label: "Content" },
+  { key: "structure", label: "Structure" },
+  { key: "skills", label: "Skills" },
 ];
 
-function scoreColor(s: number) {
-  return s > 69 ? "var(--phos)" : s > 49 ? "var(--copper-hi)" : "var(--ember)";
-}
-
-function ScoreBar({ score }: { score: number }) {
-  const filled = Math.round((score / 100) * 20);
-  const color = scoreColor(score);
+function MiniBar({ score, muted }: { score: number; muted?: boolean }) {
   return (
-    <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
-      <span style={{ color }}>{"█".repeat(filled)}</span>
-      <span style={{ color: "var(--fg-4)" }}>{"░".repeat(20 - filled)}</span>
+    <span
+      className="score-bar"
+      style={{ display: "block", flex: 1, opacity: muted ? 0.45 : 1 }}
+    >
+      <span
+        className="score-bar__fill"
+        style={{ display: "block", width: `${score}%` }}
+      />
     </span>
   );
 }
@@ -61,14 +61,14 @@ const ComparePanel = ({
   return (
     <div
       ref={panelRef}
-      className="rl-card is-accent rl-fade-in"
-      style={{ position: "relative", width: "100%", padding: 0 }}
+      className="card card--pop"
+      style={{
+        position: "relative",
+        width: "100%",
+        padding: 0,
+        overflow: "hidden",
+      }}
     >
-      <span className="rl-corner tl" />
-      <span className="rl-corner tr" />
-      <span className="rl-corner bl" />
-      <span className="rl-corner br" />
-
       {/* Header */}
       <div
         style={{
@@ -76,17 +76,17 @@ const ComparePanel = ({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "14px 20px",
-          borderBottom: "1px dashed var(--border)",
-          background: "var(--bg-2)",
+          borderBottom: "var(--bw) solid var(--ink)",
+          background: "var(--cyan)",
         }}
       >
-        <span className="rl-eyebrow-prompt">compare_mode</span>
+        <span className="eyebrow eyebrow--ink">{"// COMPARE"}</span>
         <button
           onClick={onClose}
-          className="rl-btn rl-btn-ghost"
-          style={{ fontSize: 12, padding: "4px 10px" }}
+          className="btn btn--surface btn--sm"
+          style={{ padding: "6px 12px", fontSize: 12 }}
         >
-          ✕ close
+          ✕ Close
         </button>
       </div>
 
@@ -95,7 +95,7 @@ const ComparePanel = ({
         className="rl-compare-row"
         style={{
           padding: "14px 20px",
-          borderBottom: "1px dashed var(--border)",
+          borderBottom: "1px solid var(--line)",
         }}
       >
         <div />
@@ -104,24 +104,23 @@ const ComparePanel = ({
             <p
               style={{
                 margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                color: "var(--fg-1)",
-                fontWeight: 500,
+                fontSize: 14,
+                fontWeight: 900,
+                color: "var(--ink)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}
             >
-              {r.companyName || "resume"}
+              {r.companyName || "Resume"}
             </p>
             {r.jobTitle && (
               <p
                 style={{
                   margin: "2px 0 0",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  color: "var(--fg-3)",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--fg-2)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -138,22 +137,16 @@ const ComparePanel = ({
       <div
         className="rl-compare-row"
         style={{
-          padding: "12px 20px",
-          borderBottom: "1px dashed var(--border)",
-          background: "var(--surface-2)",
+          padding: "14px 20px",
+          borderBottom: "1px solid var(--line)",
+          background: "var(--fill-1)",
         }}
       >
         <p
-          style={{
-            margin: 0,
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--fg-3)",
-            letterSpacing: "0.12em",
-            alignSelf: "center",
-          }}
+          className="eyebrow"
+          style={{ margin: 0, alignSelf: "center", fontSize: 10 }}
         >
-          overall
+          OVERALL
         </p>
         {[a, b].map((r) => {
           const s = r.feedback.overallScore;
@@ -173,29 +166,34 @@ const ComparePanel = ({
             >
               <span
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: winner ? scoreColor(s) : "var(--fg-4)",
-                  letterSpacing: "-1px",
+                  fontSize: 30,
+                  fontWeight: 900,
+                  color: winner ? "var(--ink)" : "var(--fg-3)",
+                  letterSpacing: "-0.03em",
                   fontVariantNumeric: "tabular-nums",
-                  textShadow: winner ? `0 0 12px ${scoreColor(s)}88` : "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
                 {s}
                 {winner && (
                   <span
+                    aria-label="Winner"
                     style={{
-                      marginLeft: 6,
-                      fontSize: 12,
-                      color: "var(--phos)",
+                      width: 12,
+                      height: 12,
+                      background: "var(--lime)",
+                      border: "var(--bw) solid var(--ink)",
+                      borderRadius: 3,
+                      display: "inline-block",
                     }}
-                  >
-                    ◆
-                  </span>
+                  />
                 )}
               </span>
-              <ScoreBar score={s} />
+              <div style={{ width: "80%", display: "flex" }}>
+                <MiniBar score={s} muted={!winner} />
+              </div>
             </div>
           );
         })}
@@ -211,15 +209,15 @@ const ComparePanel = ({
             className="rl-compare-row"
             style={{
               padding: "10px 20px",
-              borderBottom: "1px dashed var(--border)",
+              borderBottom: "1px solid var(--line)",
             }}
           >
             <p
               style={{
                 margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--fg-3)",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "var(--fg-2)",
                 alignSelf: "center",
               }}
             >
@@ -238,15 +236,13 @@ const ComparePanel = ({
                   padding: "0 8px",
                 }}
               >
-                <span className="rl-run-score-bar">
-                  <ScoreBar score={score} />
-                </span>
+                <MiniBar score={score} muted={!winner} />
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: 12,
-                    fontWeight: 700,
-                    color: winner ? scoreColor(score) : "var(--fg-4)",
+                    fontWeight: 600,
+                    color: winner ? "var(--ink)" : "var(--fg-3)",
                     width: 28,
                     textAlign: "right",
                     fontVariantNumeric: "tabular-nums",
@@ -264,46 +260,39 @@ const ComparePanel = ({
       {kwA && kwB && (
         <div style={{ padding: "16px 20px" }}>
           <span
-            className="rl-comment"
-            style={{ marginBottom: 12, display: "block" }}
+            className="eyebrow"
+            style={{ display: "block", marginBottom: 12 }}
           >
-            keyword_overlap
+            {"// KEYWORD OVERLAP"}
           </span>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
               gap: 12,
-              marginTop: 12,
             }}
           >
             {inBoth.length > 0 && (
               <div
                 style={{
-                  background: "rgba(168,230,163,0.06)",
-                  border: "1px solid var(--phos-dim)",
-                  borderRadius: "var(--radius-md)",
+                  background: "var(--surface)",
+                  border: "var(--bw) solid var(--ink)",
+                  borderRadius: 12,
                   padding: 12,
                 }}
               >
                 <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    color: "var(--phos)",
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                  }}
+                  className="eyebrow eyebrow--ink"
+                  style={{ margin: "0 0 8px", fontSize: 10 }}
                 >
-                  + in both ({inBoth.length})
+                  ✓ IN BOTH ({inBoth.length})
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {inBoth.map((k) => (
                     <span
                       key={k}
-                      className="rl-chip rl-chip-phos"
-                      style={{ fontSize: 10 }}
+                      className="chip chip--lime"
+                      style={{ fontSize: 10.5 }}
                     >
                       {k}
                     </span>
@@ -311,71 +300,50 @@ const ComparePanel = ({
                 </div>
               </div>
             )}
-            {onlyA.length > 0 && (
-              <div
-                style={{
-                  background: "var(--surface-2)",
-                  border: "1px dashed var(--border-hi)",
-                  borderRadius: "var(--radius-md)",
-                  padding: 12,
-                }}
-              >
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    color: "var(--copper-hi)",
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  only in {a.companyName || "A"} ({onlyA.length})
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {onlyA.map((k) => (
-                    <span key={k} className="rl-chip" style={{ fontSize: 10 }}>
-                      {k}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {onlyB.length > 0 && (
-              <div
-                style={{
-                  background: "var(--surface-2)",
-                  border: "1px dashed var(--border-hi)",
-                  borderRadius: "var(--radius-md)",
-                  padding: 12,
-                }}
-              >
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    color: "var(--copper)",
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  only in {b.companyName || "B"} ({onlyB.length})
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {onlyB.map((k) => (
-                    <span key={k} className="rl-chip" style={{ fontSize: 10 }}>
-                      {k}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            {[
+              { list: onlyA, owner: a },
+              { list: onlyB, owner: b },
+            ].map(
+              ({ list, owner }, i) =>
+                list.length > 0 && (
+                  <div
+                    key={i}
+                    style={{
+                      background: "var(--fill-1)",
+                      border: "1.5px dashed var(--ink)",
+                      borderRadius: 12,
+                      padding: 12,
+                    }}
+                  >
+                    <p
+                      className="eyebrow"
+                      style={{
+                        margin: "0 0 8px",
+                        fontSize: 10,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      ONLY IN{" "}
+                      {(
+                        owner.companyName || (i === 0 ? "A" : "B")
+                      ).toUpperCase()}{" "}
+                      ({list.length})
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {list.map((k) => (
+                        <span
+                          key={k}
+                          className="chip"
+                          style={{ fontSize: 10.5 }}
+                        >
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ),
             )}
           </div>
         </div>
@@ -386,8 +354,8 @@ const ComparePanel = ({
         className="rl-compare-row"
         style={{
           padding: "12px 20px",
-          borderTop: "1px dashed var(--border)",
-          background: "var(--bg-2)",
+          borderTop: "1px solid var(--line)",
+          background: "var(--fill-1)",
         }}
       >
         <div />
@@ -395,13 +363,15 @@ const ComparePanel = ({
           <div key={r.id} style={{ display: "flex", justifyContent: "center" }}>
             <Link
               to={`/resume/${r.id}`}
-              className="rl-link-phos"
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
+                fontSize: 13,
+                fontWeight: 800,
+                color: "var(--ink)",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
               }}
             >
-              → view_report
+              Open report →
             </Link>
           </div>
         ))}
@@ -418,6 +388,11 @@ export function meta({}: Route.MetaArgs) {
 }
 
 const RESUMES_PER_PAGE = 6;
+
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
+}
 
 export default function Home() {
   const { auth, isLoading, kv, fs } = usePuterStore();
@@ -485,14 +460,33 @@ export default function Home() {
     currentPage * RESUMES_PER_PAGE,
   );
 
+  const latest = resumes[0];
+  const bestScore = resumes.length
+    ? Math.max(...resumes.map((r) => r.feedback.overallScore))
+    : 0;
+
+  const dateEyebrow = new Date()
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    })
+    .toUpperCase();
+
   return (
-    <main className="rl-page">
+    <main className="rl-page has-bottom-nav">
       <Navbar />
 
       <div
         id="main-content"
-        className="rl-section"
-        style={{ flex: 1, display: "flex", flexDirection: "column", gap: 32 }}
+        className="rl-container"
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+          padding: "44px var(--gutter-inner) 80px",
+        }}
       >
         {/* Heading */}
         <motion.div
@@ -501,43 +495,36 @@ export default function Home() {
           animate="visible"
           style={{
             display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            paddingTop: 16,
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: 20,
+            flexWrap: "wrap",
+            marginBottom: 8,
           }}
         >
-          <motion.span variants={fadeUp} className="rl-eyebrow-prompt">
-            resumelens dashboard
-          </motion.span>
-          <motion.h1 variants={fadeUp} className="rl-h1">
-            track_your_
-            <span style={{ color: "var(--phos)" }}>applications</span>
-          </motion.h1>
-          <AnimatePresence>
-            {!loadingResumes && (
-              <motion.p
-                key="subtitle"
-                variants={fadeUp}
-                initial={reduced ? false : "hidden"}
-                animate="visible"
-                exit={{ opacity: 0, y: -4 }}
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-body)",
-                  fontSize: 14,
-                  color: "var(--fg-2)",
-                  lineHeight: 1.7,
-                }}
-              >
-                {resumes.length === 0
-                  ? "No resumes yet — upload your first to get AI feedback."
-                  : "Review your submissions, drill into AI feedback, compare versions side-by-side."}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          <div>
+            <motion.div
+              variants={fadeUp}
+              className="eyebrow"
+              style={{ marginBottom: 10 }}
+            >
+              {dateEyebrow}
+            </motion.div>
+            <motion.h1
+              variants={fadeUp}
+              style={{ fontSize: 40, letterSpacing: "-0.03em" }}
+            >
+              {greeting()}, {auth.user?.username || "there"}.
+            </motion.h1>
+          </div>
+          <motion.div variants={fadeUp}>
+            <Link to="/upload" className="btn btn--primary">
+              + New scan
+            </Link>
+          </motion.div>
         </motion.div>
 
-        {/* Loading — skeleton shimmer placeholders */}
+        {/* Loading — skeleton placeholders */}
         <AnimatePresence>
           {loadingResumes && (
             <motion.div
@@ -554,12 +541,11 @@ export default function Home() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06, duration: 0.25 }}
-                  className="rl-shimmer"
                   style={{
                     height: 88,
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
+                    borderRadius: "var(--r-card)",
+                    background: "var(--fill-2)",
+                    border: "1px solid var(--line)",
                   }}
                 />
               ))}
@@ -570,6 +556,104 @@ export default function Home() {
         {/* Populated state */}
         {!loadingResumes && resumes.length > 0 && (
           <>
+            {/* Summary cards */}
+            {latest && (
+              <div className="g-split-wide">
+                <Link
+                  to={`/resume/${latest.id}`}
+                  className="card card--cyan card--hover"
+                  style={{
+                    textDecoration: "none",
+                    color: "var(--ink)",
+                    padding: 28,
+                    display: "flex",
+                    gap: 26,
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <ScoreCircle
+                    score={latest.feedback.overallScore}
+                    size={118}
+                    trackColor="rgba(255,255,255,0.5)"
+                  />
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div
+                      className="eyebrow eyebrow--ink"
+                      style={{ fontSize: 10, marginBottom: 8 }}
+                    >
+                      LATEST SCAN
+                    </div>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        fontSize: 22,
+                        letterSpacing: "-0.02em",
+                        marginBottom: 6,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {latest.companyName || "Your resume"}
+                    </div>
+                    {latest.jobTitle && (
+                      <div
+                        style={{
+                          fontSize: 13.5,
+                          fontWeight: 700,
+                          marginBottom: 14,
+                        }}
+                      >
+                        Target: {latest.jobTitle}
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {SECTIONS.slice(0, 3).map(({ key, label }) => (
+                        <span key={key} className="chip">
+                          {label}{" "}
+                          {(latest.feedback[key] as { score: number }).score}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+
+                <div
+                  className="card card--lime"
+                  style={{
+                    padding: 28,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
+                  <div
+                    className="eyebrow eyebrow--ink"
+                    style={{ fontSize: 10 }}
+                  >
+                    BEST SCORE
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 64,
+                      fontWeight: 900,
+                      letterSpacing: "-0.04em",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {bestScore}
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>
+                    across {resumes.length}{" "}
+                    {resumes.length === 1 ? "resume" : "resumes"} → keep
+                    climbing
+                  </div>
+                </div>
+              </div>
+            )}
+
             <StatsStrip id="stats-strip" />
 
             {/* Toolbar */}
@@ -583,33 +667,23 @@ export default function Home() {
             >
               <div>
                 {compareMode && (
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 12,
-                      color: "var(--fg-3)",
-                    }}
-                  >
+                  <span className="eyebrow" style={{ fontSize: 11 }}>
                     {compareIds.length === 0
-                      ? "// select 2 resumes to compare"
+                      ? "SELECT 2 RESUMES TO COMPARE"
                       : compareIds.length === 1
-                        ? "// select one more"
-                        : "// ready — scroll down"}
+                        ? "SELECT ONE MORE"
+                        : "READY — SCROLL DOWN"}
                   </span>
                 )}
               </div>
               {resumes.length >= 2 && (
-                <motion.button
+                <button
                   id="compare-btn"
                   onClick={toggleCompareMode}
-                  whileHover={reduced ? {} : { scale: 1.03 }}
-                  whileTap={reduced ? {} : { scale: 0.97 }}
-                  transition={springs.snappy}
-                  className={`rl-btn ${compareMode ? "rl-btn-copper" : "rl-btn-secondary"}`}
-                  style={{ fontSize: 12 }}
+                  className={`btn btn--sm ${compareMode ? "btn--lime" : "btn--outline"}`}
                 >
-                  {compareMode ? "✕ cancel_compare" : "⇄ compare_resumes"}
-                </motion.button>
+                  {compareMode ? "✕ Cancel compare" : "⇄ Compare resumes"}
+                </button>
               )}
             </div>
 
@@ -667,57 +741,40 @@ export default function Home() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <motion.button
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                  justifyContent: "center",
+                }}
+              >
+                <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  whileHover={
-                    currentPage === 1 || reduced ? {} : { scale: 1.04 }
-                  }
-                  whileTap={currentPage === 1 || reduced ? {} : { scale: 0.96 }}
-                  transition={springs.snappy}
-                  className="rl-btn rl-btn-secondary"
-                  style={{
-                    fontSize: 12,
-                    opacity: currentPage === 1 ? 0.4 : 1,
-                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                    pointerEvents: currentPage === 1 ? "none" : "auto",
-                  }}
+                  className="btn btn--outline btn--sm"
                 >
-                  ← prev
-                </motion.button>
+                  ← Prev
+                </button>
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: 12,
-                    color: "var(--fg-3)",
+                    color: "var(--fg-2)",
+                    fontWeight: 600,
                   }}
                 >
                   {currentPage} / {totalPages}
                 </span>
-                <motion.button
+                <button
                   onClick={() =>
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  whileHover={
-                    currentPage === totalPages || reduced ? {} : { scale: 1.04 }
-                  }
-                  whileTap={
-                    currentPage === totalPages || reduced ? {} : { scale: 0.96 }
-                  }
-                  transition={springs.snappy}
-                  className="rl-btn rl-btn-secondary"
-                  style={{
-                    fontSize: 12,
-                    opacity: currentPage === totalPages ? 0.4 : 1,
-                    cursor:
-                      currentPage === totalPages ? "not-allowed" : "pointer",
-                    pointerEvents: currentPage === totalPages ? "none" : "auto",
-                  }}
+                  className="btn btn--outline btn--sm"
                 >
-                  next →
-                </motion.button>
+                  Next →
+                </button>
               </div>
             )}
           </>
@@ -735,13 +792,13 @@ export default function Home() {
               alignItems: "center",
               gap: 40,
               width: "100%",
-              maxWidth: 720,
+              maxWidth: 760,
               alignSelf: "center",
             }}
           >
             {/* Hero card */}
             <div
-              className="rl-card is-raised rl-hero-card"
+              className="card card--pop"
               style={{
                 position: "relative",
                 width: "100%",
@@ -753,27 +810,23 @@ export default function Home() {
                 padding: "48px 32px",
               }}
             >
-              <span className="rl-corner tl" />
-              <span className="rl-corner tr" />
-              <span className="rl-corner bl" />
-              <span className="rl-corner br" />
-
-              <span className="rl-eyebrow">// resume_analysis</span>
+              <PixelSprite size={56} />
+              <span className="eyebrow">{"// FIRST SCAN"}</span>
               <h1 style={{ fontSize: "clamp(28px, 5vw, 40px)" }}>
                 Drop your first resume
               </h1>
               <p
                 style={{
                   margin: 0,
-                  fontFamily: "var(--font-body)",
-                  fontSize: 14,
+                  fontSize: 14.5,
+                  fontWeight: 500,
                   color: "var(--fg-2)",
                   lineHeight: 1.75,
                   maxWidth: 480,
                 }}
               >
-                Upload a PDF + paste a job description. ResumeLens diffs them,
-                scores five dimensions, and tells you exactly what to rewrite.
+                Upload a PDF or DOCX and paste a job description. ResumeLens
+                scores five dimensions and tells you exactly what to rewrite.
               </p>
               <div
                 style={{
@@ -782,29 +835,24 @@ export default function Home() {
                   justifyContent: "center",
                   gap: 8,
                   padding: "16px 0 8px",
-                  borderTop: "1px dashed var(--border)",
+                  borderTop: "1px solid var(--line)",
                   width: "100%",
                 }}
               >
                 {[
-                  ["ATS", "ats_compatibility"],
-                  ["KW", "keyword_gaps"],
-                  ["TS", "tone_structure"],
-                  ["IV", "interview_prep"],
-                  ["RW", "rewrite_tips"],
-                ].map(([k, label]) => (
-                  <span key={k} className="rl-chip">
-                    <span style={{ color: "var(--copper)" }}>[{k}]</span>
-                    <span>{label}</span>
+                  "ATS compatibility",
+                  "Keyword gaps",
+                  "Tone & structure",
+                  "Interview prep",
+                  "Rewrite tips",
+                ].map((label) => (
+                  <span key={label} className="chip chip--fill">
+                    {label}
                   </span>
                 ))}
               </div>
-              <Link
-                to="/upload"
-                className="rl-btn rl-btn-primary"
-                style={{ fontSize: 14 }}
-              >
-                $ upload_resume →
+              <Link to="/upload" className="btn btn--primary">
+                Upload my resume →
               </Link>
             </div>
 
@@ -836,10 +884,11 @@ export function ErrorBoundary() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        padding: 24,
       }}
     >
       <div
-        className="rl-card is-raised"
+        className="card card--pop"
         style={{
           position: "relative",
           maxWidth: 440,
@@ -847,42 +896,28 @@ export function ErrorBoundary() {
           flexDirection: "column",
           gap: 16,
           textAlign: "center",
+          alignItems: "center",
         }}
       >
-        <span className="rl-corner tl" />
-        <span className="rl-corner tr" />
-        <span className="rl-corner bl" />
-        <span className="rl-corner br" />
-        <span className="rl-pill rl-pill-bad" style={{ alignSelf: "center" }}>
+        <span
+          className="chip"
+          style={{ background: "var(--red)", color: "#fff" }}
+        >
           ERROR
         </span>
-        <h1
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 28,
-            fontWeight: 500,
-            color: "var(--fg-1)",
-            margin: 0,
-          }}
-        >
-          something_went_wrong
-        </h1>
+        <h1 style={{ fontSize: 28 }}>Something went wrong</h1>
         <p
           style={{
-            fontFamily: "var(--font-body)",
             fontSize: 14,
+            fontWeight: 500,
             color: "var(--fg-2)",
             margin: 0,
           }}
         >
           {message}
         </p>
-        <a
-          href="/"
-          className="rl-btn rl-btn-primary"
-          style={{ alignSelf: "center" }}
-        >
-          ← go_home
+        <a href="/" className="btn btn--primary">
+          ← Go home
         </a>
       </div>
     </main>

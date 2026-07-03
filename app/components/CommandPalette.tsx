@@ -19,9 +19,9 @@ interface Command {
 }
 
 const CategoryLabel: Record<string, string> = {
-  nav: "// navigation",
-  ai: "// ai_actions",
-  account: "// account",
+  nav: "// NAVIGATE",
+  ai: "// ACTIONS",
+  account: "// ACCOUNT",
 };
 
 function buildCommands(
@@ -31,57 +31,57 @@ function buildCommands(
   return [
     {
       id: "home",
-      label: "→ go_to_dashboard",
-      hint: "view all resumes",
+      label: "Go to dashboard",
+      hint: "View all resumes",
       action: () => navigate("/"),
       category: "nav",
     },
     {
       id: "upload",
-      label: "→ upload_resume",
-      hint: "analyze a new resume",
+      label: "Upload a resume",
+      hint: "Analyze a new resume",
       action: () => navigate("/upload"),
       category: "nav",
     },
     {
       id: "history",
-      label: "→ score_history",
-      hint: "view your score trends",
+      label: "Score history",
+      hint: "View your score trends",
       action: () => navigate("/history"),
       category: "nav",
     },
     {
       id: "pricing",
-      label: "→ pricing",
-      hint: "plans and features",
+      label: "Pricing",
+      hint: "Plans and features",
       action: () => navigate("/pricing"),
       category: "nav",
     },
     {
       id: "settings",
-      label: "→ settings",
-      hint: "profile and preferences",
+      label: "Settings",
+      hint: "Profile and preferences",
       action: () => navigate("/settings"),
       category: "nav",
     },
     {
       id: "analyze",
-      label: "$ run_analyze",
-      hint: "go to upload to start analysis",
+      label: "Run a new analysis",
+      hint: "Go to upload to start",
       action: () => navigate("/upload"),
       category: "ai",
     },
     {
       id: "compare",
-      label: "⇄ compare_resumes",
-      hint: "select two resumes on dashboard",
+      label: "Compare resumes",
+      hint: "Select two resumes on the dashboard",
       action: () => navigate("/"),
       category: "ai",
     },
     {
       id: "signout",
-      label: "✕ sign_out",
-      hint: "end your session",
+      label: "Sign out",
+      hint: "End your session",
       action: signOut,
       category: "account",
     },
@@ -186,8 +186,7 @@ export default function CommandPalette() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(11,11,10,0.72)",
-              backdropFilter: "blur(6px)",
+              background: "rgba(11,11,11,0.45)",
               zIndex: 200,
             }}
           />
@@ -195,6 +194,8 @@ export default function CommandPalette() {
           {/* Panel */}
           <motion.div
             key="cp-panel"
+            role="dialog"
+            aria-label="Command palette"
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -8 }}
@@ -205,10 +206,10 @@ export default function CommandPalette() {
               left: "50%",
               x: "-50%",
               width: "min(560px, calc(100vw - 32px))",
-              background: "var(--bg-3)",
-              border: "1px solid var(--border-hi)",
-              borderRadius: "var(--radius-md)",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
+              background: "var(--surface)",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: "var(--r-card)",
+              boxShadow: "var(--pop)",
               zIndex: 201,
               overflow: "hidden",
               display: "flex",
@@ -222,44 +223,48 @@ export default function CommandPalette() {
                 alignItems: "center",
                 gap: 10,
                 padding: "12px 16px",
-                borderBottom: "1px solid var(--border)",
+                borderBottom: "var(--bw) solid var(--ink)",
               }}
             >
               <span
+                aria-hidden="true"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 14,
-                  color: "var(--fg-3)",
+                  width: 10,
+                  height: 10,
+                  background: "var(--cyan)",
+                  border: "var(--bw) solid var(--ink)",
+                  borderRadius: 2,
+                  flexShrink: 0,
                 }}
-              >
-                $
-              </span>
+              />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="type a command…"
+                placeholder="Type a command…"
                 style={{
                   flex: 1,
                   background: "transparent",
                   border: "none",
                   outline: "none",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 14,
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 700,
+                  fontSize: 15,
                   color: "var(--fg-1)",
                   boxShadow: "none",
                   padding: 0,
+                  transform: "none",
                 }}
               />
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: 10,
-                  color: "var(--fg-4)",
+                  color: "var(--fg-2)",
                   padding: "2px 6px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 5,
                 }}
               >
                 ESC
@@ -271,12 +276,11 @@ export default function CommandPalette() {
               {Object.entries(grouped).map(([cat, cmds]) => (
                 <div key={cat}>
                   <div
+                    className="eyebrow"
                     style={{
-                      padding: "8px 16px 4px",
-                      fontFamily: "var(--font-mono)",
+                      padding: "10px 16px 4px",
                       fontSize: 10,
-                      color: "var(--fg-4)",
-                      letterSpacing: "0.12em",
+                      color: "var(--fg-3)",
                     }}
                   >
                     {CategoryLabel[cat] ?? cat}
@@ -295,20 +299,18 @@ export default function CommandPalette() {
                           gap: 12,
                           padding: "10px 16px",
                           cursor: "pointer",
-                          background: isActive
-                            ? "var(--surface-2)"
-                            : "transparent",
+                          background: isActive ? "var(--cyan)" : "transparent",
                           borderLeft: isActive
-                            ? "2px solid var(--phos)"
-                            : "2px solid transparent",
-                          transition: "background var(--dur-fast)",
+                            ? "3px solid var(--ink)"
+                            : "3px solid transparent",
+                          transition: "background var(--dur-fast) ease",
                         }}
                       >
                         <span
                           style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 13,
-                            color: isActive ? "var(--fg-1)" : "var(--fg-2)",
+                            fontSize: 14,
+                            fontWeight: 800,
+                            color: "var(--ink)",
                             flex: 1,
                           }}
                         >
@@ -316,9 +318,9 @@ export default function CommandPalette() {
                         </span>
                         <span
                           style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--fg-4)",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: isActive ? "var(--ink)" : "var(--fg-3)",
                           }}
                         >
                           {cmd.hint}
@@ -333,12 +335,12 @@ export default function CommandPalette() {
                   style={{
                     padding: "24px 16px",
                     textAlign: "center",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 12,
-                    color: "var(--fg-4)",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--fg-3)",
                   }}
                 >
-                  // no commands match
+                  No commands match
                 </div>
               )}
             </div>
@@ -347,12 +349,12 @@ export default function CommandPalette() {
             <div
               style={{
                 padding: "8px 16px",
-                borderTop: "1px solid var(--border)",
+                borderTop: "1px solid var(--line)",
                 display: "flex",
                 gap: 16,
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
-                color: "var(--fg-4)",
+                color: "var(--fg-3)",
               }}
             >
               {[
@@ -364,8 +366,8 @@ export default function CommandPalette() {
                   <span
                     style={{
                       padding: "1px 5px",
-                      border: "1px solid var(--border-hi)",
-                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--line)",
+                      borderRadius: 5,
                       marginRight: 4,
                     }}
                   >

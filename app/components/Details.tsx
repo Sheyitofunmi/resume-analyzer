@@ -10,10 +10,10 @@ const SECTIONS: {
   label: string;
   id: string;
 }[] = [
-  { key: "toneAndStyle", label: "tone_&_style", id: "tone-style" },
-  { key: "content", label: "content", id: "content" },
-  { key: "structure", label: "structure", id: "structure" },
-  { key: "skills", label: "skills", id: "skills" },
+  { key: "toneAndStyle", label: "Tone & style", id: "tone-style" },
+  { key: "content", label: "Content", id: "content" },
+  { key: "structure", label: "Structure", id: "structure" },
+  { key: "skills", label: "Skills", id: "skills" },
 ];
 
 function TipCard({ tip }: { tip: Tip }) {
@@ -23,41 +23,40 @@ function TipCard({ tip }: { tip: Tip }) {
       style={{
         display: "flex",
         gap: 10,
-        padding: "10px 12px",
-        background: isGood
-          ? "rgba(168,230,163,0.05)"
-          : "rgba(230,153,104,0.06)",
-        border: `1px solid ${isGood ? "var(--phos-dim)" : "var(--copper-deep)"}`,
-        borderRadius: "var(--radius-md)",
+        padding: "12px 14px",
+        background: "var(--fill-1)",
+        border: "1px solid var(--line)",
+        borderRadius: 12,
       }}
     >
       <span
+        aria-hidden="true"
         style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 13,
-          color: isGood ? "var(--phos)" : "var(--copper-hi)",
+          width: 18,
+          height: 18,
+          borderRadius: 5,
+          border: "var(--bw) solid var(--ink)",
+          background: isGood ? "var(--lime)" : "var(--amber)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 11,
+          fontWeight: 900,
           flexShrink: 0,
           marginTop: 1,
         }}
       >
-        {isGood ? "+" : "!"}
+        {isGood ? "✓" : "!"}
       </span>
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            color: "var(--fg-1)",
-            fontWeight: 500,
-          }}
-        >
+        <span style={{ fontSize: 13.5, color: "var(--ink)", fontWeight: 800 }}>
           {tip.tip}
         </span>
         {tip.explanation && (
           <span
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
+              fontSize: 12.5,
+              fontWeight: 500,
               color: "var(--fg-2)",
               lineHeight: 1.6,
             }}
@@ -70,53 +69,57 @@ function TipCard({ tip }: { tip: Tip }) {
   );
 }
 
+function scoreChipBg(score: number) {
+  return score > 69
+    ? "var(--lime)"
+    : score > 49
+      ? "var(--amber)"
+      : "var(--red)";
+}
+
 const Details = ({ feedback }: { feedback: Feedback }) => {
   const [open, setOpen] = useState<string>("tone-style");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {SECTIONS.map(({ key, label, id }) => {
         const section = feedback[key] as { score: number; tips: Tip[] };
         const score = section.score;
         const isOpen = open === id;
-        const tier = score > 69 ? "good" : score > 49 ? "warn" : "bad";
-        const pillClass =
-          tier === "good"
-            ? "rl-pill rl-pill-good"
-            : tier === "warn"
-              ? "rl-pill rl-pill-warn"
-              : "rl-pill rl-pill-bad";
 
         return (
           <div
             key={id}
-            className="rl-card"
+            className="card"
             style={{ position: "relative", padding: 0, overflow: "hidden" }}
           >
             {/* Accordion header */}
             <button
               onClick={() => setOpen(isOpen ? "" : id)}
+              aria-expanded={isOpen}
               style={{
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 12,
-                padding: "14px 16px",
-                background: "transparent",
+                padding: "16px 20px",
+                background: isOpen ? "var(--fill-1)" : "transparent",
                 border: "none",
                 cursor: "pointer",
-                fontFamily: "var(--font-mono)",
+                fontFamily: "var(--font-sans)",
                 textAlign: "left",
+                transition: "background var(--dur-fast) ease",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span
+                  aria-hidden="true"
                   style={{
-                    fontSize: 10,
-                    color: "var(--fg-3)",
+                    fontSize: 11,
+                    color: "var(--ink)",
                     width: 12,
-                    transition: "transform var(--dur-fast)",
+                    transition: "transform var(--dur-fast) ease",
                     transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
                     display: "inline-block",
                   }}
@@ -125,34 +128,37 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
                 </span>
                 <span
                   style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "var(--fg-1)",
-                    letterSpacing: "0.02em",
+                    fontSize: 15,
+                    fontWeight: 900,
+                    color: "var(--ink)",
                   }}
                 >
                   {label}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className={pillClass} style={{ fontSize: 10 }}>
-                  {score}
-                </span>
-              </div>
+              <span
+                className="chip"
+                style={{
+                  background: scoreChipBg(score),
+                  color: score <= 49 ? "#fff" : "var(--ink)",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {score}
+              </span>
             </button>
 
             {/* Accordion content */}
             {isOpen && (
               <div
                 style={{
-                  padding: "0 16px 16px",
-                  borderTop: "1px dashed var(--border)",
+                  padding: "16px 20px",
+                  borderTop: "1px solid var(--line)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 8,
                 }}
               >
-                <div style={{ height: 12 }} />
                 {section.tips.map((tip, i) => (
                   <TipCard key={i} tip={tip} />
                 ))}

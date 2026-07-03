@@ -3,32 +3,32 @@ interface ScoreBadgeProps {
 }
 
 const ScoreBadge: React.FC<ScoreBadgeProps> = ({ score }) => {
-  let badgeColor = "";
+  let bg = "";
+  let color = "var(--ink)";
   let badgeText = "";
   let symbol = "";
 
   if (score > 70) {
-    badgeColor = "bg-badge-green text-green-600";
+    bg = "var(--lime)";
     badgeText = "Strong";
     symbol = "✓";
   } else if (score > 49) {
-    badgeColor = "bg-badge-yellow text-yellow-600";
-    badgeText = "Good Start";
+    bg = "var(--amber)";
+    badgeText = "Good start";
     symbol = "!";
   } else {
-    badgeColor = "bg-badge-red text-red-600";
-    badgeText = "Needs Work";
+    bg = "var(--red)";
+    color = "#fff";
+    badgeText = "Needs work";
     symbol = "✕";
   }
 
   return (
-    <div
-      className={`flex items-center gap-1 px-3 py-1 rounded-full ${badgeColor}`}
-    >
-      <span aria-hidden="true" className="text-xs font-bold leading-none">
+    <div className="chip" style={{ background: bg, color }}>
+      <span aria-hidden="true" style={{ fontWeight: 900, fontSize: 11 }}>
         {symbol}
       </span>
-      <p className="text-sm font-medium">{badgeText}</p>
+      <span>{badgeText}</span>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { usePuterStore } from "~/lib/puter";
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import { LogoMark } from "~/components/atoms";
 
 export const meta = () => [
   { title: "ResumeLens | Sign In" },
@@ -19,139 +20,192 @@ const Auth = () => {
 
   return (
     <main
-      className="rl-page"
+      id="main-content"
+      className="g-halves"
       style={{
         minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "var(--space-8)",
+        gap: 0,
+        background: "var(--page)",
       }}
     >
+      {/* LEFT — brand panel */}
       <div
-        className="rl-card is-raised rl-fade-in"
         style={{
           position: "relative",
-          width: "100%",
-          maxWidth: 480,
+          background: "var(--cyan)",
+          borderRight: "var(--bw) solid var(--ink)",
+          padding: "36px 44px",
           display: "flex",
           flexDirection: "column",
-          gap: 0,
-          padding: 0,
           overflow: "hidden",
+          minHeight: "40vh",
         }}
       >
-        <span className="rl-corner tl" />
-        <span className="rl-corner tr" />
-        <span className="rl-corner bl" />
-        <span className="rl-corner br" />
-
-        {/* Window chrome dots */}
         <div
+          aria-hidden="true"
           style={{
-            padding: "12px 16px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(rgba(11,11,11,.10) 1.5px,transparent 1.5px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <Link
+          to="/landing"
+          style={{
+            position: "relative",
+            display: "inline-flex",
             alignItems: "center",
-            gap: 6,
-            background: "var(--bg-2)",
+            gap: 9,
+            fontWeight: 900,
+            fontSize: 17,
+            letterSpacing: "-0.02em",
+            color: "var(--ink)",
+            textDecoration: "none",
+            width: "fit-content",
           }}
         >
-          {["var(--ember)", "var(--copper)", "var(--phos)"].map((c, i) => (
-            <span
-              key={i}
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                background: c,
-                opacity: 0.7,
-              }}
+          <LogoMark size={20} />
+          ResumeLens
+        </Link>
+        <div style={{ position: "relative", margin: "auto 0", maxWidth: 420 }}>
+          <svg
+            width="150"
+            height="100"
+            viewBox="0 0 150 100"
+            aria-hidden="true"
+            className="pix-float"
+            style={{ marginBottom: 26 }}
+          >
+            <rect
+              x="0"
+              y="50"
+              width="15"
+              height="15"
+              fill="var(--lime)"
+              className="pix-blink"
             />
-          ))}
-          <span
+            <rect x="17" y="33" width="15" height="15" fill="var(--lime)" />
+            <rect
+              x="34"
+              y="50"
+              width="15"
+              height="15"
+              fill="var(--lime)"
+              className="pix-blink"
+              style={{ animationDelay: "0.4s" }}
+            />
+            <rect
+              x="51"
+              y="16"
+              width="15"
+              height="15"
+              fill="var(--ink)"
+              className="pix-blink"
+              style={{ animationDelay: "0.2s" }}
+            />
+            <rect x="68" y="33" width="15" height="15" fill="var(--violet)" />
+            <rect
+              x="85"
+              y="16"
+              width="15"
+              height="15"
+              fill="var(--violet)"
+              className="pix-blink"
+              style={{ animationDelay: "0.7s" }}
+            />
+            <rect x="102" y="0" width="15" height="15" fill="var(--ink)" />
+          </svg>
+          <h1
             style={{
-              marginLeft: 12,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--fg-3)",
-              letterSpacing: "0.1em",
+              fontWeight: 900,
+              fontSize: 44,
+              lineHeight: 1,
+              letterSpacing: "-0.035em",
+              margin: "0 0 16px",
             }}
           >
-            resumelens — auth
-          </span>
+            The bots read fast. Read faster.
+          </h1>
+          <p
+            style={{
+              fontSize: 15.5,
+              lineHeight: 1.6,
+              fontWeight: 500,
+            }}
+          >
+            Join 120,000+ job seekers who stopped guessing what the screeners
+            want.
+          </p>
         </div>
-
-        {/* Body */}
         <div
           style={{
-            padding: "var(--space-8)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
+            position: "relative",
+            fontFamily: "var(--font-mono)",
+            fontSize: 10.5,
+            letterSpacing: "0.1em",
+            opacity: 0.65,
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span className="rl-eyebrow-prompt">resumelens auth</span>
-            <h1
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "clamp(28px, 5vw, 40px)",
-                fontWeight: 500,
-                lineHeight: 1.05,
-                letterSpacing: "-1.5px",
-                color: "var(--fg-1)",
-                margin: 0,
-              }}
-            >
-              welcome_back
-              <span className="rl-cursor" />
-            </h1>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--fg-2)",
-                lineHeight: 1.7,
-              }}
-            >
-              Log in to continue your job journey.
-            </p>
-          </div>
+          FIRST SCAN FREE · NO CARD REQUIRED
+        </div>
+      </div>
+
+      {/* RIGHT — sign in */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 44,
+        }}
+      >
+        <div style={{ width: 400, maxWidth: "100%" }}>
+          <h2
+            style={{
+              fontWeight: 900,
+              fontSize: 32,
+              letterSpacing: "-0.03em",
+              margin: "0 0 6px",
+            }}
+          >
+            Welcome back
+          </h2>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--fg-2)",
+              fontWeight: 500,
+              margin: "0 0 26px",
+            }}
+          >
+            Your versions are waiting — sign in to continue.
+          </p>
 
           {/* Puter info box */}
           <div
             style={{
-              background: "var(--surface-2)",
-              border: "1px dashed var(--border-hi)",
-              borderRadius: "var(--radius-md)",
-              padding: "12px 16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
+              background: "var(--fill-1)",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 12,
+              padding: "14px 16px",
+              marginBottom: 18,
             }}
           >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 12,
-                color: "var(--copper)",
-              }}
-            >
-              // what is puter?
-            </span>
+            <div className="eyebrow" style={{ marginBottom: 6 }}>
+              {"// WHAT IS PUTER?"}
+            </div>
             <p
               style={{
-                margin: 0,
-                fontFamily: "var(--font-body)",
                 fontSize: 13,
                 color: "var(--fg-2)",
                 lineHeight: 1.65,
+                fontWeight: 500,
               }}
             >
               ResumeLens uses{" "}
-              <span style={{ color: "var(--fg-1)", fontWeight: 500 }}>
+              <span style={{ color: "var(--ink)", fontWeight: 700 }}>
                 Puter
               </span>{" "}
               — a free cloud platform — to securely store your resumes and AI
@@ -159,32 +213,73 @@ const Auth = () => {
             </p>
           </div>
 
-          {/* CTA */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 18,
+            }}
+          >
+            <span style={{ flex: 1, height: 1.5, background: "var(--line)" }} />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                color: "var(--fg-3)",
+              }}
+            >
+              ONE CLICK
+            </span>
+            <span style={{ flex: 1, height: 1.5, background: "var(--line)" }} />
+          </div>
+
           {isLoading ? (
             <button
-              className="rl-btn rl-btn-primary rl-btn-block"
+              className="btn btn--primary"
               disabled
-              style={{ opacity: 0.6, cursor: "not-allowed", fontSize: 14 }}
+              style={{ width: "100%", padding: 15, fontSize: 14.5 }}
             >
-              <span className="rl-dot" /> signing in…
+              Signing in…
             </button>
           ) : auth.isAuthenticated ? (
             <button
-              className="rl-btn rl-btn-secondary rl-btn-block"
+              className="btn btn--outline"
               onClick={auth.signOut}
-              style={{ fontSize: 14 }}
+              style={{ width: "100%", padding: 15, fontSize: 14.5 }}
             >
-              sign_out
+              Sign out
             </button>
           ) : (
             <button
-              className="rl-btn rl-btn-primary rl-btn-block"
+              className="btn btn--primary"
               onClick={auth.signIn}
-              style={{ fontSize: 14 }}
+              style={{ width: "100%", padding: 15, fontSize: 14.5 }}
             >
-              $ log_in_with_puter →
+              Continue with Puter →
             </button>
           )}
+
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--fg-3)",
+              fontWeight: 600,
+              margin: "18px 0 0",
+              textAlign: "center",
+            }}
+          >
+            By continuing you agree to the{" "}
+            <span style={{ textDecoration: "underline", cursor: "pointer" }}>
+              Terms
+            </span>{" "}
+            and{" "}
+            <span style={{ textDecoration: "underline", cursor: "pointer" }}>
+              Privacy Policy
+            </span>
+            .
+          </p>
         </div>
       </div>
     </main>

@@ -4,13 +4,33 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- UI polish (2026-05-23)
+- Design-system replacement — "Pixel Grotesk" light theme shipped (2026-07-03)
 
 ## Current Goal
 
-- Testing and iteration
+- Testing and iteration on the new design system
 
 ## Recent Changes
+
+### Full design-system replacement — "Pixel Grotesk" (2026-07-03)
+
+Replaced the entire CIPHER dark-terminal design system with a brand-new **light-only, neo-brutalist** system, implemented pixel-faithfully from the `design_handoff_resumelens/` hi-fi HTML bundle (imported into the repo). Product logic, routes, data flow, and Puter/AI integration untouched.
+
+**Design language (all in `app/app.css` `:root` tokens):**
+
+- Palette: ink `#0B0B0B`, page `#FDFDFB`, surface `#FFFFFF`, brand cyan `#6FD6E3`, lime `#C6F24E`, violet `#8B5CF6`; amber added for the needs-work score tier; red `#D93025` for danger only. Dark-accent palette retained for deliberate ink panels (kept per user sign-off — designs override the PRD's "no dark sections" line).
+- Type: **Schibsted Grotesk** (UI, 900 headlines), **JetBrains Mono** (micro-eyebrows/scores/timestamps, `//`-prefixed labels kept per sign-off), **Newsreader** italic (landing marquee only). Fonts loaded in `root.tsx`.
+- Shape: 1.5px ink borders everywhere, radii 8–18px, signature hard offset shadow `6px 6px 0 ink` with translate-up-left hover, focus `3px 3px 0 cyan`.
+
+**Shared primitives (`app/app.css` utility classes + `atoms.tsx`):** `.btn` (primary/outline/surface/lime/cyan/danger + sizes), `.card` (+cyan/lime/violet/dark/hover/pop), `.chip`, `.badge-mono`, `.toggle` (52×28 pill), `.segment`, `.eyebrow`, `.score-bar`, `.dot-grid`, marquee, pixel-blink/float keyframes, responsive grid helpers (`.g-hero/.g-halves/.g-thirds/.g-feature/.g-split-wide`). `atoms.tsx` rebuilt: `LogoMark`, `Logo`, `PixelSprite`, `Button`, `Input/Textarea`, `Eyebrow`, `StatusPill`, `ScoreCircle`/`AnimatedScoreCircle` (flat conic-style ink ring), `ScoreBar`/`ScoreBars`, `KeywordRow`, `FadeInView` (now framer-motion `whileInView` — replaces AOS), `MagneticButton`. Removed: `Corners`, `Cursor`, ASCII `ScoreBar`, glow shadows.
+
+**Routes reskinned:** `landing.tsx` (full rebuild = Landing 4a v2: cyan dot-grid hero + sweeping pixel lens + score chips, logo marquee, draggable X-ray before/after, how-it-works, interactive Rewrite Lab, dark version-history section, pricing teaser, violet CTA; exports shared `PublicNav`), `auth.tsx` (split cyan brand panel + Puter sign-in), `onboarding.tsx` (kept 4-step role/seniority/industries/goal logic + KV save; new top-bar + lime segmented progress + chip/card selection + cyan summary), `home.tsx` (kept compare/paginate/delete logic; greeting header, cyan latest-scan + lime best-score summary cards), `upload.tsx` (kept full AI pipeline; dark scanning terminal card w/ lime scan beam), `resume.tsx` (kept split layout + re-analyze modal; shared Navbar, breadcrumb header), `history.tsx` (kept KV load; new clickable run bar-chart + cyan detail card, KPI cards, sparklines, run log), `settings.tsx` (kept notif/career/wipe logic; sectioned cards, working lime toggles, lime plan card, red danger zone — dropped dead theme/density rows), `pricing.tsx` (Free/Pro/Career+ tiers + FAQ accordion), `wipe.tsx` (red danger-zone card).
+
+**Components reskinned:** Navbar, Footer, MobileBottomNav (lucide icons), Toast, CommandPalette, ResumeCard, StatsStrip (drops react-spring → `useCountUp`), HowItWorks, Summary, ATS, Details, ResumeChecklist, RewriteSuggestions (lime header bar), InterviewQuestions (violet header), ScoreCharts, ScoreHistory, ScoreCircle, ScoreGauge, ScoreBadge. `motion.ts` retuned to snappy/mechanical (offset-lift hovers, `popIn`, no blur). Product tour (`useProductTour`) copy humanized + popover restyled in CSS.
+
+**Removed:** `gsap`, `aos`, `@react-spring/web`, `@mdxeditor/editor`, and the stray `npm` + `install` deps (all uninstalled; consolidated on framer-motion). Deleted unrouted `app/routes/resume-edit.tsx` (dead code, only consumer of `@mdxeditor`). All terminal-era CSS/`rl-*` classes purged from app.css.
+
+**Verification:** `npm run typecheck` + `npm run build` pass. Drove the running app with Playwright — landing/auth/pricing/onboarding/upload/home all render in the new style with **0 console errors**; interactive probes pass (Rewrite Lab types the improved bullet, X-ray slider updates the machine-view %, pricing Monthly/Annual toggle flips $12→$9, onboarding advances through steps). (The upload-page hook error seen mid-verify was a stale Vite dep cache from repeated `npm install`, not a code issue — resolved after `rm -rf node_modules/.vite` + server restart.)
 
 ### PRD prompt for full design-system replacement (2026-07-02)
 

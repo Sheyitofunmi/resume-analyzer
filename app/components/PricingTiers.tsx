@@ -1,229 +1,348 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { motion, useReducedMotion } from "framer-motion";
-import { springs } from "~/lib/motion";
 
-type FeatureItem = string | { type: "inherit"; label: string };
+type Feature = { label: string; included: boolean };
 
 interface Tier {
   id: string;
-  tier: string;
+  name: string;
+  tagline: string;
   monthlyPrice: string;
   yearlyPrice: string;
-  period: string;
-  tagline: string;
-  recommended: boolean;
-  features: FeatureItem[];
+  features: Feature[];
   cta: string;
   ctaTo: string;
-  variant: "primary" | "secondary";
-  accentColor: string;
 }
 
 export const TIERS: Tier[] = [
   {
     id: "free",
-    tier: "FREE",
+    name: "Free",
+    tagline: "Test the waters",
     monthlyPrice: "$0",
     yearlyPrice: "$0",
-    period: "/month",
-    tagline: "enough to land your first offer",
-    recommended: false,
-    accentColor: "var(--copper)",
     features: [
-      "up to 5 analyses / month",
-      "5-dimension scoring",
-      "keyword diff",
-      "basic rewrite suggestions",
-      "7-day analysis history",
+      { label: "1 resume scan / month", included: true },
+      { label: "Full 5-dimension score", included: true },
+      { label: "3 AI rewrites per scan", included: true },
+      { label: "Version history", included: false },
+      { label: "Keyword gap alerts", included: false },
     ],
-    cta: "$ start_free →",
+    cta: "Start free",
     ctaTo: "/auth",
-    variant: "secondary",
   },
   {
     id: "pro",
-    tier: "PRO",
+    name: "Pro",
+    tagline: "For an active search",
     monthlyPrice: "$12",
     yearlyPrice: "$9",
-    period: "/month",
-    tagline: "for active job searches",
-    recommended: true,
-    accentColor: "var(--phos)",
     features: [
-      { type: "inherit", label: "all of free, plus:" },
-      "unlimited analyses",
-      "interview question prep",
-      "AI rewrite — every bullet",
-      "unlimited score history + trends",
-      "side-by-side compare",
-      "priority response (~2s avg)",
+      { label: "Unlimited scans & roles", included: true },
+      { label: "Unlimited AI rewrites", included: true },
+      { label: "Version history & compare", included: true },
+      { label: "Keyword gap alerts", included: true },
+      { label: "ATS-safe export templates", included: true },
     ],
-    cta: "$ try_pro_free →",
+    cta: "Go Pro ▸",
     ctaTo: "/auth",
-    variant: "primary",
   },
   {
-    id: "recruiter",
-    tier: "RECRUITER",
-    monthlyPrice: "$49",
-    yearlyPrice: "$39",
-    period: "/month",
-    tagline: "for hiring teams · evaluate candidates at scale",
-    recommended: false,
-    accentColor: "var(--copper-hi)",
+    id: "career",
+    name: "Career+",
+    tagline: "Land it faster",
+    monthlyPrice: "$28",
+    yearlyPrice: "$21",
     features: [
-      { type: "inherit", label: "all of pro, plus:" },
-      "bulk analyze (50+ resumes)",
-      "team workspaces",
-      "JD-to-candidate matching",
-      "export to ATS-friendly CSV",
-      "sso · audit log · sla",
+      { label: "Everything in Pro", included: true },
+      { label: "Cover letter engine", included: true },
+      { label: "LinkedIn profile scoring", included: true },
+      { label: "1:1 expert review / quarter", included: true },
     ],
-    cta: "$ contact_us →",
-    ctaTo: "/contact",
-    variant: "secondary",
+    cta: "Get Career+",
+    ctaTo: "/auth",
   },
 ];
 
 export default function PricingTiers() {
   const [annual, setAnnual] = useState(false);
-  const reduced = useReducedMotion();
+
+  const segStyle = (active: boolean) =>
+    ({
+      padding: "11px 22px",
+      fontSize: 13,
+      fontWeight: 800,
+      background: active ? "var(--ink)" : "var(--surface)",
+      color: active ? "#fff" : "var(--ink)",
+      border: "none",
+      cursor: "pointer",
+      fontFamily: "var(--font-sans)",
+    }) as const;
 
   return (
-    <div className="rl-pricing-wrap">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 44,
+        width: "100%",
+      }}
+    >
       {/* Billing toggle */}
       <div
-        style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}
+        style={{
+          display: "inline-flex",
+          border: "var(--bw) solid var(--ink)",
+          borderRadius: 999,
+          overflow: "hidden",
+          userSelect: "none",
+        }}
       >
-        <div className="rl-pricing-toggle">
-          <button
-            className={`rl-pricing-toggle-btn${!annual ? " is-active" : ""}`}
-            onClick={() => setAnnual(false)}
-          >
-            monthly
-          </button>
-          <button
-            className={`rl-pricing-toggle-btn${annual ? " is-active" : ""}`}
-            onClick={() => setAnnual(true)}
-          >
-            annual
-          </button>
-        </div>
-        {annual && <span className="rl-pricing-save-badge">save ~25%</span>}
+        <button style={segStyle(!annual)} onClick={() => setAnnual(false)}>
+          Monthly
+        </button>
+        <button style={segStyle(annual)} onClick={() => setAnnual(true)}>
+          Annual −25%
+        </button>
       </div>
 
       {/* Cards */}
-      <div className="rl-pricing-grid">
-        {TIERS.map((t) => {
-          const price = annual ? t.yearlyPrice : t.monthlyPrice;
-          return (
-            <motion.div
-              key={t.id}
-              className={`rl-card rl-pricing-card${t.recommended ? " is-phos" : ""}`}
-              aria-label={`${t.tier} plan${t.recommended ? " — recommended" : ""}`}
+      <div
+        className="g-thirds"
+        style={{ width: "100%", alignItems: "stretch" }}
+      >
+        {/* Free */}
+        <div
+          className="card"
+          style={{
+            padding: 32,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div style={{ fontWeight: 900, fontSize: 20, marginBottom: 4 }}>
+            Free
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--fg-2)",
+              fontWeight: 600,
+              marginBottom: 18,
+            }}
+          >
+            Test the waters
+          </div>
+          <div
+            style={{
+              fontSize: 42,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              marginBottom: 22,
+            }}
+          >
+            $0
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 11,
+              fontSize: 14,
+              fontWeight: 600,
+              color: "#3C4043",
+              marginBottom: 28,
+            }}
+          >
+            {TIERS[0].features.map((f) => (
+              <span
+                key={f.label}
+                style={{ color: f.included ? undefined : "var(--fg-3)" }}
+              >
+                {f.included ? "✓" : "✗"} {f.label}
+              </span>
+            ))}
+          </div>
+          <Link
+            to="/auth"
+            className="btn btn--outline"
+            style={{ marginTop: "auto", justifyContent: "center" }}
+          >
+            Start free
+          </Link>
+        </div>
+
+        {/* Pro */}
+        <div
+          className="card card--cyan"
+          style={{
+            padding: 32,
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            boxShadow: "7px 7px 0 var(--ink)",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -13,
+              right: 22,
+              background: "var(--violet)",
+              color: "#fff",
+              border: "var(--bw) solid var(--ink)",
+              borderRadius: 999,
+              padding: "5px 13px",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+            }}
+          >
+            MOST POPULAR
+          </div>
+          <div style={{ fontWeight: 900, fontSize: 20, marginBottom: 4 }}>
+            Pro
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              color: "#1F1F1F",
+              fontWeight: 700,
+              marginBottom: 18,
+            }}
+          >
+            For an active search
+          </div>
+          <div
+            style={{
+              fontSize: 42,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              marginBottom: 22,
+            }}
+          >
+            {annual ? TIERS[1].yearlyPrice : TIERS[1].monthlyPrice}
+            <span style={{ fontSize: 16, fontWeight: 700 }}>/mo</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 11,
+              fontSize: 14,
+              fontWeight: 700,
+              marginBottom: 28,
+            }}
+          >
+            {TIERS[1].features.map((f) => (
+              <span key={f.label}>✓ {f.label}</span>
+            ))}
+          </div>
+          <Link
+            to="/auth"
+            style={{
+              marginTop: "auto",
+              display: "block",
+              textAlign: "center",
+              background: "var(--ink)",
+              color: "var(--cyan)",
+              padding: 14,
+              borderRadius: 10,
+              fontWeight: 900,
+              fontSize: 14,
+              textDecoration: "none",
+              transition: "box-shadow var(--dur-fast) ease",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.boxShadow = "4px 4px 0 rgba(11,11,11,.3)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "")}
+          >
+            Go Pro ▸
+          </Link>
+        </div>
+
+        {/* Career+ */}
+        <div
+          className="card card--dark"
+          style={{
+            padding: 32,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div style={{ fontWeight: 900, fontSize: 20, marginBottom: 4 }}>
+            Career+
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--dark-muted)",
+              fontWeight: 600,
+              marginBottom: 18,
+            }}
+          >
+            Land it faster
+          </div>
+          <div
+            style={{
+              fontSize: 42,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              marginBottom: 22,
+              color: "var(--lime)",
+            }}
+          >
+            {annual ? TIERS[2].yearlyPrice : TIERS[2].monthlyPrice}
+            <span
               style={{
-                ...(t.id === "recruiter" ? { opacity: 0.72 } : {}),
-                overflow: "hidden",
-              }}
-              initial="rest"
-              whileHover={reduced ? "rest" : "hover"}
-              animate="rest"
-              variants={{
-                rest: { scale: 1, transition: springs.snappy },
-                hover: { scale: 1.025, transition: springs.snappy },
+                fontSize: 16,
+                fontWeight: 700,
+                color: "var(--dark-fg)",
               }}
             >
-              {/* Accent bar — slides in from left on hover */}
-              <motion.div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                  background: t.accentColor,
-                  transformOrigin: "left",
-                  borderRadius: "var(--radius-md) var(--radius-md) 0 0",
-                  ...(t.recommended
-                    ? { boxShadow: `0 0 12px ${t.accentColor}` }
-                    : {}),
-                }}
-                variants={{
-                  rest: { scaleX: 0 },
-                  hover: {
-                    scaleX: 1,
-                    transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
-                  },
-                }}
-              />
-
-              {t.recommended && (
-                <div className="rl-pricing-badge" aria-hidden="true">
-                  RECOMMENDED
-                </div>
-              )}
-
-              {/* Header */}
-              <div className="rl-pricing-header">
-                <motion.span
-                  className="rl-pricing-tier-name"
-                  style={{
-                    color: t.recommended ? "var(--phos)" : "var(--fg-3)",
-                  }}
-                  variants={{
-                    rest: {
-                      color: t.recommended ? "var(--phos)" : "var(--fg-3)",
-                    },
-                    hover: { color: t.accentColor },
-                  }}
-                >
-                  {t.tier}
-                </motion.span>
-                <div className="rl-pricing-price-row">
-                  <span className="rl-pricing-price">{price}</span>
-                  <span className="rl-pricing-period">{t.period}</span>
-                </div>
-                <div className="rl-pricing-annual-note">
-                  {annual && price !== "$0" ? "billed annually" : ""}
-                </div>
-                <span className="rl-pricing-tagline">{t.tagline}</span>
-              </div>
-
-              <hr className="rl-divider" style={{ margin: 0 }} />
-
-              {/* Features */}
-              <ul className="rl-pricing-features">
-                {t.features.map((f, i) =>
-                  typeof f === "object" ? (
-                    <li key={i} className="rl-pricing-inherit">
-                      {f.label}
-                    </li>
-                  ) : (
-                    <li key={i} className="rl-pricing-feature">
-                      <span
-                        className="rl-pricing-feature-icon"
-                        aria-hidden="true"
-                      >
-                        +
-                      </span>
-                      {f}
-                    </li>
-                  ),
-                )}
-              </ul>
-
-              {/* CTA */}
-              <Link
-                to={t.ctaTo}
-                className={`rl-btn rl-btn-${t.variant} rl-btn-block`}
-              >
-                {t.cta}
-              </Link>
-            </motion.div>
-          );
-        })}
+              /mo
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 11,
+              fontSize: 14,
+              fontWeight: 600,
+              marginBottom: 28,
+            }}
+          >
+            {TIERS[2].features.map((f) => (
+              <span key={f.label}>✓ {f.label}</span>
+            ))}
+          </div>
+          <Link
+            to="/auth"
+            style={{
+              marginTop: "auto",
+              display: "block",
+              textAlign: "center",
+              background: "var(--lime)",
+              color: "var(--ink)",
+              padding: 14,
+              borderRadius: 10,
+              fontWeight: 900,
+              fontSize: 14,
+              textDecoration: "none",
+              transition: "box-shadow var(--dur-fast) ease",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.boxShadow =
+                "4px 4px 0 rgba(198,242,78,.35)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "")}
+          >
+            Get Career+
+          </Link>
+        </div>
       </div>
     </div>
   );

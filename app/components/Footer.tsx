@@ -1,179 +1,153 @@
 import { Link } from "react-router";
 import { Logo } from "~/components/atoms";
 
-const FEATURES = [
-  { k: "ATS", label: "ats_score" },
-  { k: "KW", label: "keyword_analysis" },
-  { k: "RW", label: "rewrite_tips" },
-  { k: "TS", label: "tone_style" },
-  { k: "IV", label: "interview_prep" },
+const PRODUCT_LINKS = [
+  { to: "/", label: "My resumes" },
+  { to: "/upload", label: "Upload a resume" },
+  { to: "/history", label: "Score history" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/settings", label: "Settings" },
 ];
 
 const Footer = () => {
   return (
     <footer
-      className="rl-footer"
       style={{
         width: "100%",
-        borderTop: "1px solid var(--border)",
-        background: "var(--bg-2)",
-        marginTop: 0,
+        borderTop: "var(--bw) solid var(--ink)",
+        background: "var(--surface)",
         position: "relative",
         zIndex: 2,
       }}
     >
-      {/* Feature chip strip */}
-      <div
-        style={{
-          borderBottom: "1px dashed var(--border)",
-          padding: "14px 24px",
-          display: "flex",
-          justifyContent: "center",
-          gap: 16,
-          flexWrap: "wrap",
-          maxWidth: 1280,
-          margin: "0 auto",
-        }}
-      >
-        {FEATURES.map((f) => (
-          <span key={f.k} className="rl-chip">
-            <span style={{ color: "var(--copper)" }}>[{f.k}]</span>
-            <span>{f.label}</span>
-          </span>
-        ))}
-      </div>
-
       {/* Main footer grid */}
       <div
+        className="rl-container"
         style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "40px 24px",
+          padding: "48px var(--gutter-inner)",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
           gap: 32,
         }}
       >
         {/* Brand */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <Logo size={15} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <Logo size={16} />
           <p
             style={{
-              margin: 0,
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--fg-3)",
+              fontSize: 13.5,
+              fontWeight: 500,
+              color: "var(--fg-2)",
               lineHeight: 1.7,
               maxWidth: 280,
             }}
           >
-            AI feedback for your resume. Five-dimension scoring. Keyword diff.
-            Rewrite tips. Built for engineers who'd rather read a structured
-            report than a vibe-check.
+            AI feedback for your resume — clear scores, keyword gaps, and
+            stronger bullet rewrites, so you walk into every application with
+            confidence.
           </p>
         </div>
 
         {/* Product links */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span className="rl-comment">product</span>
-          {[
-            { to: "/", label: "my_resumes" },
-            { to: "/upload", label: "upload_resume" },
-            { to: "/history", label: "score_history" },
-            { to: "/pricing", label: "pricing" },
-            { to: "/settings", label: "settings" },
-          ].map((item) => (
+          <span className="eyebrow">Product</span>
+          {PRODUCT_LINKS.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
+                fontSize: 13.5,
+                fontWeight: 700,
                 color: "var(--fg-2)",
                 textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                transition: "color var(--dur-fast), gap var(--dur-fast)",
+                transition: "color var(--dur-fast) ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = "var(--copper-hi)";
-                e.currentTarget.style.gap = "12px";
+                e.currentTarget.style.color = "var(--ink)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "var(--fg-2)";
-                e.currentTarget.style.gap = "8px";
               }}
             >
-              <span>→</span> {item.label}
+              {item.label}
             </Link>
           ))}
         </div>
 
-        {/* Powered by */}
+        {/* What you get */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span className="rl-comment">powered_by</span>
-          {["claude (anthropic)", "puter cloud", "react router v7"].map(
-            (item) => (
+          <span className="eyebrow">What you get</span>
+          {[
+            "ATS score across 5 dimensions",
+            "Keyword match vs the job post",
+            "AI bullet rewrites",
+            "Interview question prep",
+          ].map((item) => (
+            <span
+              key={item}
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--fg-2)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
               <span
-                key={item}
+                aria-hidden="true"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 12,
-                  color: "var(--fg-2)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
+                  width: 8,
+                  height: 8,
+                  background: "var(--lime)",
+                  border: "var(--bw) solid var(--ink)",
+                  borderRadius: 2,
+                  flexShrink: 0,
                 }}
-              >
-                <span style={{ color: "var(--phos)" }}>✓</span> {item}
-              </span>
-            ),
-          )}
+              />
+              {item}
+            </span>
+          ))}
         </div>
 
-        {/* Status */}
+        {/* Privacy */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span className="rl-comment">status</span>
+          <span className="eyebrow">Your data</span>
           <span
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
+              fontSize: 13,
+              fontWeight: 600,
               color: "var(--fg-2)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
+              lineHeight: 1.7,
+              maxWidth: 260,
             }}
           >
-            <span className="rl-dot" /> all systems operational
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-2)",
-            }}
-          >
-            · 3s avg analysis time
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--fg-2)",
-            }}
-          >
-            · 100+ keyword signals
+            Your resume is stored in your own Puter cloud — no third-party
+            access, delete it anytime.
           </span>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="rl-footer-bottom">
-        <span>
-          // © {new Date().getFullYear()} resumelens — your data, your machine.
+      <div
+        style={{
+          borderTop: "1px solid var(--line)",
+          padding: "16px var(--gutter-inner)",
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+          maxWidth: "var(--content-max)",
+          margin: "0 auto",
+        }}
+      >
+        <span className="mono-stamp">
+          © {new Date().getFullYear()} RESUMELENS
         </span>
-        <span>// stored via puter — no third-party access.</span>
+        <span className="mono-stamp">MADE FOR JOB SEEKERS, NOT BOTS</span>
       </div>
     </footer>
   );

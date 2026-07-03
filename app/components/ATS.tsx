@@ -1,3 +1,5 @@
+import ScoreBadge from "~/components/ScoreBadge";
+
 interface Suggestion {
   type: "good" | "improve";
   tip: string;
@@ -11,27 +13,11 @@ interface ATSProps {
 }
 
 const ATS = ({ score, suggestions, keywords }: ATSProps) => {
-  const tier = score > 69 ? "good" : score > 49 ? "warn" : "bad";
-  const tierLabel =
-    tier === "good" ? "PASS" : tier === "warn" ? "WARN" : "FAIL";
-  const pillClass =
-    tier === "good"
-      ? "rl-pill rl-pill-good"
-      : tier === "warn"
-        ? "rl-pill rl-pill-warn"
-        : "rl-pill rl-pill-bad";
-  const scoreColor =
-    tier === "good"
-      ? "var(--phos)"
-      : tier === "warn"
-        ? "var(--copper-hi)"
-        : "var(--ember)";
-
   const hasKeywords =
     keywords && (keywords.found.length > 0 || keywords.missing.length > 0);
 
   return (
-    <div className="rl-card is-accent" style={{ position: "relative" }}>
+    <div className="card" style={{ position: "relative" }}>
       {/* Header */}
       <div
         style={{
@@ -39,28 +25,29 @@ const ATS = ({ score, suggestions, keywords }: ATSProps) => {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 20,
+          gap: 12,
+          flexWrap: "wrap",
         }}
       >
-        <span className="rl-comment" style={{ fontSize: 11 }}>
-          ats_compatibility
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className={pillClass}>{tierLabel}</span>
+        <span className="eyebrow">{"// ATS COMPATIBILITY"}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <ScoreBadge score={score} />
           <span
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 40,
-              fontWeight: 500,
+              fontSize: 34,
+              fontWeight: 900,
               lineHeight: 1,
-              letterSpacing: "-1.5px",
-              color: scoreColor,
-              textShadow: `0 0 16px ${scoreColor}55`,
+              letterSpacing: "-0.03em",
               fontVariantNumeric: "tabular-nums",
             }}
           >
             {score}
             <span
-              style={{ fontSize: 14, color: "var(--fg-3)", fontWeight: 400 }}
+              style={{
+                fontSize: 14,
+                color: "var(--fg-2)",
+                fontWeight: 700,
+              }}
             >
               /100
             </span>
@@ -84,33 +71,38 @@ const ATS = ({ score, suggestions, keywords }: ATSProps) => {
               style={{
                 display: "flex",
                 gap: 10,
-                padding: "10px 12px",
-                background:
-                  s.type === "good"
-                    ? "rgba(168,230,163,0.05)"
-                    : "rgba(230,153,104,0.06)",
-                border: `1px solid ${s.type === "good" ? "var(--phos-dim)" : "var(--copper-deep)"}`,
-                borderRadius: "var(--radius-md)",
+                padding: "12px 14px",
+                background: "var(--fill-1)",
+                border: "1px solid var(--line)",
+                borderRadius: 12,
               }}
             >
               <span
+                aria-hidden="true"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                  color: s.type === "good" ? "var(--phos)" : "var(--copper-hi)",
+                  width: 18,
+                  height: 18,
+                  borderRadius: 5,
+                  border: "var(--bw) solid var(--ink)",
+                  background:
+                    s.type === "good" ? "var(--lime)" : "var(--amber)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 900,
                   flexShrink: 0,
                   marginTop: 1,
                 }}
               >
-                {s.type === "good" ? "+" : "!"}
+                {s.type === "good" ? "✓" : "!"}
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 <span
                   style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 13,
-                    color: "var(--fg-1)",
-                    fontWeight: 500,
+                    fontSize: 13.5,
+                    color: "var(--ink)",
+                    fontWeight: 800,
                   }}
                 >
                   {s.tip}
@@ -118,8 +110,8 @@ const ATS = ({ score, suggestions, keywords }: ATSProps) => {
                 {s.explanation && (
                   <span
                     style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: 12,
+                      fontSize: 12.5,
+                      fontWeight: 500,
                       color: "var(--fg-2)",
                       lineHeight: 1.6,
                     }}
@@ -135,56 +127,71 @@ const ATS = ({ score, suggestions, keywords }: ATSProps) => {
 
       {/* Keyword diff */}
       {hasKeywords && (
-        <div>
-          <div
-            style={{
-              paddingTop: 14,
-              borderTop: "1px dashed var(--border)",
-              marginBottom: 12,
-            }}
-          >
-            <span className="rl-comment" style={{ fontSize: 11 }}>
-              keyword_match
-            </span>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {keywords!.found.map((kw) => (
-              <span
-                key={kw}
-                className="rl-chip rl-chip-phos"
-                style={{ fontSize: 11 }}
-              >
-                + {kw}
-              </span>
-            ))}
-            {keywords!.missing.map((kw) => (
-              <span
-                key={kw}
-                className="rl-chip"
-                style={{
-                  fontSize: 11,
-                  background: "rgba(227,83,74,0.08)",
-                  borderColor: "var(--ember-dim)",
-                  color: "var(--ember)",
-                }}
-              >
-                − {kw}
-              </span>
-            ))}
-          </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {keywords!.found.length > 0 && (
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>
+                MATCHED KEYWORDS · {keywords!.found.length}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {keywords!.found.map((kw) => (
+                  <span key={kw} className="chip chip--lime">
+                    {kw} ✓
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {keywords!.missing.length > 0 && (
-            <p
+            <div
               style={{
-                margin: "10px 0 0",
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--fg-3)",
+                border: "var(--bw) solid var(--ink)",
+                borderRadius: "var(--r-card)",
+                background: "var(--dark-bg)",
+                color: "var(--dark-fg)",
+                padding: 20,
               }}
             >
-              // {keywords!.missing.length} keyword
-              {keywords!.missing.length !== 1 ? "s" : ""} missing from job
-              description
-            </p>
+              <div
+                className="eyebrow"
+                style={{ color: "var(--lime)", marginBottom: 12 }}
+              >
+                MISSING · ADD THESE {keywords!.missing.length}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                {keywords!.missing.map((kw) => (
+                  <span
+                    key={kw}
+                    style={{
+                      border: "1.5px dashed rgba(255,255,255,.4)",
+                      borderRadius: 999,
+                      padding: "6px 13px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+              <div
+                style={{
+                  fontSize: 12.5,
+                  lineHeight: 1.6,
+                  color: "var(--dark-muted)",
+                }}
+              >
+                These appear in the job description but not in your resume —
+                weave them into real accomplishments.
+              </div>
+            </div>
           )}
         </div>
       )}

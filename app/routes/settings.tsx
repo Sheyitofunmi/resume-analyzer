@@ -4,95 +4,64 @@ import { motion } from "framer-motion";
 import Navbar from "~/components/Navbar";
 import Footer from "~/components/Footer";
 import MobileBottomNav from "~/components/MobileBottomNav";
-import { Eyebrow, StatusPill } from "~/components/atoms";
 import { usePuterStore } from "~/lib/puter";
 import { revealUp, staggerContainer } from "~/lib/motion";
 
 export const meta = () => [{ title: "ResumeLens | Settings" }];
 
-// ── Toggle ─────────────────────────────────────────────────────────────
+// ── Toggle (52×28 pill, lime when on) ──────────────────────────────────
 function Toggle({
   on,
   onChange,
+  label,
 }: {
   on: boolean;
   onChange: (v: boolean) => void;
+  label: string;
 }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
       onClick={() => onChange(!on)}
-      className="rl-toggle"
-      style={{
-        width: 40,
-        height: 22,
-        borderRadius: 11,
-        background: on ? "var(--phos)" : "var(--surface-2)",
-        border: `1px solid ${on ? "var(--phos-dim)" : "var(--border-hi)"}`,
-        position: "relative",
-        cursor: "pointer",
-        transition: "all var(--dur-base)",
-        flexShrink: 0,
-        boxShadow: on ? "0 0 8px var(--phos-glow)" : "none",
-      }}
-      aria-pressed={on}
-    >
-      <span
-        style={{
-          position: "absolute",
-          top: 2,
-          left: on ? 20 : 2,
-          width: 16,
-          height: 16,
-          borderRadius: "50%",
-          background: on ? "var(--bg)" : "var(--fg-4)",
-          transition: "left var(--dur-base) var(--ease-out)",
-        }}
-      />
-    </button>
+      className={`toggle${on ? " toggle--on" : ""}`}
+    />
   );
 }
 
-// ── SettingRow ─────────────────────────────────────────────────────────
+// ── Setting row ────────────────────────────────────────────────────────
 function SettingRow({
   label,
   desc,
+  last = false,
   children,
 }: {
   label: string;
   desc?: string;
+  last?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div
-      className="rl-setting-row"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 16,
-        padding: "12px 0",
-        borderBottom: "1px dashed var(--border)",
+        padding: "16px 0",
+        borderBottom: last ? "none" : "1.5px solid var(--fill-3)",
         flexWrap: "wrap",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            color: "var(--fg-1)",
-          }}
-        >
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <span style={{ fontWeight: 800, fontSize: 14.5, color: "var(--ink)" }}>
           {label}
         </span>
         {desc && (
           <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              color: "var(--fg-3)",
-            }}
+            style={{ fontSize: 12.5, color: "var(--fg-2)", fontWeight: 600 }}
           >
             {desc}
           </span>
@@ -103,7 +72,7 @@ function SettingRow({
   );
 }
 
-// ── Section block ──────────────────────────────────────────────────────
+// ── Section card with header bar ───────────────────────────────────────
 function Section({
   title,
   children,
@@ -112,19 +81,26 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rl-card" style={{ position: "relative" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        <div
-          style={{
-            paddingBottom: 16,
-            marginBottom: 4,
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <span className="rl-eyebrow-prompt">{title}</span>
-        </div>
-        {children}
+    <div
+      style={{
+        border: "var(--bw) solid var(--ink)",
+        borderRadius: "var(--r-card)",
+        background: "var(--surface)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 26px",
+          borderBottom: "var(--bw) solid var(--ink)",
+          background: "var(--fill-1)",
+          fontWeight: 900,
+          fontSize: 15,
+        }}
+      >
+        {title}
       </div>
+      <div style={{ padding: "10px 26px 16px" }}>{children}</div>
     </div>
   );
 }
@@ -141,11 +117,6 @@ export default function Settings() {
     weeklyDigest: false,
     productUpdates: false,
   });
-
-  // Appearance
-  const [density, setDensity] = useState<"compact" | "default" | "relaxed">(
-    "default",
-  );
 
   // Career
   const [onboardingData, setOnboardingData] = useState<{
@@ -176,300 +147,289 @@ export default function Settings() {
 
   const user = auth.user;
 
+  const NOTIF_DEFS: {
+    key: keyof typeof notifs;
+    name: string;
+    desc: string;
+  }[] = [
+    {
+      key: "analysisComplete",
+      name: "Scan complete",
+      desc: "Notify me when a scan finishes with the new score.",
+    },
+    {
+      key: "scoreImproved",
+      name: "Score improved",
+      desc: "Alert me when a score beats the previous run.",
+    },
+    {
+      key: "weeklyDigest",
+      name: "Weekly digest",
+      desc: "Score trend and new keyword opportunities, every Monday.",
+    },
+    {
+      key: "productUpdates",
+      name: "Product updates",
+      desc: "New features and releases.",
+    },
+  ];
+
   return (
-    <main className="rl-page">
+    <main className="rl-page has-bottom-nav">
       <Navbar />
 
       <div
-        className="rl-section"
-        style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}
+        id="main-content"
+        style={{
+          flex: 1,
+          maxWidth: 860,
+          width: "100%",
+          margin: "0 auto",
+          padding: "44px 32px 80px",
+          boxSizing: "border-box",
+        }}
       >
-        {/* Header */}
-        <motion.div
-          variants={staggerContainer(0.07)}
+        <motion.h1
+          variants={revealUp}
           initial="hidden"
           animate="visible"
-          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+          style={{ fontSize: 40, letterSpacing: "-0.03em", margin: "0 0 36px" }}
         >
-          <motion.div variants={revealUp}>
-            <Eyebrow mode="prompt">settings</Eyebrow>
-          </motion.div>
-          <motion.h1 variants={revealUp}>
-            your_
-            <span style={{ color: "var(--copper-hi)" }}>preferences</span>
-          </motion.h1>
-        </motion.div>
+          Settings
+        </motion.h1>
 
         <motion.div
-          variants={staggerContainer(0.07, 0.1)}
+          variants={staggerContainer(0.07, 0.05)}
           initial="hidden"
           animate="visible"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-            maxWidth: 720,
-          }}
+          style={{ display: "flex", flexDirection: "column", gap: 18 }}
         >
-          {/* 1. Profile */}
+          {/* Account */}
           <motion.div variants={revealUp}>
-            <Section title="profile">
-              <SettingRow label="username" desc="your Puter account handle">
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 13,
-                    color: "var(--fg-2)",
-                    padding: "4px 10px",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "var(--radius-sm)",
-                  }}
-                >
-                  {user?.username ?? "—"}
-                </span>
+            <Section title="Account">
+              <SettingRow label="Username" desc="Your Puter account handle">
+                <span className="chip chip--fill">{user?.username ?? "—"}</span>
               </SettingRow>
-              <SettingRow label="auth_provider" desc="authentication method">
-                <span
-                  className="rl-chip"
-                  style={{
-                    color: "var(--phos)",
-                    borderColor: "var(--phos-dim)",
-                  }}
-                >
-                  puter
-                </span>
+              <SettingRow label="Signed in with" desc="Authentication method">
+                <span className="chip chip--cyan">Puter</span>
               </SettingRow>
-              <div style={{ paddingTop: 12 }}>
+              <SettingRow
+                label="Session"
+                desc="Sign out of ResumeLens on this device"
+                last
+              >
                 <button
                   type="button"
                   onClick={auth.signOut}
-                  className="rl-btn rl-btn-secondary"
-                  style={{ fontSize: 12 }}
+                  className="btn btn--outline btn--sm"
                 >
-                  ✕ sign_out
+                  Sign out
                 </button>
-              </div>
+              </SettingRow>
             </Section>
           </motion.div>
 
-          {/* 2. Career */}
+          {/* Career profile */}
           <motion.div variants={revealUp}>
-            <Section title="career_profile">
+            <Section title="Career profile">
               {onboardingData ? (
                 <>
-                  <SettingRow label="role">
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: "var(--fg-2)",
-                      }}
-                    >
+                  <SettingRow label="Target role">
+                    <span className="chip chip--fill">
                       {onboardingData.role || "—"}
                     </span>
                   </SettingRow>
-                  <SettingRow label="seniority">
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: "var(--fg-2)",
-                      }}
-                    >
+                  <SettingRow label="Seniority">
+                    <span className="chip chip--fill">
                       {onboardingData.seniority || "—"}
                     </span>
                   </SettingRow>
-                  <SettingRow label="goal">
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: "var(--fg-2)",
-                      }}
-                    >
+                  <SettingRow label="Goal">
+                    <span className="chip chip--fill">
                       {onboardingData.goal || "—"}
                     </span>
                   </SettingRow>
-                  <div style={{ paddingTop: 12 }}>
+                  <SettingRow
+                    label="Update your target"
+                    desc="Scores and rewrites are tuned to this"
+                    last
+                  >
                     <button
                       type="button"
                       onClick={() => navigate("/onboarding")}
-                      className="rl-btn rl-btn-secondary"
-                      style={{ fontSize: 12 }}
+                      className="btn btn--outline btn--sm"
                     >
-                      ✎ edit_career_profile
+                      ✎ Edit profile
                     </button>
-                  </div>
+                  </SettingRow>
                 </>
               ) : (
-                <div style={{ paddingTop: 12 }}>
+                <SettingRow
+                  label="No target set"
+                  desc="Tell us the role you're chasing to tune your scores"
+                  last
+                >
                   <button
                     type="button"
                     onClick={() => navigate("/onboarding")}
-                    className="rl-btn rl-btn-primary"
-                    style={{ fontSize: 12 }}
+                    className="btn btn--primary btn--sm"
                   >
-                    $ setup_career_profile →
+                    Set up profile →
                   </button>
-                </div>
+                </SettingRow>
               )}
             </Section>
           </motion.div>
 
-          {/* 3. Notifications */}
+          {/* Notifications */}
           <motion.div variants={revealUp}>
-            <Section title="notifications">
-              <SettingRow
-                label="analysis_complete"
-                desc="notify when AI finishes scoring"
-              >
-                <Toggle
-                  on={notifs.analysisComplete}
-                  onChange={(v) =>
-                    setNotifs((n) => ({ ...n, analysisComplete: v }))
-                  }
-                />
-              </SettingRow>
-              <SettingRow
-                label="score_improved"
-                desc="alert when your score beats previous run"
-              >
-                <Toggle
-                  on={notifs.scoreImproved}
-                  onChange={(v) =>
-                    setNotifs((n) => ({ ...n, scoreImproved: v }))
-                  }
-                />
-              </SettingRow>
-              <SettingRow
-                label="weekly_digest"
-                desc="summary email every Monday"
-              >
-                <Toggle
-                  on={notifs.weeklyDigest}
-                  onChange={(v) =>
-                    setNotifs((n) => ({ ...n, weeklyDigest: v }))
-                  }
-                />
-              </SettingRow>
-              <SettingRow
-                label="product_updates"
-                desc="new features and releases"
-              >
-                <Toggle
-                  on={notifs.productUpdates}
-                  onChange={(v) =>
-                    setNotifs((n) => ({ ...n, productUpdates: v }))
-                  }
-                />
-              </SettingRow>
+            <Section title="Notifications">
+              {NOTIF_DEFS.map((d, i) => (
+                <SettingRow
+                  key={d.key}
+                  label={d.name}
+                  desc={d.desc}
+                  last={i === NOTIF_DEFS.length - 1}
+                >
+                  <Toggle
+                    on={notifs[d.key]}
+                    label={d.name}
+                    onChange={(v) => setNotifs((n) => ({ ...n, [d.key]: v }))}
+                  />
+                </SettingRow>
+              ))}
             </Section>
           </motion.div>
 
-          {/* 4. Plan */}
+          {/* Plan — lime card */}
           <motion.div variants={revealUp}>
-            <Section title="plan">
-              <SettingRow label="current_plan" desc="your active subscription">
-                <StatusPill tier="good">FREE</StatusPill>
-              </SettingRow>
-              <SettingRow label="analyses_used" desc="this billing period">
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 13,
-                    color: "var(--fg-2)",
-                  }}
+            <div
+              className="card card--lime"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 20,
+                flexWrap: "wrap",
+                padding: 26,
+              }}
+            >
+              <div>
+                <div
+                  className="eyebrow eyebrow--ink"
+                  style={{ fontSize: 10, marginBottom: 8 }}
                 >
-                  0 / 5
-                </span>
-              </SettingRow>
-              <div style={{ paddingTop: 12 }}>
-                <button
-                  type="button"
-                  onClick={() => navigate("/pricing")}
-                  className="rl-btn rl-btn-copper"
-                  style={{ fontSize: 12 }}
-                >
-                  $ upgrade_to_pro →
-                </button>
-              </div>
-            </Section>
-          </motion.div>
-
-          {/* 5. Appearance */}
-          <motion.div variants={revealUp}>
-            <Section title="appearance">
-              <SettingRow label="theme" desc="always dark — by design">
-                <span
-                  className="rl-chip"
-                  style={{
-                    color: "var(--phos)",
-                    borderColor: "var(--phos-dim)",
-                  }}
-                >
-                  CIPHER dark
-                </span>
-              </SettingRow>
-              <SettingRow label="density" desc="ui element spacing">
-                <div className="rl-density-btns">
-                  {(["compact", "default", "relaxed"] as const).map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDensity(d)}
-                      className={`rl-btn ${density === d ? "rl-btn-copper" : "rl-btn-secondary"}`}
-                      style={{ fontSize: 11, padding: "4px 10px" }}
-                    >
-                      {d}
-                    </button>
-                  ))}
+                  CURRENT PLAN
                 </div>
-              </SettingRow>
-            </Section>
-          </motion.div>
-
-          {/* 6. Data */}
-          <motion.div variants={revealUp}>
-            <Section title="data">
-              <SettingRow
-                label="storage"
-                desc="all data stored locally via Puter — never on our servers"
-              >
-                <span
-                  className="rl-chip"
+                <div
                   style={{
-                    color: "var(--phos)",
-                    borderColor: "var(--phos-dim)",
+                    fontWeight: 900,
+                    fontSize: 24,
+                    letterSpacing: "-0.02em",
+                    marginBottom: 4,
                   }}
                 >
-                  ✓ puter cloud
-                </span>
+                  Free
+                </div>
+                <div style={{ fontSize: 13.5, fontWeight: 700 }}>
+                  Full 5-dimension scores · your data stays in your Puter cloud
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/pricing")}
+                style={{
+                  background: "var(--ink)",
+                  color: "var(--lime)",
+                  padding: "14px 28px",
+                  borderRadius: 10,
+                  fontWeight: 900,
+                  fontSize: 14,
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                  transition: "box-shadow var(--dur-fast) ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.boxShadow =
+                    "4px 4px 0 rgba(11,11,11,.3)")
+                }
+                onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "")}
+              >
+                Upgrade to Pro ▸
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Data */}
+          <motion.div variants={revealUp}>
+            <Section title="Your data">
+              <SettingRow
+                label="Storage"
+                desc="Everything is stored in your own Puter cloud — never on our servers"
+              >
+                <span className="chip chip--lime">✓ Puter cloud</span>
               </SettingRow>
               <SettingRow
-                label="export_data"
-                desc="download all your resumes and analyses"
+                label="Export data"
+                desc="Download all your resumes and analyses"
+                last
               >
                 <button
                   type="button"
-                  className="rl-btn rl-btn-secondary"
-                  style={{ fontSize: 12 }}
+                  className="btn btn--outline btn--sm"
                   onClick={() => alert("Export coming soon.")}
                 >
-                  ↓ export_all
+                  ↓ Export all
                 </button>
               </SettingRow>
-              <div style={{ paddingTop: 16 }}>
-                <button
-                  type="button"
-                  onClick={handleWipeData}
-                  className="rl-btn rl-btn-ghost-ember"
-                  style={{ fontSize: 12 }}
-                >
-                  ✕ delete_all_data
-                </button>
-              </div>
             </Section>
+          </motion.div>
+
+          {/* Danger zone */}
+          <motion.div variants={revealUp}>
+            <div
+              style={{
+                border: "var(--bw) solid var(--red)",
+                borderRadius: "var(--r-card)",
+                background: "var(--surface)",
+                padding: 26,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 20,
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontWeight: 900,
+                    fontSize: 15,
+                    color: "var(--red)",
+                    marginBottom: 4,
+                  }}
+                >
+                  Delete account & data
+                </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "var(--fg-2)",
+                    fontWeight: 600,
+                  }}
+                >
+                  Removes every resume, version, and score. Cannot be undone.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleWipeData}
+                className="btn btn--danger btn--sm"
+              >
+                Delete everything
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       </div>
