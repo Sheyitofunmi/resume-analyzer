@@ -78,7 +78,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
       }}
     >
       <Link
-        to="/landing"
+        to="/"
         style={{
           display: "flex",
           alignItems: "center",
@@ -103,7 +103,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
         }}
       >
         <Link
-          to="/landing"
+          to="/landing#xray"
           className="mobile-hide"
           style={{ color: "var(--ink)", textDecoration: "none" }}
         >

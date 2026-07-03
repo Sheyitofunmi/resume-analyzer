@@ -12,6 +12,17 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### Fixed dead "Product" nav link + GitHub Pages deployment (2026-07-03)
+
+- `PublicNav`'s "Product" link (`landing.tsx`) pointed to `/landing`, which did nothing when already on that page. Changed to `/landing#xray`, an anchor to the X-ray before/after showcase (`id="xray"`), scrolled into view via React Router's built-in `<ScrollRestoration />` hash handling.
+- Added `.github/workflows/deploy-pages.yml`: builds the SPA (`ssr:false` build output at `build/client`) on every push to `main` and deploys it via `actions/deploy-pages`. Copies `index.html` to `404.html` so GitHub Pages' 404 fallback boots the SPA for client-side routes.
+- `vite.config.ts` and `react-router.config.ts` now read a `GITHUB_PAGES` env var (set by the workflow) to set Vite's asset `base` and React Router's `basename` to `/resume-analyzer/` for the project-page subpath. Locally (`npm run dev` / `npm run build` without the env var) both stay at `/`.
+- **One-time manual step still needed**: repo Settings → Pages → Source must be set to "GitHub Actions" before the workflow's `deploy-pages` step will succeed (no `gh` CLI/token available in this session to do it via API).
+
+### Logo now always links to `/` (canonical landing page) + nav link to `/landing` (2026-07-03)
+
+`/` already renders the marketing `<Landing />` view for unauthenticated users (`home.tsx`) and the dashboard when authenticated, so it's the canonical landing URL. Logo links previously pointed to the separate `/landing` route inconsistently. Updated `Navbar.tsx` (was `auth.isAuthenticated ? "/" : "/landing"`, now always `"/"`), `auth.tsx` logo link, and `landing.tsx` logo link to all point to `/`. The standalone `/landing` route still exists (unchanged) but is no longer the logo target. Also added a "Landing" entry to `Navbar.tsx`'s `NAV_LINKS` (`/landing`) so authenticated users have a direct nav link back to the marketing page.
+
 ### Codebase audit cleanup + puter.ts dedup (2026-07-03)
 
 Full-project review pass. Removed dead code, unused assets, and refactored the Puter store. Typecheck + production build both pass.

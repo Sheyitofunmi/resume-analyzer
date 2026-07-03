@@ -17,6 +17,7 @@ const ignoreWellKnownRoutes: Plugin = {
 };
 
 export default defineConfig({
+  base: process.env.GITHUB_PAGES ? "/resume-analyzer/" : "/",
   plugins: [tailwindcss(), ignoreWellKnownRoutes, reactRouter()],
   resolve: {
     tsconfigPaths: true,

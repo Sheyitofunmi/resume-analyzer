@@ -7,6 +7,7 @@ import { useProductTour } from "~/hooks/useProductTour";
 
 const NAV_LINKS = [
   { to: "/", label: "Home", exact: true },
+  { to: "/landing", label: "Landing", exact: true },
   { to: "/upload", label: "Upload", exact: false },
   { to: "/history", label: "History", exact: false },
   { to: "/settings", label: "Settings", exact: false },
@@ -51,7 +52,7 @@ const Navbar = () => {
         }}
       >
         <Link
-          to={auth.isAuthenticated ? "/" : "/landing"}
+          to="/"
           style={{ textDecoration: "none", flexShrink: 0 }}
           aria-label="ResumeLens home"
         >

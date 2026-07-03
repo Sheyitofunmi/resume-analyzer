@@ -52,7 +52,7 @@ const Auth = () => {
           }}
         />
         <Link
-          to="/landing"
+          to="/"
           style={{
             position: "relative",
             display: "inline-flex",
