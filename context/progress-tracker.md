@@ -12,6 +12,10 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### X-ray divider line visible on the dark side (2026-07-05)
+
+On medium/desktop widths (split view >1024px) the vertical divider line rendered with `border-left: 2.5px solid var(--ink)`. Because a zero-width `border-left` paints just onto the right (machine) side of the boundary — which is the dark panel — the black line was invisible (black-on-black) above/below the slider handle. Changed it to `var(--surface)` (white) in `landing.tsx` so the divider reads clearly against the dark machine background. Verified at 1100px. Also recolored the drag handle pill (`◂ ▸`): it straddles the white/dark boundary, so a solid `var(--ink)` pill had its right half disappear into the machine panel — now `var(--cyan)` with a `var(--bw) solid var(--ink)` border and ink arrows, visible on both sides. Verified at 1280px.
+
 ### X-ray → stacked column on mobile/tablet + smaller landing header buttons (2026-07-05)
 
 Follow-up after the first round still showed cramped landing buttons and a squeezed X-ray:

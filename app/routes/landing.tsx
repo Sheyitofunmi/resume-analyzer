@@ -862,7 +862,9 @@ function XRaySection() {
               bottom: 0,
               left: `${split}%`,
               width: 0,
-              borderLeft: "2.5px solid var(--ink)",
+              /* The line renders just onto the dark machine side, so keep it
+                 light — a black line here would be invisible against it. */
+              borderLeft: "2.5px solid var(--surface)",
               zIndex: 3,
             }}
           >
@@ -874,14 +876,19 @@ function XRaySection() {
                 transform: "translateY(-50%)",
                 width: 62,
                 height: 34,
-                background: "var(--ink)",
-                color: "var(--page)",
+                /* Straddles the white/dark boundary, so use cyan + an ink
+                   border to stay visible on both sides (a black pill vanished
+                   into the machine panel). */
+                background: "var(--cyan)",
+                color: "var(--ink)",
+                border: "var(--bw) solid var(--ink)",
+                boxSizing: "border-box",
                 borderRadius: 999,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 11,
-                fontWeight: 700,
+                fontWeight: 800,
               }}
             >
               ◂ ▸
