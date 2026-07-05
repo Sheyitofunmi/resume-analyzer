@@ -132,7 +132,7 @@ const Navbar = () => {
         {auth.isAuthenticated && (
           <Link
             to="/pricing"
-            className="badge-mono mobile-hide"
+            className="badge-mono tablet-hide"
             id="nav-upload-btn"
           >
             Free plan · Upgrade
@@ -143,7 +143,7 @@ const Navbar = () => {
           <button
             id="tour-btn"
             onClick={startTour}
-            className="mobile-hide"
+            className="tablet-hide"
             title="Take a tour"
             aria-label="Take a tour"
             style={{
@@ -194,10 +194,7 @@ const Navbar = () => {
         )}
 
         {auth.isAuthenticated ? (
-          <button
-            onClick={auth.signOut}
-            className="btn btn--outline btn--sm mobile-hide"
-          >
+          <button onClick={auth.signOut} className="btn btn--outline btn--sm">
             Sign out
           </button>
         ) : (

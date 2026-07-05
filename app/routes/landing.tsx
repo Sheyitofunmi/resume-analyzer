@@ -79,6 +79,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
     >
       <Link
         to="/"
+        className="rl-landing-logo"
         style={{
           display: "flex",
           alignItems: "center",
@@ -94,6 +95,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
         ResumeLens
       </Link>
       <div
+        className="rl-landing-nav-actions"
         style={{
           display: "flex",
           alignItems: "center",
@@ -573,12 +575,19 @@ function XRaySection() {
               fontWeight: 600,
             }}
           >
-            ← Drag the divider. Left is your resume. Right is what the screening
-            bot parsed.
+            <span className="rl-xray-drag-hint">
+              ← Drag the divider. Left is your resume. Right is what the
+              screening bot parsed.
+            </span>
+            <span className="rl-xray-stack-hint">
+              Top is your resume. Below is what the screening bot actually
+              parsed.
+            </span>
           </p>
         </div>
 
         <div
+          className="rl-xray-stage"
           style={{
             position: "relative",
             height: 380,
@@ -591,6 +600,7 @@ function XRaySection() {
         >
           {/* Human side */}
           <div
+            className="rl-xray-pane"
             style={{
               position: "absolute",
               inset: 0,
@@ -598,6 +608,9 @@ function XRaySection() {
               padding: "32px 36px",
             }}
           >
+            <div className="rl-xray-tag rl-xray-tag--human">
+              HUMAN — WHAT YOU SENT
+            </div>
             <div
               style={{
                 display: "flex",
@@ -704,6 +717,7 @@ function XRaySection() {
 
           {/* Machine side */}
           <div
+            className="rl-xray-machine"
             style={{
               position: "absolute",
               top: 0,
@@ -714,6 +728,7 @@ function XRaySection() {
             }}
           >
             <div
+              className="rl-xray-pane rl-xray-machine-inner"
               style={{
                 position: "absolute",
                 top: 0,
@@ -727,6 +742,9 @@ function XRaySection() {
                 textAlign: "right",
               }}
             >
+              <div className="rl-xray-tag rl-xray-tag--machine">
+                MACHINE — WHAT THE BOT SAW
+              </div>
               <svg
                 width="72"
                 height="72"
@@ -837,6 +855,7 @@ function XRaySection() {
 
           {/* Divider */}
           <div
+            className="rl-xray-divider"
             style={{
               position: "absolute",
               top: 0,
@@ -923,6 +942,7 @@ function XRaySection() {
 
           <input
             type="range"
+            className="rl-xray-range"
             min={18}
             max={82}
             value={split}
@@ -950,7 +970,7 @@ function XRaySection() {
         >
           73% of resumes are filtered before a human ever opens them.{" "}
           <strong style={{ color: "var(--ink)" }}>
-            ResumeLens fixes the right side.
+            ResumeLens fixes what the parser sees.
           </strong>
         </div>
       </div>

@@ -30,6 +30,7 @@ const Auth = () => {
     >
       {/* LEFT — brand panel */}
       <div
+        className="rl-auth-panel"
         style={{
           position: "relative",
           background: "var(--cyan)",
@@ -154,6 +155,7 @@ const Auth = () => {
 
       {/* RIGHT — sign in */}
       <div
+        className="rl-auth-panel"
         style={{
           display: "flex",
           alignItems: "center",

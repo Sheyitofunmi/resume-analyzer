@@ -869,7 +869,10 @@ select:focus-visible {
   .g-hero,
   .g-feature,
   .g-split-wide {
-    grid-template-columns: 1fr;
+    /* minmax(0,…) lets the single column shrink below its content's
+       intrinsic width, so fixed-width children (capped with max-width)
+       can't push the track wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -946,6 +949,140 @@ select:focus-visible {
   /* Keep content clear of the fixed bottom nav */
   .has-bottom-nav {
     padding-bottom: 84px;
+  }
+}
+
+/* Hide secondary nav chrome (plan badge, tour button) on tablet/narrow
+   widths where the header links would otherwise collide. */
+@media (max-width: 1024px) {
+  .tablet-hide {
+    display: none !important;
+  }
+}
+
+/* ── Auth split panels ────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .rl-auth-panel {
+    padding: 28px 20px !important;
+  }
+}
+
+/* ── Landing top-nav actions ──────────────────────────────────────── */
+@media (max-width: 560px) {
+  .rl-landing-nav-actions {
+    gap: 8px !important;
+  }
+
+  /* Shrink the Sign in / Get started buttons so they never wrap or
+     overflow next to the logo on small phones. */
+  .rl-landing-nav-actions a {
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .rl-landing-logo {
+    font-size: 15px !important;
+    gap: 7px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .rl-landing-nav-actions a {
+    padding: 6px 10px !important;
+    font-size: 11.5px !important;
+  }
+}
+
+/* ── X-ray showcase (landing) ─────────────────────────────────────── */
+/* Stacked labels — only shown once the drag split collapses to a column. */
+.rl-xray-tag {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: var(--bw) solid var(--ink);
+  margin-bottom: 16px;
+}
+
+.rl-xray-tag--human {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.rl-xray-tag--machine {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+/* Instruction copy swaps with the layout: "drag" on desktop, "top/below"
+   once the panes stack. */
+.rl-xray-stack-hint {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  /* On mobile/tablet the side-by-side drag split can't fit, so stack the
+     two panes into a single column (human on top, machine below) and drop
+     the drag interaction. */
+  .rl-xray-stage {
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+    cursor: default !important;
+  }
+
+  /* Human pane (direct child) → static, full width */
+  .rl-xray-stage > .rl-xray-pane {
+    position: relative !important;
+    inset: auto !important;
+    width: 100%;
+  }
+
+  /* Machine clip wrapper → static, full width, separated by a rule */
+  .rl-xray-machine {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    border-top: var(--bw) solid var(--ink);
+  }
+
+  /* Machine inner panel → drop the 1062px fixed width + right align */
+  .rl-xray-machine-inner {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .rl-xray-pane {
+    padding: 22px 20px !important;
+  }
+
+  /* No drag on the stacked layout */
+  .rl-xray-divider,
+  .rl-xray-range {
+    display: none !important;
+  }
+
+  .rl-xray-tag {
+    display: inline-block !important;
+  }
+
+  .rl-xray-drag-hint {
+    display: none;
+  }
+
+  .rl-xray-stack-hint {
+    display: inline;
   }
 }
 

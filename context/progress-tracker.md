@@ -12,6 +12,33 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Recent Changes
 
+### X-ray → stacked column on mobile/tablet + smaller landing header buttons (2026-07-05)
+
+Follow-up after the first round still showed cramped landing buttons and a squeezed X-ray:
+
+- **Landing header buttons:** added `.rl-landing-logo` to the logo. At `<=560px` the Sign in / Get started buttons shrink (`padding: 7px 12px`, `font-size: 12px`), the logo drops to `15px`, and the action gap tightens to `8px`; at `<=360px` buttons shrink further (`6px 10px` / `11.5px`). Verified no wrap at 360/375px.
+- **X-ray now stacks vertically at `<=1024px`** (covers Surface Pro 7 @ 912px and iPads) instead of the side-by-side drag split. Added classes in `landing.tsx`: `.rl-xray-machine` (clip wrapper), `.rl-xray-machine-inner` (dark panel), `.rl-xray-divider`, `.rl-xray-range`, plus per-pane `.rl-xray-tag` labels ("HUMAN — WHAT YOU SENT" / "MACHINE — WHAT THE BOT SAW"). CSS makes the stage a flex column with both panes static/full-width, hides the divider + range input (no drag), and shows the tag labels. Desktop (>1024px) keeps the original draggable split untouched.
+- **Instruction copy swaps with layout:** `.rl-xray-drag-hint` ("← Drag the divider…") shows on desktop; `.rl-xray-stack-hint` ("Top is your resume. Below is what the screening bot actually parsed.") shows when stacked. Bottom caption changed from "fixes the right side" to orientation-neutral "fixes what the parser sees".
+- Verified with emulator screenshots at 360/375/768/912px (stacked, no overflow) and 1280px (original split intact). Typecheck passes.
+
+### Mobile/tablet header + X-ray fixes (2026-07-05)
+
+Follow-up from real device-emulator screenshots (Surface Pro 7, iPhone 14 Pro Max, iPhone SE):
+
+- **No sign-out on mobile:** the header's `Sign out` button was `mobile-hide` and the bottom nav has no sign-out slot (it lived only inside `/settings`). Removed `mobile-hide` from the `Sign out` button in `Navbar.tsx` so it's visible in the mobile header (logo + avatar + Sign out).
+- **Crowded/overlapping header on tablet (~912px):** the `Free plan · Upgrade` badge and the `?` tour button collided with the nav links. Switched both from `mobile-hide` to a new `.tablet-hide` utility (hidden `<=1024px`), so 721–1024px widths show just logo + links + avatar + sign-out.
+- **Cramped landing header buttons on small phones:** added `.rl-landing-nav-actions` to the landing top-nav action group; gap tightens to `10px` at `<=480px`.
+- **X-ray showcase broke on mobile/tablet:** both panes are `position:absolute`, so the stage relies on a fixed `height:380`. On narrow widths the resume content grew taller and clipped/overlapped. Added `.rl-xray-stage` (height `520px` at `<=720px`) and `.rl-xray-pane` (padding `20px 18px` at `<=720px`) to both panes in `landing.tsx`. Verified via emulator screenshots at 375px and 912px — content no longer clips and the tablet view renders the full clean layout.
+
+New CSS utilities live in `app.css`: `.tablet-hide`, `.rl-landing-nav-actions`, `.rl-xray-stage`, `.rl-xray-pane`, `.rl-auth-panel`. Typecheck passes.
+
+### Fixed mobile/tablet horizontal overflow on `/auth` (2026-07-05)
+
+- The auth page (`auth.tsx`) overflowed horizontally on phones (content measured 488px in a 390px viewport). Cause: the `g-halves` grid collapsed to a single `1fr` column, but `1fr` (= `minmax(auto, 1fr)`) won't shrink below its content's intrinsic width, so the right sign-in panel's fixed `width: 400` inner div + `padding: 44` (×2) forced the track wider than the screen.
+- `app.css`: changed the `<=900px` single-column collapse for `.g-halves/.g-thirds/.g-hero/.g-feature/.g-split-wide` from `grid-template-columns: 1fr` to `minmax(0, 1fr)`, so fixed-width children capped with `max-width: 100%` can no longer push the track past the viewport. General hardening for all these grids, not just auth.
+- `auth.tsx` + `app.css`: added `.rl-auth-panel` class to both split panels; at `<=720px` their padding drops from `44px` to `28px 20px`.
+- Verified with a Playwright overflow probe (scrollWidth vs viewport) across `/landing`, `/auth`, `/upload`, `/pricing`, `/onboarding` at 390px and 768px — all now report no horizontal overflow. Viewport meta tag confirmed present in `root.tsx`.
+
 ### Fixed dead "Product" nav link + GitHub Pages deployment (2026-07-03)
 
 - `PublicNav`'s "Product" link (`landing.tsx`) pointed to `/landing`, which did nothing when already on that page. Changed to `/landing#xray`, an anchor to the X-ray before/after showcase (`id="xray"`), scrolled into view via React Router's built-in `<ScrollRestoration />` hash handling.
