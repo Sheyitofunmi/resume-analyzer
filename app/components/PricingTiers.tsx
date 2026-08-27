@@ -13,24 +13,31 @@ interface Tier {
   features: Feature[];
   cta: string;
   ctaTo: string;
+  /**
+   * Whether the tier can actually be used today. Billing isn't wired up, so
+   * only Free is real — the other two are roadmap, and their cards must not
+   * look purchasable.
+   */
+  available: boolean;
 }
 
 export const TIERS: Tier[] = [
   {
     id: "free",
     name: "Free",
-    tagline: "Test the waters",
+    tagline: "Everything, right now",
     monthlyPrice: "$0",
     yearlyPrice: "$0",
     features: [
-      { label: "1 resume scan / month", included: true },
+      { label: "Unlimited resume scans", included: true },
       { label: "Full 5-dimension score", included: true },
-      { label: "3 AI rewrites per scan", included: true },
-      { label: "Version history", included: false },
-      { label: "Keyword gap alerts", included: false },
+      { label: "AI bullet rewrites", included: true },
+      { label: "Keyword gap vs. the job post", included: true },
+      { label: "Score history & interview questions", included: true },
     ],
     cta: "Start free",
     ctaTo: "/auth",
+    available: true,
   },
   {
     id: "pro",
@@ -39,14 +46,14 @@ export const TIERS: Tier[] = [
     monthlyPrice: "$12",
     yearlyPrice: "$9",
     features: [
-      { label: "Unlimited scans & roles", included: true },
-      { label: "Unlimited AI rewrites", included: true },
-      { label: "Version history & compare", included: true },
-      { label: "Keyword gap alerts", included: true },
+      { label: "Version history & side-by-side compare", included: true },
       { label: "ATS-safe export templates", included: true },
+      { label: "Track multiple roles at once", included: true },
+      { label: "Keyword gap alerts on saved roles", included: true },
     ],
-    cta: "Go Pro ▸",
-    ctaTo: "/auth",
+    cta: "Planned",
+    ctaTo: "",
+    available: false,
   },
   {
     id: "career",
@@ -60,8 +67,9 @@ export const TIERS: Tier[] = [
       { label: "LinkedIn profile scoring", included: true },
       { label: "1:1 expert review / quarter", included: true },
     ],
-    cta: "Get Career+",
-    ctaTo: "/auth",
+    cta: "Planned",
+    ctaTo: "",
+    available: false,
   },
 ];
 
@@ -73,6 +81,23 @@ export default function PricingTiers() {
   // visitor straight back to the dashboard — the CTAs looked broken. Send
   // them into a scan instead, and route new visitors through sign-up first.
   const ctaTo = auth.isAuthenticated ? "/upload" : "/auth?next=/upload";
+
+  // Paid tiers aren't buyable yet, so they get a flat label instead of a
+  // button. Anything that looks clickable here is a promise the app can't keep.
+  const plannedStyle = {
+    marginTop: "auto",
+    display: "block",
+    textAlign: "center",
+    padding: 14,
+    borderRadius: 10,
+    fontWeight: 900,
+    fontSize: 13,
+    letterSpacing: "0.06em",
+    border: "2px dashed currentColor",
+    opacity: 0.62,
+    cursor: "default",
+    userSelect: "none",
+  } as const;
 
   const segStyle = (active: boolean) =>
     ({
@@ -96,6 +121,27 @@ export default function PricingTiers() {
         width: "100%",
       }}
     >
+      {/* Billing isn't live. Say so before anyone reads the prices. */}
+      <div
+        role="note"
+        style={{
+          maxWidth: 640,
+          textAlign: "center",
+          border: "var(--bw) solid var(--ink)",
+          borderRadius: 12,
+          background: "var(--lime)",
+          color: "var(--ink)",
+          padding: "14px 20px",
+          fontSize: 14,
+          fontWeight: 700,
+          lineHeight: 1.5,
+        }}
+      >
+        ResumeLens is free while it's in early access. Everything the app does
+        today is on the Free plan — Pro and Career+ are what's planned next, and
+        neither is purchasable yet.
+      </div>
+
       {/* Billing toggle */}
       <div
         style={{
@@ -139,7 +185,7 @@ export default function PricingTiers() {
               marginBottom: 18,
             }}
           >
-            Test the waters
+            {TIERS[0].tagline}
           </div>
           <div
             style={{
@@ -246,28 +292,9 @@ export default function PricingTiers() {
               <span key={f.label}>✓ {f.label}</span>
             ))}
           </div>
-          <Link
-            to={ctaTo}
-            style={{
-              marginTop: "auto",
-              display: "block",
-              textAlign: "center",
-              background: "var(--ink)",
-              color: "var(--cyan)",
-              padding: 14,
-              borderRadius: 10,
-              fontWeight: 900,
-              fontSize: 14,
-              textDecoration: "none",
-              transition: "box-shadow var(--dur-fast) ease",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow = "4px 4px 0 rgba(11,11,11,.3)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "")}
-          >
-            Go Pro ▸
-          </Link>
+          <div style={{ ...plannedStyle, color: "var(--ink)" }}>
+            PLANNED — NOT YET AVAILABLE
+          </div>
         </div>
 
         {/* Career+ */}
@@ -326,29 +353,9 @@ export default function PricingTiers() {
               <span key={f.label}>✓ {f.label}</span>
             ))}
           </div>
-          <Link
-            to={ctaTo}
-            style={{
-              marginTop: "auto",
-              display: "block",
-              textAlign: "center",
-              background: "var(--lime)",
-              color: "var(--ink)",
-              padding: 14,
-              borderRadius: 10,
-              fontWeight: 900,
-              fontSize: 14,
-              textDecoration: "none",
-              transition: "box-shadow var(--dur-fast) ease",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow =
-                "4px 4px 0 rgba(198,242,78,.35)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "")}
-          >
-            Get Career+
-          </Link>
+          <div style={{ ...plannedStyle, color: "var(--lime)" }}>
+            PLANNED — NOT YET AVAILABLE
+          </div>
         </div>
       </div>
     </div>

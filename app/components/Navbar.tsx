@@ -136,7 +136,7 @@ const Navbar = () => {
             className="badge-mono tablet-hide"
             id="nav-upload-btn"
           >
-            Free plan · Upgrade
+            Free · Early access
           </Link>
         )}
 

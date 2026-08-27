@@ -13,20 +13,20 @@ export const meta = () => [
 
 const FAQS = [
   {
-    q: "Which ATS systems do you simulate?",
-    a: "Our parser replicates the extraction behavior of the major applicant tracking systems used by most large employers — including how they handle columns, tables, images, and non-standard fonts.",
+    q: "What does the ATS score actually measure?",
+    a: "It's a heuristic, not a simulation of any specific ATS. We extract your resume in the browser the way a plain-text parser would — so columns, tables, images and unusual fonts show up as extraction problems — then have the model judge what survived. Treat it as a signal about how machine-readable your resume is, not a guaranteed pass or fail at any one employer.",
   },
   {
     q: "Will rewrites still sound like me?",
-    a: "Yes. The engine rewrites only the structure and evidence of each bullet — your vocabulary and tone are preserved, and nothing is applied until you accept it.",
+    a: "The engine rewrites the structure and evidence of a bullet rather than your vocabulary, and nothing is applied automatically — every suggestion sits next to your original so you can take it or leave it.",
   },
   {
     q: "What happens to my data?",
-    a: "Resumes are encrypted, never shared, and never used to train models. Delete your account and everything is gone within 24 hours.",
+    a: "Your resume is parsed in your browser and stored in your own Puter cloud account, not on a server we run. We can't read it, and it isn't used to train anything. You can delete everything yourself at any time from Settings.",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Anytime, in one click from Settings. Annual plans are refunded pro-rata for unused months.",
+    q: "Is it really free?",
+    a: "Yes, and there's nothing to cancel — ResumeLens is in early access with no billing set up. AI calls run through Puter, which bills usage to your own Puter account rather than ours. If paid plans arrive later, anything you can do today will stay available.",
   },
 ];
 
