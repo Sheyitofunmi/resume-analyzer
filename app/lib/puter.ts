@@ -1,6 +1,11 @@
 import { create } from "zustand";
-import { demoFeedback } from "../../constants";
-import { extractJSON } from "~/lib/utils";
+import {
+  demoFeedback,
+  prepareAtsInstructions,
+  prepareWritingInstructions,
+} from "../../constants";
+import type { JobContext } from "../../constants";
+import { extractJSON, mergeFeedbackHalves } from "~/lib/utils";
 
 declare global {
   interface Window {
@@ -44,11 +49,24 @@ declare global {
   }
 }
 
+/**
+ * Why the last analysis fell back to `demoFeedback`. `null` means the scores
+ * came from the model. Lets the UI say "the service timed out" instead of
+ * silently presenting canned numbers as a real result.
+ */
+export type FeedbackFallbackReason =
+  | "unavailable" // Puter.js never loaded
+  | "timeout" // queued or stalled past the deadline
+  | "error" // the call threw
+  | "empty" // the stream closed without producing text
+  | null;
+
 interface PuterStore {
   isLoading: boolean;
   error: string | null;
   puterReady: boolean;
   isUsingDemoFeedback: boolean;
+  feedbackFallbackReason: FeedbackFallbackReason;
   auth: {
     user: PuterUser | null;
     isAuthenticated: boolean;
@@ -77,13 +95,13 @@ interface PuterStore {
     ) => Promise<AIResponse | undefined>;
     feedback: (
       path: string,
-      message: string,
-      onChunk?: (accumulated: string) => void,
+      job: JobContext,
+      onProgress?: (fraction: number) => void,
     ) => Promise<AIResponse | undefined>;
     feedbackFromText: (
       resumeText: string,
-      message: string,
-      onChunk?: (accumulated: string) => void,
+      job: JobContext,
+      onProgress?: (fraction: number) => void,
     ) => Promise<AIResponse | undefined>;
     img2txt: (
       image: string | File | Blob,
@@ -117,6 +135,28 @@ interface PuterStore {
 const getPuter = (): typeof window.puter | null =>
   typeof window !== "undefined" && window.puter ? window.puter : null;
 
+// A synchronous hint about whether this browser has ever completed a sign-in.
+// Puter.js takes a network round trip to answer that, so `/` uses this to
+// decide what to paint first instead of stalling on a loading screen.
+const RETURNING_KEY = "rl:returning";
+
+export const hasSignedInBefore = (): boolean => {
+  try {
+    return localStorage.getItem(RETURNING_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+const rememberSignedIn = (value: boolean) => {
+  try {
+    if (value) localStorage.setItem(RETURNING_KEY, "1");
+    else localStorage.removeItem(RETURNING_KEY);
+  } catch {
+    /* private mode / storage disabled — the hint is optional */
+  }
+};
+
 export const usePuterStore = create<PuterStore>((set, get) => {
   // Merge a partial auth patch, preserving the stable action references.
   const patchAuth = (patch: Partial<PuterStore["auth"]>) =>
@@ -138,6 +178,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
     try {
       const isSignedIn = await puter.auth.isSignedIn();
+      rememberSignedIn(isSignedIn);
       if (isSignedIn) {
         const user = await puter.auth.getUser();
         patchAuth({ user, isAuthenticated: true, getUser: () => user });
@@ -185,6 +226,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
 
     try {
       await puter.auth.signOut();
+      rememberSignedIn(false);
       patchAuth({ user: null, isAuthenticated: false, getUser: () => null });
       set({ isLoading: false });
     } catch (err) {
@@ -282,72 +324,168 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       message: { content: JSON.stringify(demoFeedback) },
     }) as unknown as AIResponse;
 
-  const streamFeedback = async (
+  const useDemo = (reason: FeedbackFallbackReason) => {
+    set({ isUsingDemoFeedback: true, feedbackFallbackReason: reason });
+    return demoResponse();
+  };
+
+  // Puter can queue a request indefinitely on a busy tier. Bound both the wait
+  // for the first token and the whole response so a stalled call surfaces as a
+  // timeout instead of an unbounded spinner.
+  const FIRST_CHUNK_TIMEOUT_MS = 45_000;
+  const OVERALL_TIMEOUT_MS = 150_000;
+
+  const withDeadline = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+    let timer: ReturnType<typeof setTimeout>;
+    return Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("__timeout__")), ms);
+      }),
+    ]).finally(() => clearTimeout(timer)) as Promise<T>;
+  };
+
+  /**
+   * Streams one analysis call to completion. Resolves to the raw text, or to
+   * `null` if it failed — in which case `feedbackFallbackReason` says why.
+   * `onDelta` reports characters received so callers can show real progress.
+   */
+  const streamOnce = async (
     content: ChatMessageContent[],
-    onChunk?: (accumulated: string) => void,
-  ): Promise<AIResponse> => {
+    instructions: string,
+    onDelta?: (chars: number) => void,
+  ): Promise<string | null> => {
     const puter = getPuter();
     if (!puter) {
-      set({ isUsingDemoFeedback: true });
-      return demoResponse();
+      set({ feedbackFallbackReason: "unavailable" });
+      return null;
     }
-    try {
-      const stream = await (puter.ai.chat([{ role: "user", content }], {
-        model: "claude-sonnet-4-6",
-        stream: true,
-      }) as unknown as Promise<AsyncIterable<{ text?: string }>>);
 
-      let text = "";
-      for await (const part of stream) {
-        if (part?.text) {
-          text += part.text;
-          onChunk?.(text);
+    let text = "";
+    try {
+      const startedAt = Date.now();
+      const stream = await withDeadline(
+        puter.ai.chat(
+          [
+            {
+              role: "user",
+              content: [...content, { type: "text", text: instructions }],
+            },
+          ],
+          { model: "claude-sonnet-4-6", stream: true },
+        ) as unknown as Promise<AsyncIterable<{ text?: string }>>,
+        FIRST_CHUNK_TIMEOUT_MS,
+      );
+
+      // Iterate manually so each `next()` can carry its own deadline: a tight
+      // one until the model starts talking, then the remaining overall budget.
+      const iterator = stream[Symbol.asyncIterator]();
+      for (;;) {
+        const remaining = OVERALL_TIMEOUT_MS - (Date.now() - startedAt);
+        if (remaining <= 0) throw new Error("__timeout__");
+        const budget = text
+          ? remaining
+          : Math.min(FIRST_CHUNK_TIMEOUT_MS, remaining);
+
+        const { value, done } = await withDeadline(iterator.next(), budget);
+        if (done) break;
+        if (value?.text) {
+          text += value.text;
+          onDelta?.(value.text.length);
         }
       }
 
       if (!text) {
-        set({ isUsingDemoFeedback: true });
-        return demoResponse();
+        set({ feedbackFallbackReason: "empty" });
+        return null;
       }
-
-      set({ isUsingDemoFeedback: false });
-      return { message: { content: text } } as unknown as AIResponse;
-    } catch {
-      set({ isUsingDemoFeedback: true });
-      return demoResponse();
+      return text;
+    } catch (err) {
+      const timedOut = err instanceof Error && err.message === "__timeout__";
+      // A timeout after partial output still leaves truncated, unparseable
+      // JSON, so both cases fail — but the caller can tell them apart.
+      set({ feedbackFallbackReason: timedOut ? "timeout" : "error" });
+      return null;
     }
+  };
+
+  // Rough size of a complete two-part response, used only to turn characters
+  // received into a progress fraction. Being off just makes the bar move a
+  // little fast or slow; it is clamped either way.
+  const EXPECTED_RESPONSE_CHARS = 2800;
+
+  /**
+   * Runs the two halves of the analysis concurrently and stitches them into
+   * one `Feedback` object. Two smaller responses stream in parallel, so the
+   * user waits on the slower half rather than on the sum of both.
+   */
+  const streamSplitFeedback = async (
+    content: ChatMessageContent[],
+    job: JobContext,
+    onProgress?: (fraction: number) => void,
+  ): Promise<AIResponse> => {
+    if (!getPuter()) return useDemo("unavailable");
+
+    let charsSoFar = 0;
+    const report = onProgress
+      ? (chars: number) => {
+          charsSoFar += chars;
+          // Hold just short of full until both halves have actually landed.
+          onProgress(Math.min(0.95, charsSoFar / EXPECTED_RESPONSE_CHARS));
+        }
+      : undefined;
+
+    set({ feedbackFallbackReason: null });
+    const [atsText, writingText] = await Promise.all([
+      streamOnce(content, prepareAtsInstructions(job), report),
+      streamOnce(content, prepareWritingInstructions(job), report),
+    ]);
+
+    // Either half missing leaves an incomplete report, so fall back wholesale.
+    if (!atsText || !writingText) {
+      return useDemo(get().feedbackFallbackReason ?? "error");
+    }
+
+    const merged = mergeFeedbackHalves(atsText, writingText);
+    // Both halves streamed fine but the shape is unusable.
+    if (!merged) return useDemo("error");
+
+    onProgress?.(1);
+    set({ isUsingDemoFeedback: false, feedbackFallbackReason: null });
+    return {
+      message: { content: JSON.stringify(merged) },
+    } as unknown as AIResponse;
   };
 
   const feedback = async (
     imagePath: string,
-    message: string,
-    onChunk?: (accumulated: string) => void,
+    job: JobContext,
+    onProgress?: (fraction: number) => void,
   ) => {
     if (!getPuter()) {
       setError("Puter.js not available");
       return;
     }
-    return streamFeedback(
-      [
-        { type: "file", puter_path: imagePath },
-        { type: "text", text: message },
-      ],
-      onChunk,
+    return streamSplitFeedback(
+      [{ type: "file", puter_path: imagePath }],
+      job,
+      onProgress,
     );
   };
 
   const feedbackFromText = async (
     resumeText: string,
-    message: string,
-    onChunk?: (accumulated: string) => void,
+    job: JobContext,
+    onProgress?: (fraction: number) => void,
   ) => {
     if (!getPuter()) {
       setError("Puter.js not available");
       return;
     }
-    return streamFeedback(
-      [{ type: "text", text: `RESUME TEXT:\n${resumeText}\n\n${message}` }],
-      onChunk,
+    return streamSplitFeedback(
+      [{ type: "text", text: `RESUME TEXT:\n${resumeText}` }],
+      job,
+      onProgress,
     );
   };
 
@@ -436,6 +574,7 @@ Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...
     error: null,
     puterReady: false,
     isUsingDemoFeedback: false,
+    feedbackFallbackReason: null,
     auth: {
       user: null,
       isAuthenticated: false,
@@ -461,14 +600,14 @@ Return as a JSON array only, no other text, no backticks. Example: [{"weak":"...
       ) => chat(prompt, imageURL, testMode, options),
       feedback: (
         path: string,
-        message: string,
-        onChunk?: (accumulated: string) => void,
-      ) => feedback(path, message, onChunk),
+        job: JobContext,
+        onProgress?: (fraction: number) => void,
+      ) => feedback(path, job, onProgress),
       feedbackFromText: (
         resumeText: string,
-        message: string,
-        onChunk?: (accumulated: string) => void,
-      ) => feedbackFromText(resumeText, message, onChunk),
+        job: JobContext,
+        onProgress?: (fraction: number) => void,
+      ) => feedbackFromText(resumeText, job, onProgress),
       img2txt: (image: string | File | Blob, testMode?: boolean) =>
         img2txt(image, testMode),
       interviewQuestions: (

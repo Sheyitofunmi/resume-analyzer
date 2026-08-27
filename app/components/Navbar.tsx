@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { to: "/landing", label: "Landing", exact: true },
   { to: "/upload", label: "Upload", exact: false },
   { to: "/history", label: "History", exact: false },
+  { to: "/pricing", label: "Pricing", exact: false },
   { to: "/settings", label: "Settings", exact: false },
 ];
 

@@ -11,11 +11,21 @@ export const meta = () => [
 const Auth = () => {
   const { isLoading, auth } = usePuterStore();
   const location = useLocation();
-  const next = location.search.split("next=")[1];
   const navigate = useNavigate();
 
+  // Only same-origin paths are honoured, so a crafted ?next= can't bounce
+  // a signed-in user off to another site.
+  const requested = new URLSearchParams(location.search).get("next");
+  const next =
+    requested && requested.startsWith("/") && !requested.startsWith("//")
+      ? requested
+      : "/";
+
+  // "Get started" sends people here with next=/upload; "Sign in" doesn't.
+  const isNewUser = next === "/upload";
+
   useEffect(() => {
-    if (auth.isAuthenticated) navigate(next || "/");
+    if (auth.isAuthenticated) navigate(next, { replace: true });
   }, [auth.isAuthenticated, next]);
 
   return (
@@ -172,7 +182,7 @@ const Auth = () => {
               margin: "0 0 6px",
             }}
           >
-            Welcome back
+            {isNewUser ? "Create your account" : "Welcome back"}
           </h2>
           <p
             style={{
@@ -182,7 +192,9 @@ const Auth = () => {
               margin: "0 0 26px",
             }}
           >
-            Your versions are waiting — sign in to continue.
+            {isNewUser
+              ? "One click and you're straight into your first scan."
+              : "Your versions are waiting — sign in to continue."}
           </p>
 
           {/* Puter info box */}

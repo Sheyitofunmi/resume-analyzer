@@ -92,7 +92,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
         }}
       >
         <LogoMark size={20} />
-        ResumeLens
+        <span className="rl-landing-wordmark">ResumeLens</span>
       </Link>
       <div
         className="rl-landing-nav-actions"
@@ -106,14 +106,15 @@ export function PublicNav({ active }: { active?: "pricing" }) {
       >
         <Link
           to="/landing#xray"
-          className="mobile-hide"
+          className="rl-nav-link mobile-hide"
           style={{ color: "var(--ink)", textDecoration: "none" }}
         >
           Product
         </Link>
         <Link
           to="/pricing"
-          className="mobile-hide"
+          prefetch="intent"
+          className="rl-nav-link"
           style={{
             color: "var(--ink)",
             textDecoration: active === "pricing" ? "underline" : "none",
@@ -122,22 +123,30 @@ export function PublicNav({ active }: { active?: "pricing" }) {
         >
           Pricing
         </Link>
+        {/* Signed out there is only one auth action — Puter is one-click, so a
+            separate "Sign in" link just pointed at the same page as "Get
+            started". Dashboard/New scan are genuinely different destinations,
+            so both survive once you're in. */}
+        {authed && (
+          <Link
+            to="/"
+            prefetch="intent"
+            style={{
+              border: "var(--bw) solid var(--ink)",
+              padding: "9px 18px",
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "var(--ink)",
+              textDecoration: "none",
+            }}
+          >
+            Dashboard
+          </Link>
+        )}
         <Link
-          to="/auth"
-          style={{
-            border: "var(--bw) solid var(--ink)",
-            padding: "9px 18px",
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 800,
-            color: "var(--ink)",
-            textDecoration: "none",
-          }}
-        >
-          Sign in
-        </Link>
-        <Link
-          to={authed ? "/upload" : "/auth"}
+          to={authed ? "/upload" : "/auth?next=/upload"}
+          prefetch="intent"
           style={{
             background: "var(--ink)",
             color: "var(--cyan)",
@@ -148,7 +157,7 @@ export function PublicNav({ active }: { active?: "pricing" }) {
             textDecoration: "none",
           }}
         >
-          Get started
+          {authed ? "New scan" : "Get started — free"}
         </Link>
       </div>
     </nav>
@@ -1595,7 +1604,7 @@ function PricingTeaser({ ctaTo }: { ctaTo: string }) {
             <span>✓ Full 5-dimension score</span>
             <span>✓ 3 AI rewrites per scan</span>
           </div>
-          <Link to={ctaTo} className="btn btn--outline">
+          <Link to={ctaTo} prefetch="intent" className="btn btn--outline">
             Start free
           </Link>
         </div>
@@ -1650,6 +1659,7 @@ function PricingTeaser({ ctaTo }: { ctaTo: string }) {
           </div>
           <Link
             to={ctaTo}
+            prefetch="intent"
             style={{
               display: "inline-block",
               background: "var(--ink)",
@@ -1769,6 +1779,7 @@ export default function Landing() {
             >
               <Link
                 to={ctaTo}
+                prefetch="intent"
                 style={{
                   background: "var(--ink)",
                   color: "#fff",
@@ -1933,6 +1944,7 @@ export default function Landing() {
           </p>
           <Link
             to={ctaTo}
+            prefetch="intent"
             style={{
               display: "inline-block",
               background: "var(--lime)",

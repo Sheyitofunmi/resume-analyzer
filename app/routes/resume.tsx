@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { springs } from "~/lib/motion";
 import { usePuterStore } from "~/lib/puter";
+import type { FeedbackFallbackReason } from "~/lib/puter";
 import Navbar from "~/components/Navbar";
 import Summary from "~/components/Summary";
 import ATS from "~/components/ATS";
@@ -17,7 +18,6 @@ import ScoreHistory from "~/components/ScoreHistory";
 import ResumeChecklist from "~/components/ResumeChecklist";
 import InterviewQuestions from "~/components/InterviewQuestions";
 import RewriteSuggestions from "~/components/RewriteSuggestions";
-import { prepareInstructions } from "../../constants";
 import { extractJSON } from "~/lib/utils";
 
 export const meta = () => [
@@ -28,7 +28,15 @@ export const meta = () => [
 const MAX_JOB_DESC_CHARS = 3000;
 
 const Resume = () => {
-  const { auth, isLoading, fs, kv, ai, isUsingDemoFeedback } = usePuterStore();
+  const {
+    auth,
+    isLoading,
+    fs,
+    kv,
+    ai,
+    isUsingDemoFeedback,
+    feedbackFallbackReason,
+  } = usePuterStore();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -41,6 +49,8 @@ const Resume = () => {
   const [storedImagePath, setStoredImagePath] = useState("");
   const [storedResumeText, setStoredResumeText] = useState<string | null>(null);
   const [storedIsDemo, setStoredIsDemo] = useState(false);
+  const [storedDemoReason, setStoredDemoReason] =
+    useState<FeedbackFallbackReason>(null);
   const [scoreHistory, setScoreHistory] = useState<ScoreHistoryEntry[]>([]);
 
   const [showReanalyze, setShowReanalyze] = useState(false);
@@ -66,6 +76,7 @@ const Resume = () => {
     setStoredImagePath("");
     setStoredResumeText(null);
     setStoredIsDemo(false);
+    setStoredDemoReason(null);
     setShowReanalyze(false);
     setReanalyzeStatus("");
     setSuccessToast(false);
@@ -86,6 +97,7 @@ const Resume = () => {
         setStoredImagePath(data.imagePath ?? "");
         setStoredResumeText(data.resumeText ?? null);
         setStoredIsDemo(Boolean(data.isDemo));
+        setStoredDemoReason(data.demoReason ?? null);
         setNewJobTitle(data.jobTitle ?? "");
         setNewJobDescription(data.jobDescription ?? "");
       }
@@ -120,25 +132,21 @@ const Resume = () => {
     setShowReanalyze(false);
     setSuccessToast(false);
     const trimmedDescription = newJobDescription.slice(0, MAX_JOB_DESC_CHARS);
-    const instructions = prepareInstructions({
+    const job = {
       jobTitle: newJobTitle,
       jobDescription: trimmedDescription,
-    });
-    const onChunk = (acc: string) => {
-      if (acc.includes('"skills"')) setReanalyzeStatus("Scoring skills…");
-      else if (acc.includes('"structure"'))
-        setReanalyzeStatus("Scoring document structure…");
-      else if (acc.includes('"content"'))
-        setReanalyzeStatus("Scoring content…");
-      else if (acc.includes('"toneAndStyle"'))
-        setReanalyzeStatus("Scoring tone & style…");
-      else if (acc.includes('"ATS"'))
-        setReanalyzeStatus("Scoring ATS compatibility…");
+    };
+    // The two scoring calls stream concurrently, so report how much of the
+    // response has arrived rather than naming a section in progress.
+    const onProgress = (fraction: number) => {
+      setReanalyzeStatus(
+        `Scoring 5 dimensions… ${Math.round(fraction * 100)}%`,
+      );
     };
     const runAnalysis = async () => {
       const result = storedResumeText
-        ? await ai.feedbackFromText(storedResumeText, instructions, onChunk)
-        : await ai.feedback(storedImagePath, instructions, onChunk);
+        ? await ai.feedbackFromText(storedResumeText, job, onProgress)
+        : await ai.feedback(storedImagePath, job, onProgress);
       if (!result) throw new Error("No response from AI");
       const raw =
         typeof result.message.content === "string"
@@ -161,10 +169,12 @@ const Resume = () => {
         data.jobTitle = newJobTitle;
         data.jobDescription = newJobDescription;
         data.isDemo = usePuterStore.getState().isUsingDemoFeedback;
+        data.demoReason = usePuterStore.getState().feedbackFallbackReason;
         await kv.set(`resume:${id}`, JSON.stringify(data));
       }
       const reDemo = usePuterStore.getState().isUsingDemoFeedback;
       setStoredIsDemo(reDemo);
+      setStoredDemoReason(usePuterStore.getState().feedbackFallbackReason);
       setFeedback(newFeedback);
       setStoredJobTitle(newJobTitle);
       const newEntry: ScoreHistoryEntry = {
@@ -224,8 +234,9 @@ const Resume = () => {
         >
           <span style={{ fontWeight: 900, fontSize: 14 }}>!</span>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>
-            AI unavailable. The analysis below is sample data — the AI service
-            could not be reached.
+            {(storedDemoReason ?? feedbackFallbackReason) === "timeout"
+              ? "AI timed out. The analysis below is sample data — the service took too long to respond. Re-analyze to try again."
+              : "AI unavailable. The analysis below is sample data — the AI service could not be reached."}
           </p>
         </div>
       )}

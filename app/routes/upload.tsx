@@ -7,10 +7,13 @@ import MobileBottomNav from "~/components/MobileBottomNav";
 import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
-import { convertPdfToImage, extractPdfText } from "~/lib/pdf2img";
+import {
+  convertPdfToImage,
+  extractPdfText,
+  releasePdfDocument,
+} from "~/lib/pdf2img";
 import { convertDocxToImage, extractDocxText } from "~/lib/docx2img";
 import { generateUUID } from "~/lib/utils";
-import { prepareInstructions } from "../../constants";
 
 const STEPS = [
   "Parsing document structure…",
@@ -20,18 +23,24 @@ const STEPS = [
 ];
 
 // ── Scanning terminal panel ─────────────────────────────────────────────
+// Scoring takes far longer than the other steps combined, so the bar advances
+// a fraction of a step as the AI response streams in rather than waiting for
+// the next `setCurrentStep`. Without this it sits frozen for most of the run.
 function ProcessingPanel({
   currentStep,
   statusText,
   fileName,
+  analysisProgress,
 }: {
   currentStep: number;
   statusText: string;
   fileName?: string;
+  analysisProgress: number;
 }) {
+  const stepsDone = Math.max(0, currentStep) + analysisProgress;
   const progressPct = Math.min(
     100,
-    Math.max(8, (Math.max(0, currentStep) / STEPS.length) * 100),
+    Math.max(8, (Math.min(stepsDone, STEPS.length) / STEPS.length) * 100),
   );
 
   return (
@@ -152,6 +161,7 @@ const Upload = () => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -194,24 +204,23 @@ const Upload = () => {
     file: File;
   }) => {
     setIsProcessing(true);
+    setAnalysisProgress(0);
     try {
       const uuid = generateUUID();
       const isDocx = file.name.toLowerCase().endsWith(".docx");
-      const instructions = prepareInstructions({ jobTitle, jobDescription });
+      const job = { jobTitle, jobDescription };
 
-      const onChunk = (acc: string) => {
-        if (acc.includes('"skills"')) setStatusText("Scoring skills…");
-        else if (acc.includes('"structure"'))
-          setStatusText("Scoring document structure…");
-        else if (acc.includes('"content"')) setStatusText("Scoring content…");
-        else if (acc.includes('"toneAndStyle"'))
-          setStatusText("Scoring tone & style…");
-        else if (acc.includes('"ATS"'))
-          setStatusText("Scoring ATS compatibility…");
+      // The two scoring calls stream concurrently, so there is no single
+      // section order to narrate — report how much of the response has landed
+      // instead, which is what actually moves during the long wait.
+      const onProgress = (fraction: number) => {
+        setAnalysisProgress(fraction);
+        if (fraction > 0) setStatusText("Scoring 5 dimensions…");
       };
 
       // Try text extraction to skip the image-based vision call
       let resumeText: string | null = null;
+      setStatusText("Reading resume…");
       try {
         const extracted = isDocx
           ? await extractDocxText(file)
@@ -222,7 +231,26 @@ const Upload = () => {
       }
 
       setCurrentStep(0);
-      setStatusText("Converting resume to image…");
+
+      // On the text path the thumbnail is never sent to the model, so rendering
+      // it must not gate the analysis — kick off the AI call (and the original
+      // file upload) first, then render while the response streams in.
+      // Both are caught here so an early return below can never leave an
+      // unhandled rejection behind.
+      const analysisPromise = resumeText
+        ? ai
+            .feedbackFromText(resumeText, job, onProgress)
+            .catch(() => undefined)
+        : null;
+      const resumeUploadPromise = resumeText
+        ? fs
+            .write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file)
+            .catch(() => undefined)
+        : null;
+
+      setStatusText(
+        resumeText ? "Analyzing resume…" : "Converting resume to image…",
+      );
       const imageResult = isDocx
         ? await convertDocxToImage(file)
         : await convertPdfToImage(file);
@@ -240,12 +268,11 @@ const Upload = () => {
       let uploadedFile: Awaited<ReturnType<typeof fs.write>>;
 
       if (resumeText) {
-        // Text path: image upload + AI analysis + file upload all run in parallel
-        setStatusText("Uploading & analyzing…");
+        // Text path: analysis is already in flight; join it with the uploads.
         const [uploadedImage, fb, uf] = await Promise.all([
           fs.write(`resume-${uuid}.jpg`, imageResult.file),
-          ai.feedbackFromText(resumeText, instructions, onChunk),
-          fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
+          analysisPromise!,
+          resumeUploadPromise!,
         ]);
         if (!uploadedImage) {
           setStatusText("Upload failed. Please try again.");
@@ -273,7 +300,7 @@ const Upload = () => {
         setCurrentStep(2);
         setStatusText("Analyzing resume…");
         const [fb, uf] = await Promise.all([
-          ai.feedback(imagePath, instructions, onChunk),
+          ai.feedback(imagePath, job, onProgress),
           fs.write(`resume-${uuid}.${isDocx ? "docx" : "pdf"}`, file),
         ]);
         feedback = fb;
@@ -290,7 +317,12 @@ const Upload = () => {
       }
 
       setCurrentStep(3);
-      setStatusText("Saving analysis…");
+      const fallbackReason = usePuterStore.getState().feedbackFallbackReason;
+      setStatusText(
+        fallbackReason === "timeout"
+          ? "The AI service timed out — saving sample scores…"
+          : "Saving analysis…",
+      );
       const feedbackText =
         typeof feedback.message.content === "string"
           ? feedback.message.content
@@ -306,8 +338,10 @@ const Upload = () => {
         jobDescription,
         pageCount: imageResult.pageCount,
         // Persist whether these scores are the demo fallback (AI returned
-        // nothing / errored) so the report can flag it on later reloads.
+        // nothing / errored) so the report can flag it on later reloads, and
+        // why, so the flag can say something more useful than "unavailable".
         isDemo: usePuterStore.getState().isUsingDemoFeedback,
+        demoReason: fallbackReason,
         feedback: JSON.parse(feedbackText),
       };
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
@@ -330,6 +364,10 @@ const Upload = () => {
       setStatusText(`Error: ${message}. Please try again.`);
       setIsProcessing(false);
       setCurrentStep(-1);
+    } finally {
+      // The parsed PDF is memoised so text extraction and thumbnail rendering
+      // share one parse; free it now that both are done.
+      releasePdfDocument();
     }
   };
 
@@ -417,6 +455,7 @@ const Upload = () => {
             currentStep={currentStep}
             statusText={statusText}
             fileName={file?.name}
+            analysisProgress={analysisProgress}
           />
         ) : (
           /* Upload form */

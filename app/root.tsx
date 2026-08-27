@@ -10,9 +10,9 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { usePuterStore } from "~/lib/puter";
-import { useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { hasSignedInBefore, usePuterStore } from "~/lib/puter";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { ToastProvider } from "~/components/Toast";
 import CommandPalette from "~/components/CommandPalette";
 
@@ -74,23 +74,27 @@ function PuterLoadingScreen() {
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  // No `AnimatePresence` here on purpose. Under `mode="popLayout"` the outgoing
+  // route's exit never completed, so its `position: absolute` clone stayed in
+  // the DOM at `opacity: 0` covering the viewport — invisible, but still eating
+  // every click, which killed all subsequent client-side navigation until a
+  // hard reload. Only the incoming route animates now: React swaps it on the
+  // key change and the fade-in runs on the element that is actually there.
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, scale: 0.99 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.99 }}
-        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, scale: 0.99 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
 export const links: Route.LinksFunction = () => [
+  { rel: "preconnect", href: "https://js.puter.com" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -103,14 +107,30 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// Routes that render fine without an auth answer. Blocking these on the
+// third-party Puter script just made the first paint wait on a network round
+// trip they never needed.
+const PUTER_OPTIONAL_ROUTES = new Set(["/landing", "/pricing", "/auth"]);
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { init, isLoading, puterReady } = usePuterStore();
+  const { pathname } = useLocation();
+  // The prerendered shell paints the splash, so the first client render has to
+  // agree with it; after mount we can consult localStorage.
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     init();
   }, [init]);
 
-  const showLoader = isLoading && !puterReady;
+  // "/" only needs an auth answer for someone who has signed in here before —
+  // everyone else is getting the landing page either way.
+  const needsAuthAnswer =
+    !PUTER_OPTIONAL_ROUTES.has(pathname) &&
+    (pathname !== "/" || !hydrated || hasSignedInBefore());
+
+  const showLoader = isLoading && !puterReady && needsAuthAnswer;
 
   return (
     <html lang="en">
@@ -124,7 +144,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <script src="https://js.puter.com/v2/"></script>
+        {/* async so it never blocks parsing or the route chunks — the store
+            polls for window.puter, so it tolerates arriving late. */}
+        <script async src="https://js.puter.com/v2/"></script>
         {showLoader ? (
           <PuterLoadingScreen />
         ) : (

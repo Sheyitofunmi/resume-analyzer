@@ -151,75 +151,73 @@ export const demoFeedback = {
   },
 };
 
-export const AIResponseFormat = `
-      interface Feedback {
-      overallScore: number; //max 100
-      ATS: {
-        score: number; //rate based on ATS suitability
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-        keywords: {
-          found: string[]; //important keywords from the job description that are present in the resume
-          missing: string[]; //important keywords from the job description that are missing from the resume
-        };
-      };
-      toneAndStyle: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      content: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      structure: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      skills: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-    }`;
-
-export const prepareInstructions = ({
-  jobTitle,
-  jobDescription,
-}: {
+export interface JobContext {
   jobTitle: string;
   jobDescription: string;
-}) =>
+}
+
+// Output length is what the user waits on: the response streams token by
+// token, so every extra word of prose is extra seconds on the progress bar.
+// Tips are capped at 3 and explanations at one sentence for that reason —
+// loosen these and the analysis gets measurably slower.
+//
+// For the same reason the five sections are scored by TWO prompts run in
+// parallel (see `streamSplitFeedback` in `lib/puter.ts`) rather than one that
+// emits all of them: each half is roughly half the tokens, so the user waits
+// on the slower half instead of on the sum. Keep the halves balanced — moving
+// a section across changes which one dominates.
+const SECTION_SHAPE = `
+      // Section = {
+      //   score: number (0-100),
+      //   tips: exactly 3 of {
+      //     type: "good" | "improve",
+      //     tip: string,          // short title, max 8 words
+      //     explanation: string,  // ONE sentence, max 25 words
+      //   },
+      // }`;
+
+const rules = ({ jobTitle, jobDescription }: JobContext) =>
   `You are an expert in ATS (Applicant Tracking System) and resume analysis. Your job is to give HONEST, ACCURATE feedback.
 
       CRITICAL RULES — follow these before scoring anything:
-      1. If the image does not contain a real resume (e.g. it is blank, random text, a photo, a meme, or unrelated content), set ALL scores to 0 and explain in every tip that valid resume content was not detected.
+      1. If the resume provided is not a real resume (e.g. it is blank, random text, a photo, a meme, or unrelated content), set ALL scores to 0 and explain in every tip that valid resume content was not detected.
       2. If the job title or job description appears to be random characters, nonsense, or clearly fake (e.g. "asdfjkl", "qqqqq", "test test", "blah blah"), set ALL scores below 20 and note in every tip that a valid job description was not provided.
       3. If the resume content has no meaningful relation to the provided job title or job description, all scores should reflect that mismatch — do NOT inflate scores out of politeness.
       4. Be brutally honest. If the resume is weak, scores should be low (20–40). Only give high scores (80+) for genuinely strong, well-matched resumes.
-      5. Never fabricate keywords or skills not actually present in the resume image.
+      5. Never fabricate keywords or skills not actually present in the resume.
+      6. Be terse. Every tip is one short title plus ONE sentence of at most 25 words — no preamble, no restating the rubric, no repeating a point across sections.
 
       The job title is: ${jobTitle}
-      The job description is: ${jobDescription}
+      The job description is: ${jobDescription}`;
 
-      Analyze the resume image and provide feedback using the following format:
-      ${AIResponseFormat}
-      Return the analysis as a JSON object only, without any other text and without backticks.
-      Do not include any other text or comments.`;
+const closing = `
+      Return ONLY that JSON object — no other text, no comments, no backticks.`;
+
+/** Half one of the parallel analysis: machine-readability and skill match. */
+export const prepareAtsInstructions = (job: JobContext) =>
+  `${rules(job)}
+
+      Score ONLY these two dimensions of the resume:
+      ${SECTION_SHAPE}
+      {
+        "ATS": Section & {
+          // score reflects how well an applicant tracking system can parse and match this resume
+          "keywords": {
+            "found": string[],   // max 8 job-description keywords present in the resume
+            "missing": string[]  // max 8 job-description keywords absent from the resume
+          }
+        },
+        "skills": Section  // depth and relevance of the skills on offer vs the job
+      }${closing}`;
+
+/** Half two of the parallel analysis: how the resume is written. */
+export const prepareWritingInstructions = (job: JobContext) =>
+  `${rules(job)}
+
+      Score ONLY these three dimensions of the resume:
+      ${SECTION_SHAPE}
+      {
+        "toneAndStyle": Section, // voice, confidence, professionalism
+        "content": Section,      // substance of the achievements and their relevance to the job
+        "structure": Section     // layout, ordering, section headings, length
+      }${closing}`;

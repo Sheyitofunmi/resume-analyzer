@@ -7,7 +7,7 @@ import StatsStrip from "~/components/StatsStrip";
 import HowItWorks from "~/components/HowItWorks";
 import MobileBottomNav from "~/components/MobileBottomNav";
 import Landing from "~/routes/landing";
-import { usePuterStore } from "~/lib/puter";
+import { hasSignedInBefore, usePuterStore } from "~/lib/puter";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { springs, staggerContainer, fadeUp } from "~/lib/motion";
@@ -439,8 +439,11 @@ export default function Home() {
     loadResumes();
   }, [isLoading, auth.isAuthenticated]);
 
-  // Show landing page for unauthenticated users
-  if (!isLoading && !auth.isAuthenticated) return <Landing />;
+  // Show landing page for unauthenticated users. Visitors who have never
+  // signed in on this browser get it right away rather than waiting on
+  // Puter's auth round trip — there is nothing else we'd show them.
+  if (!auth.isAuthenticated && (!isLoading || !hasSignedInBefore()))
+    return <Landing />;
 
   const handleDelete = (resume: Resume) => {
     setResumes((prev) => {

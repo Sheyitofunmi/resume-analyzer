@@ -20,6 +20,49 @@ export function formatSize(bytes: number): string {
 
 export const generateUUID = () => crypto.randomUUID();
 
+/**
+ * Stitches the two halves of a split analysis into one `Feedback`.
+ *
+ * The five sections are scored by two prompts running in parallel, so neither
+ * response is a complete report and neither model call can judge the overall
+ * score — that is derived here from the five section scores.
+ *
+ * Returns `null` if either half is unparseable or missing a section, which the
+ * caller treats as a failed analysis. Being strict matters: a half-populated
+ * report would render as a confident set of scores with sections silently
+ * missing.
+ */
+export function mergeFeedbackHalves(
+  atsText: string,
+  writingText: string,
+): Feedback | null {
+  let ats: any;
+  let writing: any;
+  try {
+    ats = JSON.parse(extractJSON(atsText));
+    writing = JSON.parse(extractJSON(writingText));
+  } catch {
+    return null;
+  }
+
+  const merged = {
+    ATS: ats?.ATS,
+    skills: ats?.skills,
+    toneAndStyle: writing?.toneAndStyle,
+    content: writing?.content,
+    structure: writing?.structure,
+  };
+
+  const scores = Object.values(merged).map((section: any) => section?.score);
+  if (scores.some((score) => typeof score !== "number")) return null;
+
+  const overallScore = Math.round(
+    (scores as number[]).reduce((sum, score) => sum + score, 0) / scores.length,
+  );
+
+  return { overallScore, ...merged } as Feedback;
+}
+
 export function extractJSON(text: string): string {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenced) return fenced[1].trim();

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { usePuterStore } from "~/lib/puter";
 
 type Feature = { label: string; included: boolean };
 
@@ -66,6 +67,12 @@ export const TIERS: Tier[] = [
 
 export default function PricingTiers() {
   const [annual, setAnnual] = useState(false);
+  const { auth } = usePuterStore();
+
+  // Every tier used to point at /auth, which bounces an already-signed-in
+  // visitor straight back to the dashboard — the CTAs looked broken. Send
+  // them into a scan instead, and route new visitors through sign-up first.
+  const ctaTo = auth.isAuthenticated ? "/upload" : "/auth?next=/upload";
 
   const segStyle = (active: boolean) =>
     ({
@@ -165,7 +172,7 @@ export default function PricingTiers() {
             ))}
           </div>
           <Link
-            to="/auth"
+            to={ctaTo}
             className="btn btn--outline"
             style={{ marginTop: "auto", justifyContent: "center" }}
           >
@@ -240,7 +247,7 @@ export default function PricingTiers() {
             ))}
           </div>
           <Link
-            to="/auth"
+            to={ctaTo}
             style={{
               marginTop: "auto",
               display: "block",
@@ -320,7 +327,7 @@ export default function PricingTiers() {
             ))}
           </div>
           <Link
-            to="/auth"
+            to={ctaTo}
             style={{
               marginTop: "auto",
               display: "block",

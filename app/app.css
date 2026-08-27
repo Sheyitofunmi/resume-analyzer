@@ -978,6 +978,13 @@ select:focus-visible {
   .rl-landing-nav-actions a {
     padding: 7px 12px !important;
     font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  /* Plain text links (Product / Pricing) aren't buttons — no button padding,
+     which is what buys room for Pricing next to the two CTAs. */
+  .rl-landing-nav-actions a.rl-nav-link {
+    padding: 0 !important;
   }
 
   .rl-landing-logo {
@@ -990,6 +997,16 @@ select:focus-visible {
   .rl-landing-nav-actions a {
     padding: 6px 10px !important;
     font-size: 11.5px !important;
+  }
+
+  .rl-landing-nav-actions a.rl-nav-link {
+    padding: 0 !important;
+  }
+
+  /* Below ~360px the mark alone has to carry the brand — the wordmark is the
+     only thing left to cut before the nav starts scrolling sideways. */
+  .rl-landing-wordmark {
+    display: none;
   }
 }
 
